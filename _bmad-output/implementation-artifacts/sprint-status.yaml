@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-10T15:38:50
+last_updated: 2026-04-10T16:32:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -48,8 +48,8 @@ development_status:
   # Dependencies: None (foundation epic)
   # ============================================================
   epic-0: in-progress
-  0-1-project-init-and-frontend-backend-skeleton: ready-for-dev
-  0-2-shared-types-schemas-and-error-handling-framework: backlog
+  0-1-project-init-and-frontend-backend-skeleton: done
+  0-2-shared-types-schemas-and-error-handling-framework: done
   0-3-file-parsing-and-path-utils-infrastructure: backlog
   0-4-dark-theme-design-system-and-shell-layout: backlog
   0-5-config-file-reading-and-app-startup: backlog

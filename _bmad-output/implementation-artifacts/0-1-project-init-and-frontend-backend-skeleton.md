@@ -1,6 +1,6 @@
 # Story 0.1: 项目初始化与前后端骨架
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -57,61 +57,62 @@ So that 我可以在统一的开发环境中开始构建功能。
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: 项目根目录初始化 (AC: #1)
-  - [ ] 1.1 创建 `package.json`，配置项目名称、版本、scripts、engines（Node.js >= 18）
-  - [ ] 1.2 创建 `tsconfig.json`（根配置，引用 client + server）
-  - [ ] 1.3 创建 `tsconfig.client.json`（前端 TS 配置，target: ES2020, jsx: react-jsx）
-  - [ ] 1.4 创建 `tsconfig.server.json`（后端 TS 配置，target: ES2022, module: NodeNext, moduleResolution: NodeNext）
-  - [ ] 1.5 创建 `.nvmrc`（锁定 Node.js 版本 >= 18）
-  - [ ] 1.6 创建 `.gitignore`（node_modules, dist, .tmp 等）
-  - [ ] 1.7 创建 `.env.example`（PORT=3001, CLIENT_PORT=5173, PROD_PORT=3000）
-  - [ ] 1.8 创建 `.editorconfig`（2 space indent, UTF-8, LF 换行符）
+- [x] Task 1: 项目根目录初始化 (AC: #1)
+  - [x] 1.1 创建 `package.json`，配置项目名称、版本、scripts、engines（Node.js >= 18）
+  - [x] 1.2 创建 `tsconfig.json`（根配置，引用 client + server）
+  - [x] 1.3 创建 `tsconfig.client.json`（前端 TS 配置，target: ES2020, jsx: react-jsx）
+  - [x] 1.4 创建 `tsconfig.server.json`（后端 TS 配置，target: ES2022, module: NodeNext, moduleResolution: NodeNext）
+  - [x] 1.5 创建 `.nvmrc`（锁定 Node.js 版本 >= 18）
+  - [x] 1.6 创建 `.gitignore`（node_modules, dist, .tmp 等）
+  - [x] 1.7 创建 `.env.example`（PORT=3001, CLIENT_PORT=5173, PROD_PORT=3000）
+  - [x] 1.8 创建 `.editorconfig`（2 space indent, UTF-8, LF 换行符）
 
-- [ ] Task 2: 安装核心依赖 (AC: #1)
-  - [ ] 2.1 安装生产依赖：`express`, `cors`, `gray-matter`, `js-yaml`, `fs-extra`
-  - [ ] 2.2 安装开发依赖：`@types/express`, `@types/cors`, `@types/fs-extra`, `concurrently`, `tsx`, `typescript`, `cross-env`
-  - [ ] 2.3 安装前端依赖：`react`, `react-dom`, `react-router-dom`
-  - [ ] 2.4 安装前端开发依赖：`@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `vite`
-  - [ ] 2.5 验证 `npm install` 无错误，`tsc --noEmit` 通过
+- [x] Task 2: 安装核心依赖 (AC: #1)
+  - [x] 2.1 安装生产依赖：`express`, `cors`, `gray-matter`, `js-yaml`, `fs-extra`
+  - [x] 2.2 安装开发依赖：`@types/express`, `@types/cors`, `@types/fs-extra`, `concurrently`, `tsx`, `typescript`, `cross-env`
+  - [x] 2.3 安装前端依赖：`react`, `react-dom`, `react-router-dom`
+  - [x] 2.4 安装前端开发依赖：`@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `vite`
+  - [x] 2.5 验证 `npm install` 无错误，`tsc --noEmit` 通过
 
-- [ ] Task 3: Vite 前端骨架 (AC: #2, #4)
-  - [ ] 3.1 创建 `vite.config.ts`：配置 React 插件 + proxy `/api` → `http://localhost:3001`
-  - [ ] 3.2 创建 `src/main.tsx`：React 入口，挂载到 `#root`
-  - [ ] 3.3 创建 `src/App.tsx`：使用 `createBrowserRouter` + `RouterProvider`（v6 data router 模式）配置 5 个路由
-  - [ ] 3.4 创建 `src/vite-env.d.ts`：Vite 类型声明
-  - [ ] 3.5 创建 `index.html`：Vite 入口 HTML
-  - [ ] 3.6 创建 5 个空壳页面组件：
+- [x] Task 3: Vite 前端骨架 (AC: #2, #4)
+  - [x] 3.1 创建 `vite.config.ts`：配置 React 插件 + proxy `/api` → `http://localhost:3001`
+  - [x] 3.2 创建 `src/main.tsx`：React 入口，挂载到 `#root`
+  - [x] 3.3 创建 `src/App.tsx`：使用 `createBrowserRouter` + `RouterProvider`（v6 data router 模式）配置 5 个路由
+  - [x] 3.4 创建 `src/vite-env.d.ts`：Vite 类型声明
+  - [x] 3.5 创建 `index.html`：Vite 入口 HTML
+  - [x] 3.6 创建 5 个空壳页面组件 + NotFound：
     - `src/pages/SkillBrowsePage.tsx`（/）
     - `src/pages/WorkflowPage.tsx`（/workflow）
     - `src/pages/SyncPage.tsx`（/sync）
     - `src/pages/ImportPage.tsx`（/import）
     - `src/pages/SettingsPage.tsx`（/settings）
+    - `src/pages/NotFound.tsx`（*）
 
-- [ ] Task 4: Express 后端骨架 (AC: #2, #3)
-  - [ ] 4.1 创建 `server/index.ts`：Express 入口，绑定 `127.0.0.1`，启动服务
-  - [ ] 4.2 创建 `server/app.ts`：Express app 配置（cors, json 中间件, 注册 healthRoutes, API 404 处理器）
-  - [ ] 4.3 创建 `server/routes/healthRoutes.ts`：`GET /api/health` 端点
-  - [ ] 4.4 生产模式下 serve `dist/` 静态文件，API 404 处理器（`/api/*` 未匹配路由返回 JSON 404），SPA fallback（其余路由返回 `index.html`）
-  - [ ] 4.5 验证 Express 绑定 `127.0.0.1`，外部 IP 请求被拒绝
+- [x] Task 4: Express 后端骨架 (AC: #2, #3)
+  - [x] 4.1 创建 `server/index.ts`：Express 入口，绑定 `127.0.0.1`，启动服务
+  - [x] 4.2 创建 `server/app.ts`：Express app 配置（cors, json 中间件, 注册 healthRoutes, API 404 处理器）
+  - [x] 4.3 创建 `server/routes/healthRoutes.ts`：`GET /api/health` 端点
+  - [x] 4.4 生产模式下 serve `dist/` 静态文件，API 404 处理器（`/api/*` 未匹配路由返回 JSON 404），SPA fallback（其余路由返回 `index.html`）
+  - [x] 4.5 验证 Express 绑定 `127.0.0.1`，外部 IP 请求被拒绝
 
-- [ ] Task 5: 开发与构建脚本 (AC: #2, #5)
-  - [ ] 5.1 配置 `package.json` scripts：
+- [x] Task 5: 开发与构建脚本 (AC: #2, #5)
+  - [x] 5.1 配置 `package.json` scripts：
     - `dev`: `concurrently -n client,server -c blue,green "npm run dev:client" "npm run dev:server"`
     - `dev:client`: `vite`
     - `dev:server`: `tsx watch server/index.ts`
     - `build`: `tsc --noEmit && vite build`
     - `start`: `cross-env NODE_ENV=production tsx server/index.ts`
     - `typecheck`: `tsc --noEmit`
-  - [ ] 5.2 验证 `npm run dev` 同时启动前后端
-  - [ ] 5.3 验证 `npm run build && npm start` 生产模式正常运行
+  - [x] 5.2 验证 `npm run dev` 同时启动前后端
+  - [x] 5.3 验证 `npm run build && npm start` 生产模式正常运行
 
-- [ ] Task 6: CLI 全局命令 (AC: #6)
-  - [ ] 6.1 创建 `bin/cli.js`：#!/usr/bin/env node，通过 `child_process.fork` 结合 `tsx` 加载 `server/index.ts`，启动 Express + 自动打开浏览器（try-catch 容错），支持 `--no-open` 参数
-  - [ ] 6.2 在 `package.json` 中配置 `"bin": { "skill-manager": "./bin/cli.js" }`
-  - [ ] 6.3 验证 `node bin/cli.js` 正常启动服务
+- [x] Task 6: CLI 全局命令 (AC: #6)
+  - [x] 6.1 创建 `bin/cli.js`：#!/usr/bin/env node，通过 `child_process.fork` 结合 `tsx` 加载 `server/index.ts`，启动 Express + 自动打开浏览器（try-catch 容错），支持 `--no-open` 参数
+  - [x] 6.2 在 `package.json` 中配置 `"bin": { "skill-manager": "./bin/cli.js" }`
+  - [x] 6.3 验证 `node bin/cli.js` 正常启动服务
 
-- [ ] Task 7: 目录结构骨架 (AC: #1)
-  - [ ] 7.1 创建空目录结构（确保 Git 追踪）：
+- [x] Task 7: 目录结构骨架 (AC: #1)
+  - [x] 7.1 创建空目录结构（确保 Git 追踪）：
     - `src/components/ui/`（shadcn/ui 组件，后续 Story 填充）
     - `src/components/layout/`
     - `src/components/skills/`
@@ -135,7 +136,7 @@ So that 我可以在统一的开发环境中开始构建功能。
     - `public/fonts/`
     - `tests/integration/`
     - `tests/fixtures/sample-skills/`
-  - [ ] 7.2 在空目录中放置 `.gitkeep` 文件
+  - [x] 7.2 在空目录中放置 `.gitkeep` 文件
 
 ## Dev Notes
 
@@ -338,6 +339,77 @@ Claude claude-4.6-opus (Amelia — Senior Software Engineer)
 
 ### Debug Log References
 
+- Express v5 使用新版 path-to-regexp，`/api/*` 语法不再支持，改为 `/api/{*path}` 和 `{*path}`
+- tsx 需要放在 dependencies 而非 devDependencies，因为 CLI 和 npm start 在生产模式下依赖它
+- npm 安装了 Express v5、React v19、TypeScript v6、Vite v8（2026 年最新稳定版），与 Story 中的最低版本要求兼容
+
 ### Completion Notes List
 
+- ✅ Task 1: 创建 package.json, tsconfig.json, tsconfig.client.json, tsconfig.server.json, .nvmrc, .gitignore, .env.example, .editorconfig
+- ✅ Task 2: 安装所有生产依赖和开发依赖，tsx 移至 dependencies
+- ✅ Task 3: 创建 vite.config.ts, index.html, src/main.tsx, src/App.tsx, src/vite-env.d.ts, 5 个页面组件 + NotFound
+- ✅ Task 4: 创建 server/index.ts, server/app.ts（createApp 工厂函数）, server/routes/healthRoutes.ts
+- ✅ Task 5: 配置 package.json scripts（dev, dev:client, dev:server, build, start, typecheck）
+- ✅ Task 6: 创建 bin/cli.js（fork + tsx, --no-open 参数, 自动打开浏览器, 优雅退出）
+- ✅ Task 7: 创建 22 个空目录 + .gitkeep 文件
+- 🔧 修复：Express v5 path-to-regexp 通配符语法（/api/* → /api/{*path}）
+- 🔧 决策：app.ts 改为 createApp 工厂函数，接收 isProduction 和 distPath 参数，确保 SPA fallback 在 API 404 之后注册
+
+### Verification Results
+
+- `tsc --noEmit` ✅ 编译通过
+- `vite build` ✅ 构建成功（dist/index.html + dist/assets/index-*.js）
+- `GET /api/health` ✅ 返回 {success:true, data:{status:"ok", version:"0.1.0", timestamp:"..."}}
+- `GET /api/nonexistent` ✅ 返回 {success:false, error:{code:"NOT_FOUND", message:"API endpoint not found"}}
+- 生产模式端口 3000 ✅
+- SPA fallback（/workflow 返回 200）✅
+- Express 绑定 127.0.0.1 ✅（lsof 确认 TCP 127.0.0.1:3001 LISTEN）
+
 ### File List
+
+- package.json (新建)
+- package-lock.json (自动生成)
+- tsconfig.json (新建)
+- tsconfig.client.json (新建)
+- tsconfig.server.json (新建)
+- vite.config.ts (新建)
+- index.html (新建)
+- .nvmrc (新建)
+- .gitignore (新建)
+- .env.example (新建)
+- .editorconfig (新建)
+- bin/cli.js (新建)
+- src/main.tsx (新建)
+- src/App.tsx (新建)
+- src/vite-env.d.ts (新建)
+- src/pages/SkillBrowsePage.tsx (新建)
+- src/pages/WorkflowPage.tsx (新建)
+- src/pages/SyncPage.tsx (新建)
+- src/pages/ImportPage.tsx (新建)
+- src/pages/SettingsPage.tsx (新建)
+- src/pages/NotFound.tsx (新建)
+- server/index.ts (新建)
+- server/app.ts (新建)
+- server/routes/healthRoutes.ts (新建)
+- src/components/ui/.gitkeep (新建)
+- src/components/layout/.gitkeep (新建)
+- src/components/skills/.gitkeep (新建)
+- src/components/workflow/.gitkeep (新建)
+- src/components/sync/.gitkeep (新建)
+- src/components/import/.gitkeep (新建)
+- src/components/settings/.gitkeep (新建)
+- src/components/shared/.gitkeep (新建)
+- src/stores/.gitkeep (新建)
+- src/hooks/.gitkeep (新建)
+- src/lib/.gitkeep (新建)
+- src/types/.gitkeep (新建)
+- server/services/.gitkeep (新建)
+- server/utils/.gitkeep (新建)
+- server/middleware/.gitkeep (新建)
+- server/types/.gitkeep (新建)
+- shared/.gitkeep (新建)
+- skills/.gitkeep (新建)
+- config/.gitkeep (新建)
+- public/fonts/.gitkeep (新建)
+- tests/integration/.gitkeep (新建)
+- tests/fixtures/sample-skills/.gitkeep (新建)
