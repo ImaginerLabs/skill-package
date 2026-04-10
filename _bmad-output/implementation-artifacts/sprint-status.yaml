@@ -1,0 +1,109 @@
+# generated: 2026-04-10T15:38:50
+# last_updated: 2026-04-10T15:44:51
+# project: skill-package
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-04-10T15:38:50
+last_updated: 2026-04-10T15:38:50
+project: skill-package
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  # ============================================================
+  # Epic 0: 技术脚手架与设计系统
+  # 用户运行 npm start，看到暗色主题的空壳应用界面，5 个路由页面可切换
+  # Dependencies: None (foundation epic)
+  # ============================================================
+  epic-0: in-progress
+  0-1-project-init-and-frontend-backend-skeleton: ready-for-dev
+  0-2-shared-types-schemas-and-error-handling-framework: backlog
+  0-3-file-parsing-and-path-utils-infrastructure: backlog
+  0-4-dark-theme-design-system-and-shell-layout: backlog
+  0-5-config-file-reading-and-app-startup: backlog
+  epic-0-retrospective: optional
+
+  # ============================================================
+  # Epic 1: Skill 浏览与分类管理
+  # 用户可以浏览分类目录中的 Skill 卡片，查看预览，搜索筛选，管理分类和元数据
+  # Dependencies: Epic 0
+  # ============================================================
+  epic-1: backlog
+  1-1-backend-skill-scan-and-cache-service: backlog
+  1-2-category-tree-and-card-grid-view: backlog
+  1-3-markdown-rendering-preview: backlog
+  1-4-search-and-command-palette: backlog
+  1-5-view-toggle-and-list-view: backlog
+  1-6-category-management-crud: backlog
+  1-7-skill-management-delete-move-edit-metadata: backlog
+  1-8-toast-notification-system-and-accessibility: backlog
+  epic-1-retrospective: optional
+
+  # ============================================================
+  # Epic 2: IDE 导入与冷启动
+  # 用户可以从 CodeBuddy IDE 扫描并导入 Skill 文件到仓库中
+  # Dependencies: Epic 1
+  # ============================================================
+  epic-2: backlog
+  2-0-safe-write-and-path-protection-infrastructure: backlog
+  2-1-ide-directory-scan-api: backlog
+  2-2-import-wizard-and-category-selection: backlog
+  2-3-file-import-and-frontmatter-completion: backlog
+  2-4-cold-start-guide-and-post-import-cleanup: backlog
+  epic-2-retrospective: optional
+
+  # ============================================================
+  # Epic 3: 工作流编排
+  # 用户可以编排多 Skill 工作流，生成标准工作流 .md 文件
+  # Dependencies: Epic 1
+  # ============================================================
+  epic-3: backlog
+  3-1-workflow-editor-layout-and-skill-selection: backlog
+  3-2-drag-sort-and-step-editing: backlog
+  3-3-workflow-file-generation-and-preview: backlog
+  3-4-workflow-management-edit-and-delete: backlog
+  epic-3-retrospective: optional
+
+  # ============================================================
+  # Epic 4: IDE 同步与路径配置
+  # 用户可以配置同步目标，一键同步 Skill 到 IDE 项目目录
+  # Dependencies: Epic 1
+  # ============================================================
+  epic-4: backlog
+  4-1-sync-target-path-configuration: backlog
+  4-2-skill-selection-and-batch-operations: backlog
+  4-3-one-click-sync-execution-and-result-log: backlog
+  4-4-sync-status-indicator: backlog
+  epic-4-retrospective: optional
