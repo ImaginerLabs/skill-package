@@ -203,7 +203,6 @@ $RECYCLE.BIN/
 # ========================================
 
 # Build outputs
-_bmad-output/
 dist/
 build/
 out/
@@ -264,3 +263,5 @@ lerna-debug.log*
 
 # Local configuration
 *.local
+
+knowledge
