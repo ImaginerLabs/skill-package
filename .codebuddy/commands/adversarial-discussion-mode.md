@@ -1,0 +1,1 @@
+召集 @bmad-party-mode 和 @bmad-review-adversarial-general，按照我的要求对当前议题展开对抗式讨论，多角度碰撞后给出结论
