@@ -5,6 +5,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import {
+  CleanupRequestBodySchema,
   ImportRequestBodySchema,
   ScanRequestBodySchema,
 } from "../../shared/schemas.js";
@@ -102,19 +103,24 @@ importRoutes.post(
   "/import/cleanup",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { filePaths } = req.body as { filePaths?: string[] };
-      if (!Array.isArray(filePaths) || filePaths.length === 0) {
+      const parsed = CleanupRequestBodySchema.safeParse(req.body);
+      if (!parsed.success) {
         res.status(400).json({
           success: false,
           error: {
             code: "VALIDATION_ERROR",
-            message: "filePaths 为必填项且不能为空",
+            message: parsed.error.issues
+              .map((i) => `${i.path.join(".")}: ${i.message}`)
+              .join("; "),
           },
         });
         return;
       }
 
-      const result = await cleanupFiles(filePaths);
+      const result = await cleanupFiles(
+        parsed.data.filePaths,
+        parsed.data.scanRoot,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);

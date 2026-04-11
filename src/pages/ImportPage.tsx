@@ -1,6 +1,27 @@
+import { FolderOpen, Loader2, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { Category, ScanResult, ScanResultItem } from "../../shared/types";
 import { toast } from "../components/shared/toast-store";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { Button } from "../components/ui/button";
+import { Checkbox } from "../components/ui/checkbox";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   ApiError,
   cleanupSourceFiles,
@@ -32,6 +53,13 @@ export default function ImportPage() {
 
   // 清理选项
   const [cleanupAfterImport, setCleanupAfterImport] = useState(false);
+
+  // 清理确认弹窗
+  const [cleanupDialog, setCleanupDialog] = useState<{
+    open: boolean;
+    paths: string[];
+    scanRoot?: string;
+  }>({ open: false, paths: [] });
 
   // 加载分类列表
   useEffect(() => {
@@ -86,6 +114,25 @@ export default function ImportPage() {
     });
   }, [scanState]);
 
+  // 执行清理源文件
+  const handleCleanup = useCallback(
+    async (paths: string[], cleanupScanRoot?: string) => {
+      try {
+        const cleanResult = await cleanupSourceFiles(paths, cleanupScanRoot);
+        if (cleanResult.failed === 0) {
+          toast.success(`已清理 ${cleanResult.success} 个源文件`);
+        } else {
+          toast.error(
+            `清理完成：${cleanResult.success} 成功，${cleanResult.failed} 失败`,
+          );
+        }
+      } catch {
+        toast.error("清理源文件失败");
+      }
+    },
+    [],
+  );
+
   // 执行导入
   const handleImport = useCallback(async () => {
     if (
@@ -99,7 +146,16 @@ export default function ImportPage() {
       const selectedItems = scanState.data.items
         .filter((i) => selectedPaths.has(i.absolutePath))
         .map((i) => ({ absolutePath: i.absolutePath, name: i.name }));
-      const result = await importFiles(selectedItems, selectedCategory);
+      // P1-fix: 传递当前扫描路径作为 scanRoot，确保后端路径安全校验正确
+      const scanRootPath =
+        scanPath.trim() === "" || scanPath.trim() === "~/.codebuddy/skills"
+          ? undefined
+          : scanPath.trim();
+      const result = await importFiles(
+        selectedItems,
+        selectedCategory,
+        scanRootPath,
+      );
       if (result.failed === 0) {
         toast.success(`成功导入 ${result.success} 个文件`);
       } else {
@@ -115,24 +171,12 @@ export default function ImportPage() {
         const successPaths = selectedItems
           .filter((_, i) => result.details[i]?.status === "success")
           .map((i) => i.absolutePath);
-        if (
-          successPaths.length > 0 &&
-          window.confirm(
-            `确认删除 ${successPaths.length} 个已导入的源文件？\n\n此操作不可撤销，将永久删除原始文件。`,
-          )
-        ) {
-          try {
-            const cleanResult = await cleanupSourceFiles(successPaths);
-            if (cleanResult.failed === 0) {
-              toast.success(`已清理 ${cleanResult.success} 个源文件`);
-            } else {
-              toast.error(
-                `清理完成：${cleanResult.success} 成功，${cleanResult.failed} 失败`,
-              );
-            }
-          } catch {
-            toast.error("清理源文件失败");
-          }
+        if (successPaths.length > 0) {
+          setCleanupDialog({
+            open: true,
+            paths: successPaths,
+            scanRoot: scanRootPath,
+          });
         }
       }
       // 导入成功后清空选择
@@ -143,7 +187,13 @@ export default function ImportPage() {
     } finally {
       setImporting(false);
     }
-  }, [scanState, selectedPaths, selectedCategory, cleanupAfterImport]);
+  }, [
+    scanState,
+    selectedPaths,
+    selectedCategory,
+    cleanupAfterImport,
+    scanPath,
+  ]);
 
   const items = scanState.status === "success" ? scanState.data.items : [];
   const allSelected = items.length > 0 && selectedPaths.size === items.length;
@@ -167,62 +217,45 @@ export default function ImportPage() {
           >
             扫描路径
           </label>
-          <input
+          <Input
             id="scan-path"
             type="text"
             value={scanPath}
             onChange={(e) => setScanPath(e.target.value)}
             placeholder="~/.codebuddy/skills"
-            className="w-full px-3 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
           />
         </div>
-        <button
-          onClick={handleScan}
-          disabled={scanState.status === "loading"}
-          className="px-4 py-2 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-        >
+        <Button onClick={handleScan} disabled={scanState.status === "loading"}>
           {scanState.status === "loading" ? (
             <span className="flex items-center gap-2">
-              <svg
-                className="animate-spin h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
+              <Loader2 size={16} className="animate-spin" />
               扫描中...
             </span>
           ) : (
             "扫描"
           )}
-        </button>
+        </Button>
       </div>
 
       {/* 错误状态 */}
       {scanState.status === "error" && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 p-4">
-          <p className="text-red-400 font-medium">扫描失败</p>
-          <p className="text-red-300 text-sm mt-1">{scanState.message}</p>
+        <div className="rounded-md border border-[hsl(var(--destructive))/0.3] bg-[hsl(var(--destructive))/0.1] p-4">
+          <p className="text-[hsl(var(--destructive))] font-medium">扫描失败</p>
+          <p className="text-[hsl(var(--destructive))] text-sm mt-1 opacity-80">
+            {scanState.message}
+          </p>
         </div>
       )}
 
       {/* 空目录提示 */}
       {scanState.status === "success" && items.length === 0 && (
         <div className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-8 text-center">
+          <FolderOpen
+            size={32}
+            className="mx-auto text-[hsl(var(--muted-foreground))] mb-2 opacity-60"
+          />
           <p className="text-[hsl(var(--muted-foreground))] text-lg">
-            📂 目录为空
+            目录为空
           </p>
           <p className="text-[hsl(var(--muted-foreground))] text-sm mt-2">
             在 <code className="text-xs">{scanState.data.scanPath}</code>{" "}
@@ -239,12 +272,7 @@ export default function ImportPage() {
             <div className="flex items-center gap-4">
               {/* 全选 checkbox */}
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={toggleAll}
-                  className="w-4 h-4 rounded border-[hsl(var(--border))] accent-[hsl(var(--primary))]"
-                />
+                <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
                 <span className="text-sm">全选</span>
               </label>
               {/* 已选统计 */}
@@ -255,51 +283,53 @@ export default function ImportPage() {
 
             <div className="flex items-center gap-3">
               {/* 分类选择器 */}
-              <select
+              <Select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-1.5 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+                onValueChange={setSelectedCategory}
               >
-                <option value="">选择分类...</option>
-                {categories.map((cat) => (
-                  <option key={cat.name} value={cat.name}>
-                    {cat.displayName}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="选择分类..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.name} value={cat.name}>
+                      {cat.displayName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               {/* 导入按钮 */}
-              <button
+              <Button
                 onClick={handleImport}
                 disabled={!canImport || importing}
-                className="px-4 py-1.5 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-medium text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                size="sm"
               >
                 {importing ? "导入中..." : `导入选中 (${selectedPaths.size})`}
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* 清理选项 */}
           <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-[hsl(var(--muted-foreground))]">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={cleanupAfterImport}
-              onChange={(e) => setCleanupAfterImport(e.target.checked)}
-              className="w-4 h-4 rounded border-[hsl(var(--border))] accent-[hsl(var(--primary))]"
+              onCheckedChange={(checked) =>
+                setCleanupAfterImport(checked === true)
+              }
             />
             导入后删除源文件（不可撤销）
           </label>
+
           <div className="rounded-md border border-[hsl(var(--border))] divide-y divide-[hsl(var(--border))]">
             {items.map((item: ScanResultItem) => (
               <label
                 key={item.absolutePath}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selectedPaths.has(item.absolutePath)}
-                  onChange={() => toggleItem(item.absolutePath)}
-                  className="w-4 h-4 shrink-0 rounded border-[hsl(var(--border))] accent-[hsl(var(--primary))]"
+                  onCheckedChange={() => toggleItem(item.absolutePath)}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -331,14 +361,48 @@ export default function ImportPage() {
       {/* 空状态引导（未扫描时） */}
       {scanState.status === "idle" && (
         <div className="rounded-md border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted))/50] p-8 text-center">
+          <Search
+            size={32}
+            className="mx-auto text-[hsl(var(--muted-foreground))] mb-2 opacity-60"
+          />
           <p className="text-[hsl(var(--muted-foreground))] text-lg">
-            🔍 开始扫描
+            开始扫描
           </p>
           <p className="text-[hsl(var(--muted-foreground))] text-sm mt-2">
-            输入 CodeBuddy IDE 的 Skill 目录路径，点击"扫描"按钮发现可导入的文件
+            输入 CodeBuddy IDE 的 Skill
+            目录路径，点击&quot;扫描&quot;按钮发现可导入的文件
           </p>
         </div>
       )}
+
+      {/* 清理源文件确认弹窗 */}
+      <AlertDialog
+        open={cleanupDialog.open}
+        onOpenChange={(open) => {
+          if (!open) setCleanupDialog({ open: false, paths: [] });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除源文件</AlertDialogTitle>
+            <AlertDialogDescription>
+              确认删除 {cleanupDialog.paths.length}{" "}
+              个已导入的源文件？此操作不可撤销，将永久删除原始文件。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleCleanup(cleanupDialog.paths, cleanupDialog.scanRoot);
+                setCleanupDialog({ open: false, paths: [] });
+              }}
+            >
+              确认删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

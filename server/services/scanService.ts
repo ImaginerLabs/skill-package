@@ -56,15 +56,42 @@ export async function detectCodeBuddy(): Promise<{
 
 /**
  * 递归收集目录中的所有 .md 文件
+ * P5: 添加最大深度限制和 visited set，防止 symlink loop 导致无限递归
  */
-async function collectMdFiles(dirPath: string): Promise<string[]> {
+async function collectMdFiles(
+  dirPath: string,
+  currentDepth = 0,
+  maxDepth = 10,
+  visited: Set<string> = new Set(),
+): Promise<string[]> {
+  if (currentDepth > maxDepth) {
+    return [];
+  }
+
+  // 使用 realpath 检测 symlink 循环
+  let realDir: string;
+  try {
+    realDir = await fs.realpath(dirPath);
+  } catch {
+    return [];
+  }
+  if (visited.has(realDir)) {
+    return [];
+  }
+  visited.add(realDir);
+
   const results: string[] = [];
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
-      const subFiles = await collectMdFiles(fullPath);
+      const subFiles = await collectMdFiles(
+        fullPath,
+        currentDepth + 1,
+        maxDepth,
+        visited,
+      );
       results.push(...subFiles);
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
       results.push(fullPath);

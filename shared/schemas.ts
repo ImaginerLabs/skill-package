@@ -85,6 +85,15 @@ export const ImportRequestItemSchema = z.object({
 export const ImportRequestBodySchema = z.object({
   items: z.array(ImportRequestItemSchema).min(1, "至少选择一个文件"),
   category: z.string().min(1, "分类为必填项"),
+  /** 扫描时使用的根目录，用于路径安全校验 */
+  scanRoot: z.string().optional(),
+});
+
+/** POST /api/import/cleanup 请求体 */
+export const CleanupRequestBodySchema = z.object({
+  filePaths: z.array(z.string().min(1)).min(1, "filePaths 不能为空"),
+  /** 允许删除的根目录（默认为 CodeBuddy 扫描路径） */
+  scanRoot: z.string().optional(),
 });
 
 /** ImportResultItem Zod Schema */

@@ -197,10 +197,11 @@ export async function scanDirectory(scanPath?: string): Promise<ScanResult> {
 export async function importFiles(
   items: Array<{ absolutePath: string; name: string }>,
   category: string,
+  scanRoot?: string,
 ): Promise<ImportResult> {
   return apiCall<ImportResult>("/api/import/execute", {
     method: "POST",
-    body: JSON.stringify({ items, category }),
+    body: JSON.stringify({ items, category, scanRoot }),
   });
 }
 
@@ -218,6 +219,7 @@ export async function detectCodeBuddy(): Promise<{
 /** 清理源文件（导入后删除原始文件） */
 export async function cleanupSourceFiles(
   filePaths: string[],
+  scanRoot?: string,
 ): Promise<{
   total: number;
   success: number;
@@ -231,6 +233,6 @@ export async function cleanupSourceFiles(
     errors: string[];
   }>("/api/import/cleanup", {
     method: "POST",
-    body: JSON.stringify({ filePaths }),
+    body: JSON.stringify({ filePaths, scanRoot }),
   });
 }

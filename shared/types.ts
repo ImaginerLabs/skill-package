@@ -105,6 +105,8 @@ export interface ImportRequest {
   items: ImportRequestItem[];
   /** 目标分类 */
   category: string;
+  /** 扫描时使用的根目录（用于路径安全校验，默认为 CodeBuddy 默认路径） */
+  scanRoot?: string;
 }
 
 /** 导入结果项 */
