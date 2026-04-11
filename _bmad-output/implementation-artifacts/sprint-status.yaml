@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-10T20:24:00
+last_updated: 2026-04-10T23:30:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -109,6 +109,20 @@ development_status:
   1-7-skill-management-delete-move-edit-metadata: done
   1-8-toast-notification-system-and-accessibility: done
   epic-1-retrospective: optional
+
+  # ============================================================
+  # Epic 1.5: UI 视觉优化与组件补全
+  # UI 视觉质感全面提升：补全 shadcn/ui 组件、添加顶部栏/状态栏、统一样式
+  # Dependencies: Epic 1
+  # ============================================================
+  epic-1.5: in-progress
+  1.5-1-shadcn-ui-component-completion: review
+  1.5-2-header-and-statusbar-layout: review
+  1.5-3-sidebar-visual-enhancement: review
+  1.5-4-page-style-unification: review
+  1.5-5-empty-state-and-preview-enhancement: review
+  1.5-6-visual-polish-and-consistency: review
+  epic-1.5-retrospective: optional
 
   # ============================================================
   # Epic 2: IDE 导入与冷启动

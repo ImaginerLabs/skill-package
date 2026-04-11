@@ -6,7 +6,8 @@ import {
   screen,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import ToastContainer, { toast } from "../../../src/components/shared/Toast";
+import ToastContainer from "../../../src/components/shared/Toast";
+import { toast } from "../../../src/components/shared/toast-store";
 
 describe("Toast", () => {
   beforeEach(() => {

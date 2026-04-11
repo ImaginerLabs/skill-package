@@ -1,8 +1,18 @@
-import { LayoutGrid, List, RefreshCw, Search } from "lucide-react";
+import {
+  LayoutGrid,
+  List,
+  Package,
+  RefreshCw,
+  Search,
+  Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SkillGrid from "../components/skills/SkillGrid";
 import SkillListView from "../components/skills/SkillListView";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { useSkillSearch } from "../hooks/useSkillSearch";
 import { detectCodeBuddy, refreshSkills } from "../lib/api";
 import { useSkillStore } from "../stores/skill-store";
@@ -86,73 +96,70 @@ export default function SkillBrowsePage() {
         <div className="flex-1 max-w-md ml-auto relative">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))] pointer-events-none"
           />
-          <input
-            type="text"
-            placeholder="搜索 Skill...  ⌘K"
+          <Input
+            placeholder="筛选 Skill..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent"
+            className="pl-9"
           />
         </div>
 
         {/* 视图切换 */}
         <div className="flex items-center border border-[hsl(var(--border))] rounded-md overflow-hidden">
-          <button
+          <Button
+            variant={viewMode === "grid" ? "secondary" : "ghost"}
+            size="icon"
             onClick={() => handleViewModeChange("grid")}
-            className={`p-2 transition-colors ${
-              viewMode === "grid"
-                ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
-                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-            }`}
+            className={`h-9 w-9 rounded-none ${viewMode === "grid" ? "text-[hsl(var(--primary))]" : ""}`}
             title="卡片视图"
           >
             <LayoutGrid size={16} />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "secondary" : "ghost"}
+            size="icon"
             onClick={() => handleViewModeChange("list")}
-            className={`p-2 transition-colors ${
-              viewMode === "list"
-                ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))]"
-                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-            }`}
+            className={`h-9 w-9 rounded-none ${viewMode === "list" ? "text-[hsl(var(--primary))]" : ""}`}
             title="列表视图"
           >
             <List size={16} />
-          </button>
+          </Button>
         </div>
 
         {/* 刷新按钮 */}
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={handleRefresh}
           disabled={loading}
-          className="p-2 rounded-md border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors disabled:opacity-50"
           title="刷新 Skill 列表"
         >
           <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-        </button>
+        </Button>
       </div>
 
       {/* 冷启动引导 */}
       {!loading && skills.length === 0 && coldStart?.detected && (
         <div className="mb-4 p-6 rounded-lg border-2 border-dashed border-[hsl(var(--primary))/0.4] bg-[hsl(var(--primary))/0.05]">
-          <h2 className="text-lg font-semibold text-[hsl(var(--foreground))] mb-2">
-            🎉 检测到 CodeBuddy IDE Skill 文件
-          </h2>
+          <div className="flex items-center gap-2 mb-2">
+            <Zap size={20} className="text-[hsl(var(--primary))]" />
+            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+              检测到 CodeBuddy IDE Skill 文件
+            </h2>
+            <Badge variant="default" className="text-xs">
+              {coldStart.fileCount} 个文件
+            </Badge>
+          </div>
           <p className="text-sm text-[hsl(var(--muted-foreground))] mb-3">
             在{" "}
-            <code className="text-xs bg-[hsl(var(--muted))] px-1 py-0.5 rounded">
+            <code className="text-xs bg-[hsl(var(--surface-elevated))] px-1 py-0.5 rounded">
               {coldStart.path}
             </code>{" "}
-            中发现 {coldStart.fileCount} 个 Skill 文件，点击下方按钮开始导入。
+            中发现 Skill 文件，点击下方按钮开始导入。
           </p>
-          <button
-            onClick={() => navigate("/import")}
-            className="px-4 py-2 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            开始导入 →
-          </button>
+          <Button onClick={() => navigate("/import")}>开始导入 →</Button>
         </div>
       )}
 
@@ -160,9 +167,13 @@ export default function SkillBrowsePage() {
       {!loading &&
         skills.length === 0 &&
         (!coldStart || !coldStart.detected) && (
-          <div className="mb-4 p-6 rounded-lg border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted))/50] text-center">
+          <div className="mb-4 p-6 rounded-lg border border-dashed border-[hsl(var(--border))] text-center">
+            <Package
+              size={48}
+              className="mx-auto text-[hsl(var(--muted-foreground))] mb-3 opacity-40"
+            />
             <p className="text-[hsl(var(--muted-foreground))] text-lg mb-2">
-              📭 暂无 Skill
+              暂无 Skill
             </p>
             <p className="text-sm text-[hsl(var(--muted-foreground))]">
               前往{" "}

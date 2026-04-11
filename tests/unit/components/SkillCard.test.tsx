@@ -129,7 +129,7 @@ describe("SkillCard", () => {
 
       const card = screen.getByRole("button");
       expect(card.className).toContain("transition-all");
-      expect(card.className).toContain("duration-150");
+      expect(card.className).toContain("duration-200");
     });
 
     it("包含正确的边框样式类", () => {

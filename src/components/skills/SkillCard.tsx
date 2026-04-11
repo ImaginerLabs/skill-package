@@ -5,6 +5,7 @@
 import { FileText, GitBranch } from "lucide-react";
 import type { SkillMeta } from "../../../shared/types";
 import { useSkillStore } from "../../stores/skill-store";
+import { Badge } from "../ui/badge";
 
 interface SkillCardProps {
   skill: SkillMeta;
@@ -21,7 +22,7 @@ export default function SkillCard({ skill }: SkillCardProps) {
   return (
     <button
       onClick={() => selectSkill(skill.id)}
-      className={`group w-full text-left rounded-lg border p-4 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-[hsl(var(--primary))] ${
+      className={`group w-full text-left rounded-lg border p-4 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[hsl(var(--primary))] ${
         isSelected
           ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))/0.08] shadow-[0_0_0_1px_hsl(var(--primary))]"
           : "border-[hsl(var(--border))] bg-[hsl(var(--card))] hover:border-[hsl(var(--muted))] hover:bg-[hsl(var(--surface-elevated))]"
@@ -51,27 +52,24 @@ export default function SkillCard({ skill }: SkillCardProps) {
       </p>
 
       {/* 底部标签 */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-1.5 flex-wrap">
         {/* 分类标签 */}
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[hsl(var(--primary))/0.12] text-[hsl(var(--primary))]">
+        <Badge variant="default" className="h-5 px-1.5 text-[10px]">
           {skill.category}
-        </span>
+        </Badge>
 
         {/* 类型标识 */}
         {skill.type === "workflow" && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[hsl(var(--info))/0.12] text-[hsl(var(--info))]">
+          <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
             工作流
-          </span>
+          </Badge>
         )}
 
         {/* 标签 */}
         {skill.tags.slice(0, 2).map((tag) => (
-          <span
-            key={tag}
-            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]"
-          >
+          <Badge key={tag} variant="outline" className="h-5 px-1.5 text-[10px]">
             {tag}
-          </span>
+          </Badge>
         ))}
         {skill.tags.length > 2 && (
           <span className="text-[10px] text-[hsl(var(--muted-foreground))]">

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Category, ScanResult, ScanResultItem } from "../../shared/types";
-import { toast } from "../components/shared/Toast";
+import { toast } from "../components/shared/toast-store";
 import {
   ApiError,
   cleanupSourceFiles,

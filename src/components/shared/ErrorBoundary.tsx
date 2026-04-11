@@ -1,9 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
 // ============================================================
 // src/components/shared/ErrorBoundary.tsx — React 错误边界组件
 // ============================================================
 
-import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+import { Component } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;

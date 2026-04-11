@@ -7,6 +7,19 @@ import { useState } from "react";
 import type { SkillMeta } from "../../../shared/types";
 import { deleteSkill, moveSkillCategory, updateSkillMeta } from "../../lib/api";
 import { useSkillStore } from "../../stores/skill-store";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 interface MetadataEditorProps {
   skill: SkillMeta;
@@ -54,7 +67,6 @@ export default function MetadataEditor({
 
   // 删除 Skill
   const handleDelete = async () => {
-    if (!confirm(`确定要删除 "${skill.name}" 吗？此操作不可撤销。`)) return;
     try {
       await deleteSkill(skill.id);
       selectSkill(null);
@@ -83,12 +95,14 @@ export default function MetadataEditor({
         <h3 className="text-sm font-bold font-[var(--font-code)]">
           编辑元数据
         </h3>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="p-1 rounded text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+          className="h-7 w-7"
         >
           <X size={14} />
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -103,11 +117,10 @@ export default function MetadataEditor({
           <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
             名称
           </label>
-          <input
-            type="text"
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-2 py-1.5 rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm"
+            className="h-8 text-sm"
           />
         </div>
 
@@ -120,7 +133,7 @@ export default function MetadataEditor({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-2 py-1.5 rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm resize-none"
+            className="flex w-full rounded-md border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 resize-none"
           />
         </div>
 
@@ -129,12 +142,11 @@ export default function MetadataEditor({
           <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
             标签（逗号分隔）
           </label>
-          <input
-            type="text"
+          <Input
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="tag1, tag2, tag3"
-            className="w-full px-2 py-1.5 rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm"
+            className="h-8 text-sm"
           />
         </div>
 
@@ -144,41 +156,59 @@ export default function MetadataEditor({
             移动到分类
           </label>
           <div className="flex gap-2">
-            <input
-              type="text"
+            <Input
               value={moveCategory}
               onChange={(e) => setMoveCategory(e.target.value)}
               placeholder="目标分类名称"
-              className="flex-1 px-2 py-1.5 rounded border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm"
+              className="h-8 text-sm flex-1"
             />
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleMove}
               disabled={!moveCategory.trim()}
-              className="inline-flex items-center gap-1 px-2 py-1.5 rounded border border-[hsl(var(--border))] text-xs disabled:opacity-50 hover:bg-[hsl(var(--accent))]"
+              className="gap-1"
             >
               <FolderInput size={12} />
               移动
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* 操作按钮 */}
         <div className="flex items-center gap-2 pt-2">
-          <button
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            size="sm"
+            className="gap-1"
           >
             <Save size={14} />
             {saving ? "保存中..." : "保存"}
-          </button>
-          <button
-            onClick={handleDelete}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-[hsl(var(--destructive))] text-[hsl(var(--destructive))] text-sm hover:bg-[hsl(var(--destructive))/0.1]"
-          >
-            <Trash2 size={14} />
-            删除
-          </button>
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="gap-1">
+                <Trash2 size={14} />
+                删除
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>确认删除</AlertDialogTitle>
+                <AlertDialogDescription>
+                  确定要删除 &quot;{skill.name}&quot; 吗？此操作不可撤销。
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>取消</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>
+                  确认删除
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

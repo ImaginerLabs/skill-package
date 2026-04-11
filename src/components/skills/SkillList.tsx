@@ -5,6 +5,7 @@
 import { FileText, GitBranch } from "lucide-react";
 import type { SkillMeta } from "../../../shared/types";
 import { useSkillStore } from "../../stores/skill-store";
+import { Badge } from "../ui/badge";
 
 interface SkillListItemProps {
   skill: SkillMeta;
@@ -18,7 +19,7 @@ function SkillListItem({ skill }: SkillListItemProps) {
   return (
     <button
       onClick={() => selectSkill(skill.id)}
-      className={`flex items-center gap-3 w-full px-3 py-2 text-left rounded transition-colors ${
+      className={`flex items-center gap-3 w-full px-3 py-2 text-left rounded-md transition-colors duration-200 cursor-pointer ${
         isSelected
           ? "bg-[hsl(var(--primary))/0.08] border border-[hsl(var(--primary))]"
           : "hover:bg-[hsl(var(--accent))] border border-transparent"
@@ -42,15 +43,15 @@ function SkillListItem({ skill }: SkillListItemProps) {
       </span>
 
       {/* 分类 */}
-      <span className="shrink-0 text-[10px] px-2 py-0.5 rounded bg-[hsl(var(--primary))/0.12] text-[hsl(var(--primary))]">
+      <Badge variant="default" className="h-5 px-1.5 text-[10px] shrink-0">
         {skill.category}
-      </span>
+      </Badge>
 
       {/* 标签数量 */}
       {skill.tags.length > 0 && (
-        <span className="shrink-0 text-[10px] text-[hsl(var(--muted-foreground))]">
+        <Badge variant="outline" className="h-5 px-1.5 text-[10px] shrink-0">
           {skill.tags.length} 标签
-        </span>
+        </Badge>
       )}
     </button>
   );

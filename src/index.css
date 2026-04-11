@@ -185,3 +185,18 @@ kbd {
 .slide-in-from-right {
   animation-name: slide-in-from-right;
 }
+
+/* ---- 预览面板滑入动画 ---- */
+
+@keyframes slide-in-from-right-preview {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-preview {
+  animation: slide-in-from-right-preview 0.2s ease-out;
+}

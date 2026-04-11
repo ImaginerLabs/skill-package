@@ -11,10 +11,11 @@ export default tseslint.config(
       "dist/",
       "dist-server/",
       "node_modules/",
-      "*.cjs",
+      "**/*.cjs",
       "public/",
       "_bmad/",
       "_bmad-output/",
+      "knowledge/",
     ],
   },
 
@@ -67,8 +68,8 @@ export default tseslint.config(
       "src/**/*.test.{ts,tsx}",
       "server/**/*.test.ts",
       "shared/**/*.test.ts",
-      "e2e/**/*.ts",
-      "tests/**/*.ts",
+      "e2e/**/*.{ts,tsx}",
+      "tests/**/*.{ts,tsx}",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",

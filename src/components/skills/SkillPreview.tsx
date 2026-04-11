@@ -10,6 +10,9 @@ import remarkGfm from "remark-gfm";
 import type { SkillFull } from "../../../shared/types";
 import { fetchSkillById } from "../../lib/api";
 import { useSkillStore } from "../../stores/skill-store";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import MetadataEditor from "./MetadataEditor";
 
 /**
@@ -83,7 +86,7 @@ export default function SkillPreview() {
   if (!skill) return null;
 
   return (
-    <div className="h-full overflow-auto">
+    <ScrollArea className="h-full">
       {/* Frontmatter 元数据头部 */}
       <div className="p-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))]">
         {/* 标题 */}
@@ -96,13 +99,15 @@ export default function SkillPreview() {
           <h2 className="text-lg font-bold font-[var(--font-code)] text-[hsl(var(--foreground))] flex-1">
             {skill.name}
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setShowEditor(!showEditor)}
-            className="p-1.5 rounded text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))]"
+            className="h-8 w-8"
             title="编辑元数据"
           >
             <Pencil size={14} />
-          </button>
+          </Button>
         </div>
 
         {/* 描述 */}
@@ -111,50 +116,43 @@ export default function SkillPreview() {
         </p>
 
         {/* 元数据标签 */}
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex flex-wrap gap-1.5">
           {/* 分类 */}
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[hsl(var(--primary))/0.12] text-[hsl(var(--primary))]">
+          <Badge variant="default" className="gap-1">
             <Tag size={12} />
             {skill.category}
-          </span>
+          </Badge>
 
           {/* 类型 */}
           {skill.type === "workflow" && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[hsl(var(--info))/0.12] text-[hsl(var(--info))]">
+            <Badge variant="secondary" className="gap-1">
               <GitBranch size={12} />
               工作流
-            </span>
+            </Badge>
           )}
 
           {/* 作者 */}
           {skill.author && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]">
+            <Badge variant="outline" className="gap-1">
               <User size={12} />
               {skill.author}
-            </span>
+            </Badge>
           )}
 
           {/* 版本 */}
-          {skill.version && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]">
-              v{skill.version}
-            </span>
-          )}
+          {skill.version && <Badge variant="outline">v{skill.version}</Badge>}
 
           {/* 修改时间 */}
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]">
+          <Badge variant="outline" className="gap-1">
             <Clock size={12} />
             {new Date(skill.lastModified).toLocaleDateString("zh-CN")}
-          </span>
+          </Badge>
 
           {/* 标签 */}
           {skill.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-1 rounded bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]"
-            >
+            <Badge key={tag} variant="outline">
               #{tag}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
@@ -166,7 +164,6 @@ export default function SkillPreview() {
           onClose={() => setShowEditor(false)}
           onUpdated={() => {
             fetchSkills();
-            // 重新加载当前 Skill 详情
             if (selectedSkillId) {
               fetchSkillById(selectedSkillId)
                 .then(setSkill)
@@ -185,6 +182,6 @@ export default function SkillPreview() {
           {skill.content}
         </ReactMarkdown>
       </div>
-    </div>
+    </ScrollArea>
   );
 }

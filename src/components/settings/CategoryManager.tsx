@@ -11,6 +11,20 @@ import {
   updateCategory as apiUpdateCategory,
   fetchCategories,
 } from "../../lib/api";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 /**
  * 分类管理 — 添加、修改、删除分类
@@ -84,7 +98,6 @@ export default function CategoryManager() {
 
   // 删除分类
   const handleDelete = async (name: string) => {
-    if (!confirm(`确定要删除分类 "${name}" 吗？`)) return;
     try {
       await apiDeleteCategory(name);
       await loadCategories();
@@ -108,13 +121,14 @@ export default function CategoryManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold font-[var(--font-code)]">分类管理</h2>
-        <button
+        <Button
           onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm font-medium hover:opacity-90 transition-opacity"
+          size="sm"
+          className="gap-1"
         >
           <Plus size={14} />
           新建分类
-        </button>
+        </Button>
       </div>
 
       {/* 错误提示 */}
@@ -131,42 +145,35 @@ export default function CategoryManager() {
       {showAddForm && (
         <div className="mb-4 p-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
           <div className="grid gap-3">
-            <input
-              type="text"
+            <Input
               placeholder="分类标识（英文，如 coding）"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="px-3 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm"
             />
-            <input
-              type="text"
+            <Input
               placeholder="显示名称（如 编程开发）"
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.target.value)}
-              className="px-3 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm"
             />
-            <input
-              type="text"
+            <Input
               placeholder="描述（可选）"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              className="px-3 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm"
             />
             <div className="flex gap-2">
-              <button
-                onClick={handleCreate}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm"
-              >
+              <Button onClick={handleCreate} size="sm" className="gap-1">
                 <Check size={14} />
                 创建
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setShowAddForm(false)}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-[hsl(var(--border))] text-sm"
+                className="gap-1"
               >
                 <X size={14} />
                 取消
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -188,32 +195,34 @@ export default function CategoryManager() {
               {editingName === cat.name ? (
                 /* 编辑模式 */
                 <div className="flex-1 grid gap-2">
-                  <input
-                    type="text"
+                  <Input
                     value={editDisplayName}
                     onChange={(e) => setEditDisplayName(e.target.value)}
-                    className="px-2 py-1 rounded border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm"
+                    className="h-8 text-sm"
                   />
-                  <input
-                    type="text"
+                  <Input
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="描述"
-                    className="px-2 py-1 rounded border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-sm"
+                    className="h-8 text-sm"
                   />
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleUpdate(cat.name)}
-                      className="p-1 rounded text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))]"
+                      className="h-7 w-7 text-[hsl(var(--primary))]"
                     >
                       <Check size={14} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setEditingName(null)}
-                      className="p-1 rounded text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
+                      className="h-7 w-7"
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -227,9 +236,12 @@ export default function CategoryManager() {
                       <span className="text-xs text-[hsl(var(--muted-foreground))] font-[var(--font-code)]">
                         {cat.name}
                       </span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-[hsl(var(--surface-elevated))] text-[hsl(var(--muted-foreground))]">
+                      <Badge
+                        variant="outline"
+                        className="h-5 px-1.5 text-[10px]"
+                      >
                         {cat.skillCount} Skill
-                      </span>
+                      </Badge>
                     </div>
                     {cat.description && (
                       <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">
@@ -237,20 +249,44 @@ export default function CategoryManager() {
                       </p>
                     )}
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => startEdit(cat)}
-                    className="p-1.5 rounded text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))]"
+                    className="h-8 w-8"
                     title="编辑"
                   >
                     <Pencil size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat.name)}
-                    className="p-1.5 rounded text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] hover:bg-[hsl(var(--destructive))/0.1]"
-                    title="删除"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))]"
+                        title="删除"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>确认删除</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          确定要删除分类 &quot;{cat.name}&quot; 吗？
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(cat.name)}
+                        >
+                          确认删除
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               )}
             </div>

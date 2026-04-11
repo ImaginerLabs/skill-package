@@ -8,6 +8,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useUIStore } from "../../stores/ui-store";
 import CategoryTree from "../skills/CategoryTree";
+import { ScrollArea } from "../ui/scroll-area";
 
 const navItems = [
   { to: "/", icon: BookOpen, label: "Skill 库" },
@@ -18,7 +19,8 @@ const navItems = [
 ];
 
 /**
- * 左侧边栏 — 导航 + 分类目录树
+ * 左侧边栏 — 导航菜单 + 分类目录树
+ * 活跃状态左侧 2px Run Green 竖线指示器
  */
 export default function Sidebar() {
   const { sidebarOpen } = useUIStore();
@@ -30,13 +32,6 @@ export default function Sidebar() {
       className="flex flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] shrink-0"
       style={{ width: "var(--sidebar-width)" }}
     >
-      {/* Logo / 标题 */}
-      <div className="flex items-center gap-2 px-4 py-4 border-b border-[hsl(var(--border))]">
-        <span className="text-[hsl(var(--primary))] font-bold font-[var(--font-code)] text-lg">
-          ⚡ Skill Manager
-        </span>
-      </div>
-
       {/* 导航菜单 */}
       <nav className="py-2">
         {navItems.map(({ to, icon: Icon, label }) => (
@@ -45,10 +40,10 @@ export default function Sidebar() {
             to={to}
             end={to === "/"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+              `flex items-center gap-3 px-4 py-2 text-sm transition-colors duration-200 cursor-pointer ${
                 isActive
-                  ? "bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-medium"
-                  : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))]"
+                  ? "border-l-2 border-[hsl(var(--primary))] bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-medium pl-[14px]"
+                  : "border-l-2 border-transparent text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] pl-[14px]"
               }`
             }
           >
@@ -61,15 +56,10 @@ export default function Sidebar() {
       {/* 分隔线 */}
       <div className="border-t border-[hsl(var(--border))]" />
 
-      {/* 分类目录树 */}
-      <div className="flex-1 overflow-auto">
+      {/* 分类目录树 — 使用 ScrollArea */}
+      <ScrollArea className="flex-1">
         <CategoryTree />
-      </div>
-
-      {/* 底部信息 */}
-      <div className="px-4 py-3 border-t border-[hsl(var(--border))] text-xs text-[hsl(var(--muted-foreground))]">
-        v0.1.0
-      </div>
+      </ScrollArea>
     </aside>
   );
 }
