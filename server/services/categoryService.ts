@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import type { Category } from "../../shared/types.js";
 import { AppError } from "../types/errors.js";
 import { readYaml, writeYaml } from "../utils/yamlUtils.js";
-import { getAllSkills } from "./skillService.js";
+import { getAllSkills, waitForInitialization } from "./skillService.js";
 
 // 项目根目录
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +28,9 @@ export async function getCategories(): Promise<Category[]> {
     description: item.description as string | undefined,
     skillCount: 0,
   }));
+
+  // 等待 Skill 缓存初始化完成，避免竞态条件导致 skillCount 为 0
+  await waitForInitialization();
 
   // 计算每个分类的 Skill 数量
   const skills = getAllSkills();
@@ -96,6 +99,7 @@ export async function updateCategory(
   await writeYaml(CATEGORIES_PATH, categories);
 
   // 计算 skillCount
+  await waitForInitialization();
   const skills = getAllSkills();
   const skillCount = skills.filter((s) => s.category === name).length;
 
@@ -119,6 +123,7 @@ export async function deleteCategory(name: string): Promise<void> {
   }
 
   // 检查分类下是否有 Skill
+  await waitForInitialization();
   const skills = getAllSkills();
   const skillCount = skills.filter((s) => s.category === name).length;
   if (skillCount > 0) {

@@ -28,6 +28,9 @@ const parseErrors = new Map<string, string>();
 /** 缓存是否已初始化 */
 let initialized = false;
 
+/** 初始化完成的 Promise，供外部等待 */
+let initializationPromise: Promise<void> | null = null;
+
 // ---- 目录扫描 ----
 
 /**
@@ -69,6 +72,12 @@ async function scanMarkdownFiles(dirPath: string): Promise<string[]> {
  * 应在应用启动时调用一次
  */
 export async function initializeSkillCache(): Promise<void> {
+  // 包装为可等待的 Promise 并保存引用
+  initializationPromise = _doInitialize();
+  return initializationPromise;
+}
+
+async function _doInitialize(): Promise<void> {
   console.log("[skillService] 开始扫描 skills/ 目录...");
   const startTime = Date.now();
 
@@ -354,5 +363,16 @@ export async function updateSkillMeta(
 function ensureInitialized(): void {
   if (!initialized) {
     throw AppError.internal("Skill 缓存尚未初始化，请等待应用启动完成");
+  }
+}
+
+/**
+ * 等待缓存初始化完成（供其他 service 调用，避免竞态条件）
+ * 若初始化尚未开始则直接返回
+ */
+export async function waitForInitialization(): Promise<void> {
+  if (initialized) return;
+  if (initializationPromise) {
+    await initializationPromise;
   }
 }

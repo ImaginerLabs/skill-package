@@ -25,6 +25,8 @@ categoryRoutes.get(
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const categories = await getCategories();
+      // 禁用缓存，确保 skillCount 始终是最新值
+      res.set("Cache-Control", "no-store");
       res.json({ success: true, data: categories });
     } catch (err) {
       next(err);
