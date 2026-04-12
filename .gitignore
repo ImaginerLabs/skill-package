@@ -37,3 +37,4 @@ knowledge/
 # Test artifacts
 test-results/
 playwright-report/
+coverage/
