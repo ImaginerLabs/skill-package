@@ -13,9 +13,11 @@ import SkillList from "./SkillList";
 export default function SkillListView() {
   const { skills, selectedCategory, searchQuery } = useSkillStore();
 
-  // 先按分类筛选
+  // 先按分类筛选（大小写不敏感）
   const categoryFiltered = selectedCategory
-    ? skills.filter((s) => s.category === selectedCategory)
+    ? skills.filter(
+        (s) => s.category.toLowerCase() === selectedCategory.toLowerCase(),
+      )
     : skills;
 
   // 再用 Fuse.js 模糊搜索

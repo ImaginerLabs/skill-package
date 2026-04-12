@@ -125,8 +125,23 @@ describe("SyncStatusIndicator", () => {
   });
 
   describe("交互", () => {
-    it("点击跳转到 /sync 页面", async () => {
+    it("无同步目标时点击跳转到 /sync?action=add-target", async () => {
       const user = userEvent.setup();
+      // targets 为空（默认）
+      render(
+        <MemoryRouter>
+          <SyncStatusIndicator />
+        </MemoryRouter>,
+      );
+      await user.click(screen.getByRole("button"));
+      expect(mockNavigate).toHaveBeenCalledWith("/sync?action=add-target");
+    });
+
+    it("有同步目标时点击跳转到 /sync", async () => {
+      const user = userEvent.setup();
+      mockSyncStoreState.targets = [
+        { id: "t1", name: "Test", path: "/tmp/test", enabled: true },
+      ];
       render(
         <MemoryRouter>
           <SyncStatusIndicator />
@@ -136,9 +151,12 @@ describe("SyncStatusIndicator", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/sync");
     });
 
-    it("syncing 状态下点击也能跳转", async () => {
+    it("syncing 状态下点击也能跳转（有目标）", async () => {
       const user = userEvent.setup();
       mockSyncStoreState.syncStatus = "syncing";
+      mockSyncStoreState.targets = [
+        { id: "t1", name: "Test", path: "/tmp/test", enabled: true },
+      ];
       render(
         <MemoryRouter>
           <SyncStatusIndicator />
@@ -148,9 +166,12 @@ describe("SyncStatusIndicator", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/sync");
     });
 
-    it("error 状态下点击也能跳转", async () => {
+    it("error 状态下点击也能跳转（有目标）", async () => {
       const user = userEvent.setup();
       mockSyncStoreState.syncStatus = "error";
+      mockSyncStoreState.targets = [
+        { id: "t1", name: "Test", path: "/tmp/test", enabled: true },
+      ];
       render(
         <MemoryRouter>
           <SyncStatusIndicator />

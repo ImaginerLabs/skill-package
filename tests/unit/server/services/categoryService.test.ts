@@ -85,12 +85,24 @@ describe("categoryService", () => {
       expect(result[1].skillCount).toBe(1);
     });
 
-    it("配置文件为空时返回空数组", async () => {
+    it("配置文件为空且无 Skill 时返回空数组", async () => {
       vi.mocked(readYaml).mockResolvedValue(null);
+      vi.mocked(getAllSkills).mockReturnValue([]);
 
       const result = await getCategories();
 
       expect(result).toEqual([]);
+    });
+
+    it("配置文件为空但有 Skill 时返回未分类虚拟分类", async () => {
+      vi.mocked(readYaml).mockResolvedValue(null);
+      // 使用默认 mockSkills（3 个 Skill）
+
+      const result = await getCategories();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe("uncategorized");
+      expect(result[0].skillCount).toBe(3);
     });
 
     it("displayName 缺失时使用 name", async () => {
@@ -99,6 +111,79 @@ describe("categoryService", () => {
       const result = await getCategories();
 
       expect(result[0].displayName).toBe("test");
+    });
+
+    it("大小写不敏感匹配：Skill category 为 Coding 时归入 coding 分类", async () => {
+      vi.mocked(getAllSkills).mockReturnValue([
+        {
+          id: "s1",
+          name: "Skill 1",
+          category: "Coding", // 大写 C
+          tags: [],
+          description: "",
+          filePath: "coding/s1.md",
+          fileSize: 100,
+          lastModified: "2024-01-01T00:00:00Z",
+        },
+        {
+          id: "s2",
+          name: "Skill 2",
+          category: "WRITING", // 全大写
+          tags: [],
+          description: "",
+          filePath: "writing/s2.md",
+          fileSize: 200,
+          lastModified: "2024-01-01T00:00:00Z",
+        },
+      ] as any);
+
+      const result = await getCategories();
+
+      const codingCat = result.find((c) => c.name === "coding");
+      const writingCat = result.find((c) => c.name === "writing");
+      expect(codingCat?.skillCount).toBe(1);
+      expect(writingCat?.skillCount).toBe(1);
+      // 无未分类
+      expect(result.find((c) => c.name === "uncategorized")).toBeUndefined();
+    });
+
+    it("无法匹配任何分类的 Skill 归入未分类虚拟分类", async () => {
+      vi.mocked(getAllSkills).mockReturnValue([
+        {
+          id: "s1",
+          name: "Skill 1",
+          category: "unknown-category",
+          tags: [],
+          description: "",
+          filePath: "unknown/s1.md",
+          fileSize: 100,
+          lastModified: "2024-01-01T00:00:00Z",
+        },
+        {
+          id: "s2",
+          name: "Skill 2",
+          category: "another-unknown",
+          tags: [],
+          description: "",
+          filePath: "unknown/s2.md",
+          fileSize: 200,
+          lastModified: "2024-01-01T00:00:00Z",
+        },
+      ] as any);
+
+      const result = await getCategories();
+
+      const uncategorized = result.find((c) => c.name === "uncategorized");
+      expect(uncategorized).toBeDefined();
+      expect(uncategorized?.displayName).toBe("未分类");
+      expect(uncategorized?.skillCount).toBe(2);
+    });
+
+    it("所有 Skill 均能匹配分类时不追加未分类虚拟分类", async () => {
+      // 使用默认 mockSkills（全部能匹配）
+      const result = await getCategories();
+
+      expect(result.find((c) => c.name === "uncategorized")).toBeUndefined();
     });
   });
 

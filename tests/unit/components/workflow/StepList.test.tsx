@@ -189,5 +189,80 @@ describe("StepList", () => {
 
       expect(screen.getByLabelText("拖拽排序 代码审查")).toBeInTheDocument();
     });
+
+    it("多步骤时正确渲染所有步骤", () => {
+      vi.mocked(useWorkflowStore).mockReturnValue({
+        steps: [
+          { order: 1, skillId: "s1", skillName: "步骤A", description: "" },
+          { order: 2, skillId: "s2", skillName: "步骤B", description: "" },
+          { order: 3, skillId: "s3", skillName: "步骤C", description: "" },
+        ],
+        removeStep: mockRemoveStep,
+        reorderSteps: mockReorderSteps,
+        updateStepDescription: mockUpdateStepDescription,
+      } as unknown as ReturnType<typeof useWorkflowStore>);
+
+      render(<StepList />);
+
+      expect(screen.getByText("步骤A")).toBeInTheDocument();
+      expect(screen.getByText("步骤B")).toBeInTheDocument();
+      expect(screen.getByText("步骤C")).toBeInTheDocument();
+      expect(screen.getByLabelText("移除 步骤A")).toBeInTheDocument();
+      expect(screen.getByLabelText("移除 步骤B")).toBeInTheDocument();
+      expect(screen.getByLabelText("移除 步骤C")).toBeInTheDocument();
+    });
+
+    it("步骤列表有正确的 role 和 aria-label", () => {
+      vi.mocked(useWorkflowStore).mockReturnValue({
+        steps: [
+          { order: 1, skillId: "s1", skillName: "步骤A", description: "" },
+        ],
+        removeStep: mockRemoveStep,
+        reorderSteps: mockReorderSteps,
+        updateStepDescription: mockUpdateStepDescription,
+      } as unknown as ReturnType<typeof useWorkflowStore>);
+
+      render(<StepList />);
+
+      expect(
+        screen.getByRole("list", { name: "工作流步骤列表" }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("拖拽排序", () => {
+    it("有步骤时不显示空状态", () => {
+      vi.mocked(useWorkflowStore).mockReturnValue({
+        steps: [
+          { order: 1, skillId: "s1", skillName: "步骤A", description: "" },
+          { order: 2, skillId: "s2", skillName: "步骤B", description: "" },
+        ],
+        removeStep: mockRemoveStep,
+        reorderSteps: mockReorderSteps,
+        updateStepDescription: mockUpdateStepDescription,
+      } as unknown as ReturnType<typeof useWorkflowStore>);
+
+      render(<StepList />);
+
+      expect(screen.queryByText("开始编排工作流")).not.toBeInTheDocument();
+      expect(screen.getByText("步骤A")).toBeInTheDocument();
+      expect(screen.getByText("步骤B")).toBeInTheDocument();
+    });
+
+    it("单步骤时第一项同时是最后项", () => {
+      vi.mocked(useWorkflowStore).mockReturnValue({
+        steps: [
+          { order: 1, skillId: "s1", skillName: "唯一步骤", description: "" },
+        ],
+        removeStep: mockRemoveStep,
+        reorderSteps: mockReorderSteps,
+        updateStepDescription: mockUpdateStepDescription,
+      } as unknown as ReturnType<typeof useWorkflowStore>);
+
+      render(<StepList />);
+
+      expect(screen.getByText("唯一步骤")).toBeInTheDocument();
+      expect(screen.getByLabelText("移除 唯一步骤")).toBeInTheDocument();
+    });
   });
 });

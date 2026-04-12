@@ -32,13 +32,28 @@ export async function getCategories(): Promise<Category[]> {
   // 等待 Skill 缓存初始化完成，避免竞态条件导致 skillCount 为 0
   await waitForInitialization();
 
-  // 计算每个分类的 Skill 数量
+  // 计算每个分类的 Skill 数量（大小写不敏感匹配）
   const skills = getAllSkills();
+  let uncategorizedCount = 0;
   for (const skill of skills) {
-    const cat = categories.find((c) => c.name === skill.category);
+    const cat = categories.find(
+      (c) => c.name.toLowerCase() === skill.category.toLowerCase(),
+    );
     if (cat) {
       cat.skillCount++;
+    } else {
+      uncategorizedCount++;
     }
+  }
+
+  // 若有无法匹配任何分类的 Skill，追加「未分类」虚拟分类
+  if (uncategorizedCount > 0) {
+    categories.push({
+      name: "uncategorized",
+      displayName: "未分类",
+      description: "无法匹配已知分类的 Skill",
+      skillCount: uncategorizedCount,
+    });
   }
 
   return categories;
@@ -98,10 +113,12 @@ export async function updateCategory(
 
   await writeYaml(CATEGORIES_PATH, categories);
 
-  // 计算 skillCount
+  // 计算 skillCount（大小写不敏感匹配）
   await waitForInitialization();
   const skills = getAllSkills();
-  const skillCount = skills.filter((s) => s.category === name).length;
+  const skillCount = skills.filter(
+    (s) => s.category.toLowerCase() === name.toLowerCase(),
+  ).length;
 
   return {
     name: categories[index].name,
@@ -122,10 +139,12 @@ export async function deleteCategory(name: string): Promise<void> {
     throw AppError.notFound(`分类 "${name}" 未找到`);
   }
 
-  // 检查分类下是否有 Skill
+  // 检查分类下是否有 Skill（大小写不敏感匹配）
   await waitForInitialization();
   const skills = getAllSkills();
-  const skillCount = skills.filter((s) => s.category === name).length;
+  const skillCount = skills.filter(
+    (s) => s.category.toLowerCase() === name.toLowerCase(),
+  ).length;
   if (skillCount > 0) {
     throw new AppError(
       "CATEGORY_NOT_EMPTY",

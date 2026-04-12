@@ -12,7 +12,7 @@ import {
   Search,
   Settings,
 } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
@@ -34,6 +34,15 @@ export default function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen } = useUIStore();
   const { skills, selectSkill } = useSkillStore();
   const navigate = useNavigate();
+
+  // 按类型分组 Skill
+  const { regularSkills, workflowSkills } = useMemo(
+    () => ({
+      regularSkills: skills.filter((s) => s.type !== "workflow"),
+      workflowSkills: skills.filter((s) => s.type === "workflow"),
+    }),
+    [skills],
+  );
 
   // ⌘K 快捷键
   useEffect(() => {
@@ -97,7 +106,7 @@ export default function CommandPalette() {
           </div>
 
           {/* 搜索结果 */}
-          <Command.List className="max-h-[300px] overflow-auto p-2">
+          <Command.List className="max-h-[400px] overflow-auto p-2">
             <Command.Empty className="py-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
               未找到匹配结果
             </Command.Empty>
@@ -107,31 +116,72 @@ export default function CommandPalette() {
               heading="Skills"
               className="text-xs text-[hsl(var(--muted-foreground))] px-2 py-1"
             >
-              {skills.map((skill) => (
+              {regularSkills.map((skill) => (
                 <Command.Item
                   key={skill.id}
                   value={`${skill.name} ${skill.description} ${skill.tags.join(" ")}`}
                   onSelect={() => handleSelectSkill(skill.id)}
-                  className="flex items-center gap-2 px-2 py-2 rounded text-sm cursor-pointer data-[selected=true]:bg-[hsl(var(--accent))] text-[hsl(var(--foreground))]"
+                  className="flex items-start gap-2 px-2 py-2 rounded text-sm cursor-pointer data-[selected=true]:bg-[hsl(var(--accent))] text-[hsl(var(--foreground))]"
                 >
-                  {skill.type === "workflow" ? (
-                    <GitBranch
-                      size={14}
-                      className="shrink-0 text-[hsl(var(--info))]"
-                    />
-                  ) : (
-                    <FileText
-                      size={14}
-                      className="shrink-0 text-[hsl(var(--primary))]"
-                    />
-                  )}
-                  <span className="flex-1 truncate">{skill.name}</span>
-                  <span className="text-xs text-[hsl(var(--muted-foreground))]">
-                    {skill.category}
-                  </span>
+                  <FileText
+                    size={14}
+                    className="shrink-0 text-[hsl(var(--primary))] mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate">{skill.name}</span>
+                      <span className="text-xs text-[hsl(var(--muted-foreground))] shrink-0">
+                        {skill.category}
+                      </span>
+                    </div>
+                    {skill.description && (
+                      <p className="text-xs text-[hsl(var(--muted-foreground))] truncate mt-0.5">
+                        {skill.description.length > 60
+                          ? skill.description.slice(0, 60) + "..."
+                          : skill.description}
+                      </p>
+                    )}
+                  </div>
                 </Command.Item>
               ))}
             </Command.Group>
+
+            {/* 工作流搜索结果（仅当有工作流时显示） */}
+            {workflowSkills.length > 0 && (
+              <Command.Group
+                heading="工作流"
+                className="text-xs text-[hsl(var(--muted-foreground))] px-2 py-1"
+              >
+                {workflowSkills.map((skill) => (
+                  <Command.Item
+                    key={skill.id}
+                    value={`${skill.name} ${skill.description} ${skill.tags.join(" ")}`}
+                    onSelect={() => handleSelectSkill(skill.id)}
+                    className="flex items-start gap-2 px-2 py-2 rounded text-sm cursor-pointer data-[selected=true]:bg-[hsl(var(--accent))] text-[hsl(var(--foreground))]"
+                  >
+                    <GitBranch
+                      size={14}
+                      className="shrink-0 text-[hsl(var(--info))] mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate">{skill.name}</span>
+                        <span className="text-xs text-[hsl(var(--muted-foreground))] shrink-0">
+                          {skill.category}
+                        </span>
+                      </div>
+                      {skill.description && (
+                        <p className="text-xs text-[hsl(var(--muted-foreground))] truncate mt-0.5">
+                          {skill.description.length > 60
+                            ? skill.description.slice(0, 60) + "..."
+                            : skill.description}
+                        </p>
+                      )}
+                    </div>
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            )}
 
             {/* 页面跳转 */}
             <Command.Group

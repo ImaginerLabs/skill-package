@@ -19,7 +19,11 @@ import { ScrollArea } from "../ui/scroll-area";
  * WorkflowPreview — 工作流生成结果预览与保存
  * 支持新建和编辑模式
  */
-export default function WorkflowPreview() {
+export default function WorkflowPreview({
+  onSaveSuccess,
+}: {
+  onSaveSuccess?: () => void;
+}) {
   const { workflowName, workflowDescription, steps, editingWorkflowId, reset } =
     useWorkflowStore();
   const { fetchSkills } = useSkillStore();
@@ -69,6 +73,8 @@ export default function WorkflowPreview() {
       await fetchSkills();
       reset();
       setPreview(null);
+      // 通知父组件保存成功
+      onSaveSuccess?.();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "工作流保存失败");
     } finally {

@@ -57,6 +57,8 @@ export const useSyncStore = create<SyncStore>((set) => ({
     try {
       const targets = await apiFetchSyncTargets();
       set({ targets });
+    } catch {
+      // 静默处理错误，loading 状态由 finally 重置
     } finally {
       set({ targetsLoading: false });
     }

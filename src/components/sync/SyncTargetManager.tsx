@@ -4,6 +4,7 @@
 
 import { Check, Edit2, FolderOpen, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { PathPreset } from "../../../shared/types";
 import { fetchPathPresets, validateSyncPath } from "../../lib/api";
 import { useSyncStore } from "../../stores/sync-store";
@@ -48,6 +49,7 @@ export default function SyncTargetManager() {
   const [newPath, setNewPath] = useState("");
   const [adding, setAdding] = useState(false);
   const [pathPresets, setPathPresets] = useState<PathPreset[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [editing, setEditing] = useState<EditingState>({
     id: null,
     name: "",
@@ -67,6 +69,15 @@ export default function SyncTargetManager() {
       .then(setPathPresets)
       .catch(() => {});
   }, [fetchTargets]);
+
+  // 仅在挂载时检测 URL 参数 action=add-target，自动展开添加表单
+  useEffect(() => {
+    if (searchParams.get("action") === "add-target") {
+      setShowAddForm(true);
+      setSearchParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 路径校验（防抖）
   const handleValidatePath = useCallback(async (targetPath: string) => {
@@ -279,25 +290,66 @@ export default function SyncTargetManager() {
 
       {/* 目标列表 */}
       {targets.length === 0 && !showAddForm ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <FolderOpen
-            size={40}
-            className="text-[hsl(var(--muted-foreground))] mb-3 opacity-30"
-          />
-          <p className="text-sm text-[hsl(var(--muted-foreground))] mb-1">
-            尚未配置同步目标
+        <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+          {/* 引导标题 */}
+          <p className="text-sm font-medium text-[hsl(var(--foreground))]">
+            开始使用同步功能
           </p>
-          <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4">
-            添加 IDE 项目路径，将 Skill 同步到你的开发环境
-          </p>
+          {/* 分步引导 */}
+          <div className="w-full max-w-xs space-y-2 text-left">
+            {/* 步骤 1（高亮） */}
+            <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--primary)/0.4)] bg-[hsl(var(--primary)/0.05)] px-3 py-2.5">
+              <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-[10px] font-bold mt-0.5">
+                1
+              </span>
+              <div>
+                <p className="text-xs font-medium text-[hsl(var(--primary))]">
+                  添加同步目标
+                </p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">
+                  配置 IDE 项目路径
+                </p>
+              </div>
+            </div>
+            {/* 步骤 2（灰色） */}
+            <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--border))] px-3 py-2.5 opacity-50">
+              <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] text-[10px] font-bold mt-0.5">
+                2
+              </span>
+              <div>
+                <p className="text-xs font-medium text-[hsl(var(--foreground))]">
+                  选择 Skill
+                </p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">
+                  在左侧选择要同步的 Skill
+                </p>
+              </div>
+            </div>
+            {/* 步骤 3（灰色） */}
+            <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--border))] px-3 py-2.5 opacity-50">
+              <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] text-[10px] font-bold mt-0.5">
+                3
+              </span>
+              <div>
+                <p className="text-xs font-medium text-[hsl(var(--foreground))]">
+                  开始同步
+                </p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">
+                  一键同步到目标路径
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* 添加按钮 */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowAddForm(true)}
-            className="gap-1.5"
+            className="gap-1.5 mt-2"
+            data-testid="guide-add-target-btn"
           >
             <Plus size={14} />
-            添加第一个同步目标
+            添加同步目标
           </Button>
         </div>
       ) : (

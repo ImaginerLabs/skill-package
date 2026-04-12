@@ -41,11 +41,11 @@ export default function SyncStatusIndicator() {
     return () => clearInterval(timer);
   }, [lastSyncTime]);
 
-  const handleClick = useCallback(() => {
-    navigate("/sync");
-  }, [navigate]);
-
   const hasTargets = targets.length > 0;
+
+  const handleClick = useCallback(() => {
+    navigate(hasTargets ? "/sync" : "/sync?action=add-target");
+  }, [navigate, hasTargets]);
 
   // 根据状态渲染不同的指示器
   if (syncStatus === "syncing") {

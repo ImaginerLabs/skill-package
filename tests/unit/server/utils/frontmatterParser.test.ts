@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { parseRawFrontmatter } from "../../../../server/utils/frontmatterParser";
+import fs from "fs-extra";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  parseFrontmatter,
+  parseRawFrontmatter,
+} from "../../../../server/utils/frontmatterParser";
 
 // 辅助函数：构建标准 Skill 文件内容
 function buildSkillContent(
@@ -171,6 +175,105 @@ describe("frontmatterParser", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.meta.filePath).toBe("coding/test.md");
+      }
+    });
+  });
+
+  describe("parseFrontmatter（读文件版）", () => {
+    beforeEach(() => {
+      vi.spyOn(fs, "readFile");
+      vi.spyOn(fs, "stat");
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("文件读取失败时返回失败结果", async () => {
+      vi.mocked(fs.readFile).mockRejectedValue(
+        new Error("ENOENT: no such file or directory"),
+      );
+
+      const result = await parseFrontmatter(
+        "/fake/path/skill.md",
+        "/fake/skills",
+      );
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("文件读取失败");
+        expect(result.error).toContain("ENOENT");
+        expect(result.filePath).toBeTruthy();
+      }
+    });
+
+    it("文件读取失败（非 Error 对象）时返回失败结果", async () => {
+      vi.mocked(fs.readFile).mockRejectedValue("权限拒绝");
+
+      const result = await parseFrontmatter(
+        "/fake/path/skill.md",
+        "/fake/skills",
+      );
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("文件读取失败");
+        expect(result.error).toContain("权限拒绝");
+      }
+    });
+
+    it("成功读取文件并解析 Frontmatter", async () => {
+      const rawContent = `---
+name: 测试 Skill
+description: 测试描述
+category: coding
+tags:
+  - test
+---
+
+# 内容`;
+
+      vi.mocked(fs.readFile).mockResolvedValue(rawContent as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        size: Buffer.byteLength(rawContent, "utf-8"),
+        mtime: new Date("2024-06-01T00:00:00.000Z"),
+      } as fs.Stats);
+
+      const result = await parseFrontmatter(
+        "/fake/skills/coding/test-skill.md",
+        "/fake/skills",
+      );
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.meta.name).toBe("测试 Skill");
+        expect(result.meta.category).toBe("coding");
+        expect(result.meta.tags).toEqual(["test"]);
+        expect(result.meta.lastModified).toBe("2024-06-01T00:00:00.000Z");
+      }
+    });
+
+    it("文件内容 Frontmatter 校验失败时返回失败结果", async () => {
+      const rawContent = `---
+description: 缺少 name 和 category
+---
+
+# 内容`;
+
+      vi.mocked(fs.readFile).mockResolvedValue(rawContent as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        size: 100,
+        mtime: new Date(),
+      } as fs.Stats);
+
+      const result = await parseFrontmatter(
+        "/fake/skills/coding/bad.md",
+        "/fake/skills",
+      );
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Frontmatter 校验失败");
       }
     });
   });

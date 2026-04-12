@@ -1,10 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock @dnd-kit
-vi.mock("@dnd-kit/sortable", () => ({
-  useSortable: vi.fn(() => ({
+// 使用 vi.hoisted 确保 mock 变量在 vi.mock factory 中可访问
+const { mockUseSortable } = vi.hoisted(() => ({
+  mockUseSortable: vi.fn(() => ({
     attributes: {},
     listeners: {},
     setNodeRef: vi.fn(),
@@ -12,6 +12,10 @@ vi.mock("@dnd-kit/sortable", () => ({
     transition: null,
     isDragging: false,
   })),
+}));
+
+vi.mock("@dnd-kit/sortable", () => ({
+  useSortable: mockUseSortable,
 }));
 
 vi.mock("@dnd-kit/utilities", () => ({
@@ -97,11 +101,81 @@ describe("StepItem", () => {
     });
   });
 
+  describe("键盘排序", () => {
+    it("Alt+ArrowUp 且非第一项时调用 onMoveUp", () => {
+      render(
+        <StepItem {...defaultProps} isFirst={false} isLast={false} index={1} />,
+      );
+
+      const item = screen.getByLabelText("步骤 1: 代码审查");
+      fireEvent.keyDown(item, { key: "ArrowUp", altKey: true });
+
+      expect(mockOnMoveUp).toHaveBeenCalledWith(1);
+    });
+
+    it("Alt+ArrowDown 且非最后项时调用 onMoveDown", () => {
+      render(
+        <StepItem {...defaultProps} isFirst={false} isLast={false} index={1} />,
+      );
+
+      const item = screen.getByLabelText("步骤 1: 代码审查");
+      fireEvent.keyDown(item, { key: "ArrowDown", altKey: true });
+
+      expect(mockOnMoveDown).toHaveBeenCalledWith(1);
+    });
+
+    it("isFirst=true 时 Alt+ArrowUp 不触发 onMoveUp", () => {
+      render(<StepItem {...defaultProps} isFirst={true} index={0} />);
+
+      const item = screen.getByLabelText("步骤 1: 代码审查");
+      fireEvent.keyDown(item, { key: "ArrowUp", altKey: true });
+
+      expect(mockOnMoveUp).not.toHaveBeenCalled();
+    });
+
+    it("isLast=true 时 Alt+ArrowDown 不触发 onMoveDown", () => {
+      render(<StepItem {...defaultProps} isLast={true} index={0} />);
+
+      const item = screen.getByLabelText("步骤 1: 代码审查");
+      fireEvent.keyDown(item, { key: "ArrowDown", altKey: true });
+
+      expect(mockOnMoveDown).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("拖拽状态", () => {
+    it("isDragging=true 时应用拖拽样式", () => {
+      mockUseSortable.mockReturnValueOnce({
+        attributes: {},
+        listeners: {},
+        setNodeRef: vi.fn(),
+        transform: { x: 0, y: 10, scaleX: 1, scaleY: 1 },
+        transition: "transform 200ms",
+        isDragging: true,
+      });
+
+      render(<StepItem {...defaultProps} />);
+
+      const item = screen.getByLabelText("步骤 1: 代码审查");
+      expect(item.className).toContain("opacity-50");
+    });
+  });
   describe("可访问性", () => {
     it("步骤项有正确的 aria-label", () => {
       render(<StepItem {...defaultProps} />);
 
       expect(screen.getByLabelText("步骤 1: 代码审查")).toBeInTheDocument();
+    });
+
+    it("步骤序号为 2 时 aria-label 正确", () => {
+      render(
+        <StepItem
+          {...defaultProps}
+          step={{ ...defaultProps.step, order: 2, skillName: "测试覆盖" }}
+        />,
+      );
+
+      expect(screen.getByLabelText("步骤 2: 测试覆盖")).toBeInTheDocument();
     });
   });
 });

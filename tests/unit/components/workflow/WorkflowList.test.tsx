@@ -209,5 +209,188 @@ describe("WorkflowList", () => {
       // 不应出现确认对话框
       expect(screen.queryByText("确认删除工作流")).not.toBeInTheDocument();
     });
+
+    it("onConfirm 超时后调用后端删除 API", async () => {
+      const user = userEvent.setup();
+      const { deleteWorkflow } = await import("../../../../src/lib/api");
+      vi.mocked(deleteWorkflow).mockResolvedValue(undefined);
+      vi.mocked(mockFetchSkills).mockResolvedValue(undefined);
+      vi.mocked(fetchWorkflows).mockResolvedValue([
+        {
+          id: "wf-1",
+          name: "测试工作流",
+          description: "",
+          filePath: "workflows/test.md",
+        },
+      ]);
+
+      render(<WorkflowList />);
+
+      await vi.waitFor(() => {
+        expect(screen.getByText("测试工作流")).toBeInTheDocument();
+      });
+
+      const deleteBtn = screen.getByLabelText("删除 测试工作流");
+      await user.click(deleteBtn);
+
+      // 模拟超时后调用 onConfirm
+      const onConfirm = mockUndoable.mock.calls[0][1];
+      await act(async () => {
+        await onConfirm();
+      });
+
+      expect(deleteWorkflow).toHaveBeenCalledWith("wf-1");
+      expect(mockFetchSkills).toHaveBeenCalled();
+    });
+
+    it("onConfirm 删除失败时显示错误 Toast 并重新加载列表", async () => {
+      const user = userEvent.setup();
+      const { deleteWorkflow } = await import("../../../../src/lib/api");
+      vi.mocked(deleteWorkflow).mockRejectedValue(new Error("删除失败"));
+      vi.mocked(fetchWorkflows)
+        .mockResolvedValueOnce([
+          {
+            id: "wf-1",
+            name: "测试工作流",
+            description: "",
+            filePath: "workflows/test.md",
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: "wf-1",
+            name: "测试工作流",
+            description: "",
+            filePath: "workflows/test.md",
+          },
+        ]);
+
+      render(<WorkflowList />);
+
+      await vi.waitFor(() => {
+        expect(screen.getByText("测试工作流")).toBeInTheDocument();
+      });
+
+      const deleteBtn = screen.getByLabelText("删除 测试工作流");
+      await user.click(deleteBtn);
+
+      const onConfirm = mockUndoable.mock.calls[0][1];
+      await act(async () => {
+        await onConfirm();
+      });
+
+      expect(mockError).toHaveBeenCalledWith("删除失败");
+    });
+
+    it("重复点击删除同一工作流不触发第二次", async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchWorkflows).mockResolvedValue([
+        {
+          id: "wf-1",
+          name: "测试工作流",
+          description: "",
+          filePath: "workflows/test.md",
+        },
+      ]);
+
+      render(<WorkflowList />);
+
+      await vi.waitFor(() => {
+        expect(screen.getByText("测试工作流")).toBeInTheDocument();
+      });
+
+      const deleteBtn = screen.getByLabelText("删除 测试工作流");
+      await user.click(deleteBtn);
+
+      // 第一次删除后工作流已从列表移除，不应再次触发
+      expect(mockUndoable).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("编辑", () => {
+    it("点击编辑按钮加载工作流到编排器", async () => {
+      const user = userEvent.setup();
+      const { fetchWorkflowDetail } = await import("../../../../src/lib/api");
+      vi.mocked(fetchWorkflowDetail).mockResolvedValue({
+        id: "wf-1",
+        name: "代码审查工作流",
+        description: "自动化审查",
+        filePath: "workflows/code-review.md",
+        steps: [
+          { skillId: "s1", skillName: "Skill 1", order: 1, description: "" },
+        ],
+      });
+      vi.mocked(fetchWorkflows).mockResolvedValue([
+        {
+          id: "wf-1",
+          name: "代码审查工作流",
+          description: "自动化审查",
+          filePath: "workflows/code-review.md",
+        },
+      ]);
+
+      render(<WorkflowList />);
+
+      await vi.waitFor(() => {
+        expect(screen.getByText("代码审查工作流")).toBeInTheDocument();
+      });
+
+      const editBtn = screen.getByLabelText("编辑 代码审查工作流");
+      await user.click(editBtn);
+
+      await vi.waitFor(() => {
+        expect(fetchWorkflowDetail).toHaveBeenCalledWith("wf-1");
+      });
+
+      expect(mockLoadWorkflow).toHaveBeenCalledWith(
+        "wf-1",
+        "代码审查工作流",
+        "自动化审查",
+        expect.any(Array),
+      );
+      expect(mockSuccess).toHaveBeenCalledWith(
+        "已加载工作流「代码审查工作流」到编排器",
+      );
+    });
+
+    it("编辑失败时显示错误 Toast", async () => {
+      const user = userEvent.setup();
+      const { fetchWorkflowDetail } = await import("../../../../src/lib/api");
+      vi.mocked(fetchWorkflowDetail).mockRejectedValue(
+        new Error("加载工作流失败"),
+      );
+      vi.mocked(fetchWorkflows).mockResolvedValue([
+        {
+          id: "wf-1",
+          name: "代码审查工作流",
+          description: "",
+          filePath: "workflows/code-review.md",
+        },
+      ]);
+
+      render(<WorkflowList />);
+
+      await vi.waitFor(() => {
+        expect(screen.getByText("代码审查工作流")).toBeInTheDocument();
+      });
+
+      const editBtn = screen.getByLabelText("编辑 代码审查工作流");
+      await user.click(editBtn);
+
+      await vi.waitFor(() => {
+        expect(mockError).toHaveBeenCalledWith("加载工作流失败");
+      });
+    });
+  });
+
+  describe("加载状态", () => {
+    it("初始加载时显示加载中", () => {
+      vi.mocked(fetchWorkflows).mockImplementation(
+        () => new Promise(() => {}), // 永不 resolve
+      );
+
+      render(<WorkflowList />);
+      expect(screen.getByText("加载中...")).toBeInTheDocument();
+    });
   });
 });

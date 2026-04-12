@@ -8,15 +8,19 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import SkillSelector from "./SkillSelector";
 import StepList from "./StepList";
-import WorkflowList from "./WorkflowList";
 import WorkflowPreview from "./WorkflowPreview";
+
+interface WorkflowEditorProps {
+  /** 保存成功后的回调（可选） */
+  onSaveSuccess?: () => void;
+}
 
 /**
  * WorkflowEditor — 工作流编排页面核心组件
  * 双栏布局：左侧 Skill 选择列表 + 右侧工作流步骤列表
  * 响应式：>= 1024px 左右双栏，< 1024px 上下堆叠
  */
-export default function WorkflowEditor() {
+export default function WorkflowEditor({ onSaveSuccess }: WorkflowEditorProps) {
   const {
     workflowName,
     workflowDescription,
@@ -78,8 +82,6 @@ export default function WorkflowEditor() {
           <div className="flex-1 min-h-0">
             <SkillSelector />
           </div>
-          {/* 已有工作流列表 */}
-          <WorkflowList />
         </div>
 
         {/* 右侧：步骤列表 */}
@@ -88,7 +90,7 @@ export default function WorkflowEditor() {
             <StepList />
           </div>
           {/* 底部：预览与生成 */}
-          <WorkflowPreview />
+          <WorkflowPreview onSaveSuccess={onSaveSuccess} />
         </div>
       </div>
     </div>
