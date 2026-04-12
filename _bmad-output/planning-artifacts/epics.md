@@ -1146,3 +1146,80 @@ So that 我随时了解 Skill 是否已同步到 IDE。
 **And** 点击 StatusIndicator 跳转到同步管理页面（UX-DR9）
 **And** 同步进行中时显示 loading 动画
 **And** 同步失败时显示红色警告状态
+
+### Story 4.5: 工作流 Markdown 解析后移后端（Epic 3 回顾改进）
+
+As a 开发者,
+I want 后端提供结构化的工作流数据 API,
+So that 前端不需要解析 Markdown 格式，降低耦合和脆弱性。
+
+**Acceptance Criteria:**
+
+**Given** 前端请求工作流详情
+**When** 调用 `GET /api/workflows/:id` 端点
+**Then** 后端返回结构化的工作流数据（包含 name、description、steps 数组）
+**And** 前端 WorkflowList 组件移除 Markdown 正则解析逻辑，改用 API 返回的结构化数据
+**And** 已有工作流功能（编辑、删除）行为不变
+
+**Technical Notes:**
+
+- 来源：Epic 3 回顾 — 前端不应解析后端数据格式
+- 当前 WorkflowList.tsx 中 `handleEdit` 使用正则解析 Markdown 步骤，脆弱且违反职责分离
+
+### Story 4.6: WorkflowPreview 组件测试补全（Epic 3 回顾改进）
+
+As a 开发者,
+I want WorkflowPreview 组件有完整的单元测试覆盖,
+So that 预览和保存功能的正确性有测试保障。
+
+**Acceptance Criteria:**
+
+**Given** WorkflowPreview 组件
+**When** 运行测试套件
+**Then** 覆盖以下场景：预览按钮禁用/启用状态、预览 API 调用、保存（新建/编辑模式）、loading 状态、错误处理、Toast 通知
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 来源：Epic 3 回顾 — WorkflowPreview 是唯一缺少测试的工作流组件
+- 组件包含 API 调用（预览和保存）、loading 状态管理、编辑/新建模式切换
+
+### Story 4.7: 工作流删除撤销功能（Epic 3 回顾改进）
+
+As a 用户,
+I want 删除工作流后有 5 秒撤销窗口,
+So that 我可以在误删时快速恢复。
+
+**Acceptance Criteria:**
+
+**Given** 用户确认删除一个工作流
+**When** 删除操作执行后
+**Then** 显示包含撤销按钮的 Toast 通知，持续 5 秒（UX-DR14）
+**And** 用户点击撤销按钮后恢复已删除的工作流文件
+**And** 5 秒内未撤销则永久删除
+**And** 撤销成功后刷新列表并 Toast 通知
+
+**Technical Notes:**
+
+- 来源：Epic 3 回顾 — 删除操作缺少撤销功能（UX-DR14 未完全实现）
+- 可采用软删除 + 延迟硬删除策略，或前端缓存已删除内容
+
+### Story 4.8: Story 3-3 和 3-4 补建 Story 文件（Epic 3 回顾改进）
+
+As a 项目管理者,
+I want 为 Story 3-3 和 3-4 补建独立的 story 文件并填写 Dev Agent Record,
+So that 项目的 story 生命周期记录完整，便于后续追溯。
+
+**Acceptance Criteria:**
+
+**Given** Story 3-3（工作流文件生成与预览）和 Story 3-4（工作流管理编辑与删除）缺少独立 story 文件
+**When** 补建 story 文件
+**Then** 创建 `3-3-workflow-file-generation-and-preview.md` 和 `3-4-workflow-management-edit-and-delete.md`
+**And** 包含完整的 Tasks/Subtasks 列表（全部标记 [x]）
+**And** Dev Agent Record 记录已实现的文件列表和关键决策
+**And** Status 标记为 done
+
+**Technical Notes:**
+
+- 来源：Epic 3 回顾 — Story 3-3 和 3-4 缺少独立 story 文件，违反生命周期规范
+- 这是文档补全任务，不涉及代码修改
