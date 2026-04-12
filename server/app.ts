@@ -7,6 +7,7 @@ import { configRoutes } from "./routes/configRoutes.js";
 import { healthRoutes } from "./routes/healthRoutes.js";
 import { importRoutes } from "./routes/importRoutes.js";
 import { skillRoutes } from "./routes/skillRoutes.js";
+import { syncRoutes } from "./routes/syncRoutes.js";
 import { workflowRoutes } from "./routes/workflowRoutes.js";
 
 interface AppOptions {
@@ -32,6 +33,7 @@ export function createApp(options: AppOptions) {
   app.use("/api", skillRoutes);
   app.use("/api", categoryRoutes);
   app.use("/api", importRoutes);
+  app.use("/api", syncRoutes);
   app.use("/api", workflowRoutes);
 
   // API 404 处理器：未匹配的 /api/* 路由返回 JSON 404

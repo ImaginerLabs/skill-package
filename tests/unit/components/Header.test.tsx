@@ -12,10 +12,9 @@ vi.mock("../../../src/stores/ui-store", () => ({
   })),
 }));
 
-vi.mock("../../../src/stores/skill-store", () => ({
-  useSkillStore: vi.fn(() => ({
-    skills: [{ id: "1", name: "test" }],
-  })),
+// Mock SyncStatusIndicator 组件
+vi.mock("../../../src/components/sync/SyncStatusIndicator", () => ({
+  default: () => <span data-testid="sync-status-indicator">已同步</span>,
 }));
 
 describe("Header", () => {
@@ -52,13 +51,13 @@ describe("Header", () => {
     expect(mockSetCommandPaletteOpen).toHaveBeenCalledWith(true);
   });
 
-  it("有 Skill 时显示已同步状态", () => {
+  it("渲染 SyncStatusIndicator 组件", () => {
     render(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
     );
-    expect(screen.getByText("已同步")).toBeInTheDocument();
+    expect(screen.getByTestId("sync-status-indicator")).toBeInTheDocument();
   });
 
   it("顶部栏固定高度 48px (h-12)", () => {

@@ -307,3 +307,70 @@ export async function deleteWorkflow(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+// ---- Sync Target API ----
+
+import type { SyncTarget } from "../../shared/types";
+
+/** 获取所有同步目标 */
+export async function fetchSyncTargets(): Promise<SyncTarget[]> {
+  return apiCall<SyncTarget[]>("/api/sync/targets");
+}
+
+/** 添加同步目标 */
+export async function addSyncTarget(data: {
+  name: string;
+  path: string;
+  enabled?: boolean;
+}): Promise<SyncTarget> {
+  return apiCall<SyncTarget>("/api/sync/targets", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/** 更新同步目标 */
+export async function updateSyncTarget(
+  id: string,
+  data: { name?: string; path?: string; enabled?: boolean },
+): Promise<SyncTarget> {
+  return apiCall<SyncTarget>(`/api/sync/targets/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+/** 删除同步目标 */
+export async function deleteSyncTarget(id: string): Promise<void> {
+  return apiCall<void>(`/api/sync/targets/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+/** 校验同步路径 */
+export async function validateSyncPath(
+  targetPath: string,
+): Promise<{ exists: boolean; writable: boolean }> {
+  return apiCall<{ exists: boolean; writable: boolean }>(
+    "/api/sync/validate-path",
+    {
+      method: "POST",
+      body: JSON.stringify({ path: targetPath }),
+    },
+  );
+}
+
+// ---- Sync Push API ----
+
+import type { SyncResult } from "../../shared/types";
+
+/** 执行同步推送（将选定 Skill 复制到启用的同步目标目录） */
+export async function pushSync(
+  skillIds: string[],
+  targetIds?: string[],
+): Promise<SyncResult> {
+  return apiCall<SyncResult>("/api/sync/push", {
+    method: "POST",
+    body: JSON.stringify({ skillIds, targetIds }),
+  });
+}

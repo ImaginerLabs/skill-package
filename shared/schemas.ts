@@ -224,6 +224,26 @@ export const UpdateCategoryBodySchema = z.object({
   description: z.string().optional(),
 });
 
+/** POST /api/sync/targets 请求体 */
+export const SyncTargetCreateSchema = z.object({
+  name: z.string().min(1, "name 为必填项"),
+  path: z.string().min(1, "path 为必填项"),
+  enabled: z.boolean().default(true),
+});
+
+/** PUT /api/sync/targets/:id 请求体 */
+export const SyncTargetUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  path: z.string().min(1).optional(),
+  enabled: z.boolean().optional(),
+});
+
+/** POST /api/sync/push 请求体 */
+export const SyncPushRequestSchema = z.object({
+  skillIds: z.array(z.string().min(1)).min(1, "至少选择一个 Skill"),
+  targetIds: z.array(z.string().min(1)).optional(),
+});
+
 // ---- 类型推断导出 ----
 
 export type SkillMetaInferred = z.infer<typeof SkillMetaSchema>;

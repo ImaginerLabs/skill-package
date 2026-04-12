@@ -1,22 +1,41 @@
-import { RefreshCw } from "lucide-react";
-import { Badge } from "../components/ui/badge";
+// ============================================================
+// pages/SyncPage.tsx — IDE 同步管理页面
+// ============================================================
 
+import SyncExecutor from "../components/sync/SyncExecutor";
+import SyncSkillSelector from "../components/sync/SyncSkillSelector";
+import SyncTargetManager from "../components/sync/SyncTargetManager";
+
+/**
+ * SyncPage — IDE 同步页面
+ * 双栏布局：左侧 Skill 选择列表 + 右侧同步目标配置
+ * 底部：同步执行与结果日志
+ */
 export default function SyncPage() {
   return (
-    <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-      <RefreshCw
-        size={48}
-        className="text-[hsl(var(--primary))] mb-4 opacity-60"
-      />
-      <h2 className="text-xl font-semibold font-[var(--font-code)] text-[hsl(var(--foreground))] mb-2">
-        IDE 同步
-      </h2>
-      <p className="text-sm text-[hsl(var(--muted-foreground))] max-w-md mb-4">
-        将 Skill 同步到 IDE 项目目录，即将推出
-      </p>
-      <Badge variant="secondary" className="text-xs">
-        Coming Soon
-      </Badge>
+    <div className="h-full flex flex-col">
+      <div className="shrink-0 p-6 pb-4">
+        <h1 className="text-2xl font-bold font-[var(--font-code)] text-[hsl(var(--foreground))] mb-1">
+          IDE 同步
+        </h1>
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          选择 Skill 并配置同步目标路径，将 Skill 一键同步到 IDE 项目目录
+        </p>
+      </div>
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 px-6 gap-6">
+        {/* 左侧：Skill 选择 */}
+        <div className="lg:w-[420px] lg:shrink-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 overflow-auto">
+          <SyncSkillSelector />
+        </div>
+        {/* 右侧：同步目标配置 */}
+        <div className="flex-1 min-w-0 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 overflow-auto">
+          <SyncTargetManager />
+        </div>
+      </div>
+      {/* 底部：同步执行与结果日志 */}
+      <div className="shrink-0 px-6 py-4">
+        <SyncExecutor />
+      </div>
     </div>
   );
 }

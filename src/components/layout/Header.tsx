@@ -1,6 +1,6 @@
 import { Search, Zap } from "lucide-react";
-import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
+import SyncStatusIndicator from "../sync/SyncStatusIndicator";
 
 /**
  * 顶部栏 — Logo + 全局搜索入口 + 同步状态
@@ -8,7 +8,6 @@ import { useUIStore } from "../../stores/ui-store";
  */
 export default function Header() {
   const { setCommandPaletteOpen } = useUIStore();
-  const { skills } = useSkillStore();
 
   return (
     <header className="flex items-center justify-between h-12 px-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))] shrink-0">
@@ -34,20 +33,8 @@ export default function Header() {
         </kbd>
       </button>
 
-      {/* 右侧：同步状态指示器占位 */}
-      <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
-        {skills.length > 0 ? (
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--primary))]" />
-            已同步
-          </span>
-        ) : (
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--muted))]" />
-            未配置
-          </span>
-        )}
-      </div>
+      {/* 右侧：同步状态指示器 */}
+      <SyncStatusIndicator />
     </header>
   );
 }
