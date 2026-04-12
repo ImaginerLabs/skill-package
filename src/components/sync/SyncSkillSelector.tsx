@@ -156,6 +156,8 @@ export default function SyncSkillSelector() {
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]"
         />
         <Input
+          id="sync-skill-search"
+          name="sync-skill-search"
           placeholder="搜索 Skill..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}

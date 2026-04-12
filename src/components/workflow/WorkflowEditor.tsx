@@ -33,6 +33,8 @@ export default function WorkflowEditor() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 space-y-2">
             <Input
+              id="workflow-name"
+              name="workflow-name"
               placeholder="工作流名称"
               value={workflowName}
               onChange={(e) => setWorkflowName(e.target.value)}
@@ -40,6 +42,8 @@ export default function WorkflowEditor() {
               aria-label="工作流名称"
             />
             <Input
+              id="workflow-description"
+              name="workflow-description"
               placeholder="工作流描述（可选）"
               value={workflowDescription}
               onChange={(e) => setWorkflowDescription(e.target.value)}

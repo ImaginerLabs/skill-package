@@ -107,6 +107,7 @@ export default function SkillPreview() {
             onClick={() => setShowEditor(!showEditor)}
             className="h-8 w-8"
             title="编辑元数据"
+            aria-label="编辑元数据"
           >
             <Pencil size={14} />
           </Button>
@@ -119,6 +120,7 @@ export default function SkillPreview() {
               setPreviewOpen(false);
             }}
             title="关闭预览"
+            aria-label="关闭预览"
           >
             <X size={14} />
           </Button>

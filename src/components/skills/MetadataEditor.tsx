@@ -101,6 +101,7 @@ export default function MetadataEditor({
           size="icon"
           onClick={onClose}
           className="h-7 w-7"
+          aria-label="关闭编辑面板"
         >
           <X size={14} />
         </Button>
@@ -115,10 +116,15 @@ export default function MetadataEditor({
       <div className="space-y-3">
         {/* 名称 */}
         <div>
-          <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
+          <label
+            htmlFor="meta-name"
+            className="block text-xs text-[hsl(var(--muted-foreground))] mb-1"
+          >
             名称
           </label>
           <Input
+            id="meta-name"
+            name="meta-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="h-8 text-sm"
@@ -127,10 +133,15 @@ export default function MetadataEditor({
 
         {/* 描述 */}
         <div>
-          <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
+          <label
+            htmlFor="meta-description"
+            className="block text-xs text-[hsl(var(--muted-foreground))] mb-1"
+          >
             描述
           </label>
           <textarea
+            id="meta-description"
+            name="meta-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
@@ -142,10 +153,15 @@ export default function MetadataEditor({
 
         {/* 标签 */}
         <div>
-          <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
+          <label
+            htmlFor="meta-tags"
+            className="block text-xs text-[hsl(var(--muted-foreground))] mb-1"
+          >
             标签（逗号分隔）
           </label>
           <Input
+            id="meta-tags"
+            name="meta-tags"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="tag1, tag2, tag3"
@@ -155,11 +171,16 @@ export default function MetadataEditor({
 
         {/* 移动分类 */}
         <div>
-          <label className="block text-xs text-[hsl(var(--muted-foreground))] mb-1">
+          <label
+            htmlFor="meta-move-category"
+            className="block text-xs text-[hsl(var(--muted-foreground))] mb-1"
+          >
             移动到分类
           </label>
           <div className="flex gap-2">
             <Input
+              id="meta-move-category"
+              name="meta-move-category"
               value={moveCategory}
               onChange={(e) => setMoveCategory(e.target.value)}
               placeholder="目标分类名称"
