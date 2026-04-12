@@ -99,6 +99,8 @@ export default function SkillBrowsePage() {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))] pointer-events-none"
           />
           <Input
+            data-testid="search-input"
+            type="text"
             placeholder="筛选 Skill..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -107,7 +109,10 @@ export default function SkillBrowsePage() {
         </div>
 
         {/* 视图切换 */}
-        <div className="flex items-center border border-[hsl(var(--border))] rounded-md overflow-hidden">
+        <div
+          data-testid="view-toggle"
+          className="flex items-center border border-[hsl(var(--border))] rounded-md overflow-hidden"
+        >
           <Button
             variant={viewMode === "grid" ? "secondary" : "ghost"}
             size="icon"

@@ -18,7 +18,10 @@ export default function EmptyState({ hasSkills }: EmptyStateProps) {
   if (hasSkills) {
     // 有 Skill 但筛选/搜索无结果
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div
+        data-testid="empty-state"
+        className="flex flex-col items-center justify-center py-16 text-center"
+      >
         <Search
           size={48}
           className="text-[hsl(var(--muted-foreground))] mb-4 opacity-40"
@@ -35,7 +38,10 @@ export default function EmptyState({ hasSkills }: EmptyStateProps) {
 
   // 完全无 Skill
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div
+      data-testid="empty-state"
+      className="flex flex-col items-center justify-center py-16 text-center"
+    >
       <FolderOpen
         size={48}
         className="text-[hsl(var(--primary))] mb-4 opacity-60"

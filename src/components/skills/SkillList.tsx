@@ -66,7 +66,7 @@ interface SkillListProps {
  */
 export default function SkillList({ skills }: SkillListProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div data-testid="skill-list" className="flex flex-col gap-1">
       {skills.map((skill) => (
         <SkillListItem key={skill.id} skill={skill} />
       ))}

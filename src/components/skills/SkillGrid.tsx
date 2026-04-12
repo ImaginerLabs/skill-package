@@ -26,7 +26,10 @@ export default function SkillGrid() {
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+    <div
+      data-testid="skill-grid"
+      className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4"
+    >
       {filteredSkills.map((skill) => (
         <SkillCard key={skill.id} skill={skill} />
       ))}

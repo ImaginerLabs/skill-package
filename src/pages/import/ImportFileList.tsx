@@ -2,13 +2,6 @@ import { memo } from "react";
 import type { Category, ScanResultItem } from "../../../shared/types";
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 
 interface ImportFileListProps {
   items: ScanResultItem[];
@@ -49,7 +42,12 @@ export const ImportFileList = memo(function ImportFileList({
         <div className="flex items-center gap-4">
           {/* 全选 checkbox */}
           <label className="flex items-center gap-2 cursor-pointer select-none">
-            <Checkbox checked={allSelected} onCheckedChange={onToggleAll} />
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={onToggleAll}
+              className="h-4 w-4 rounded border border-[hsl(var(--border))] accent-[hsl(var(--primary))] cursor-pointer"
+            />
             <span className="text-sm">全选</span>
           </label>
           {/* 已选统计 */}
@@ -59,19 +57,19 @@ export const ImportFileList = memo(function ImportFileList({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* 分类选择器 */}
-          <Select value={selectedCategory} onValueChange={onCategoryChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="选择分类..." />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat.name} value={cat.name}>
-                  {cat.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* 分类选择器 — 使用原生 select 以兼容 e2e 测试 */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            className="h-9 w-[180px] rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 text-sm text-[hsl(var(--foreground))] cursor-pointer"
+          >
+            <option value="">选择分类...</option>
+            {categories.map((cat) => (
+              <option key={cat.name} value={cat.name}>
+                {cat.displayName}
+              </option>
+            ))}
+          </select>
 
           {/* 导入按钮 */}
           <Button
@@ -102,9 +100,12 @@ export const ImportFileList = memo(function ImportFileList({
             key={item.absolutePath}
             className="flex items-center gap-3 px-4 py-3 hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
           >
-            <Checkbox
+            {/* 使用原生 input[type="checkbox"] 以兼容 e2e 测试 */}
+            <input
+              type="checkbox"
               checked={selectedPaths.has(item.absolutePath)}
-              onCheckedChange={() => onToggleItem(item.absolutePath)}
+              onChange={() => onToggleItem(item.absolutePath)}
+              className="h-4 w-4 rounded border border-[hsl(var(--border))] accent-[hsl(var(--primary))] cursor-pointer"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

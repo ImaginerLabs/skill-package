@@ -88,7 +88,7 @@ export default function SkillPreview() {
   if (!skill) return null;
 
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea data-testid="preview-panel" className="h-full">
       {/* Frontmatter 元数据头部 */}
       <div className="p-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))]">
         {/* 标题 */}
@@ -190,7 +190,10 @@ export default function SkillPreview() {
       )}
 
       {/* Markdown 渲染内容 */}
-      <div className="p-4 prose prose-invert prose-sm max-w-none prose-headings:font-[var(--font-code)] prose-code:font-[var(--font-code)] prose-pre:bg-[hsl(var(--background))] prose-pre:border prose-pre:border-[hsl(var(--border))]">
+      <div
+        data-testid="skill-content"
+        className="p-4 prose prose-invert prose-sm max-w-none prose-headings:font-[var(--font-code)] prose-code:font-[var(--font-code)] prose-pre:bg-[hsl(var(--background))] prose-pre:border prose-pre:border-[hsl(var(--border))]"
+      >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeHighlight]}

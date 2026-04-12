@@ -63,14 +63,21 @@ export function useImport() {
   const handleScan = useCallback(async () => {
     setScanState({ status: "loading" });
     setSelectedPaths(new Set());
-    try {
-      const pathToScan =
-        scanPath.trim() === "" || scanPath.trim() === "~/.codebuddy/skills"
-          ? undefined
-          : scanPath.trim();
-      const result = await scanDirectory(pathToScan);
-      setScanState({ status: "success", data: result });
-    } catch (err) {
+    // 确保 loading 状态至少持续 200ms，让 UI 有足够时间反映状态变化
+    const [result] = await Promise.allSettled([
+      (async () => {
+        const pathToScan =
+          scanPath.trim() === "" || scanPath.trim() === "~/.codebuddy/skills"
+            ? undefined
+            : scanPath.trim();
+        return await scanDirectory(pathToScan);
+      })(),
+      new Promise((resolve) => setTimeout(resolve, 200)),
+    ]);
+    if (result.status === "fulfilled") {
+      setScanState({ status: "success", data: result.value });
+    } else {
+      const err = result.reason;
       const message =
         err instanceof ApiError
           ? err.message

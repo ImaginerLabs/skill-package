@@ -33,6 +33,7 @@ export default function CategoryTree() {
         <Collapsible.Content>
           {/* "全部" 选项 */}
           <button
+            data-testid="category-all"
             onClick={() => setCategory(null)}
             className={`flex items-center gap-2 w-full px-4 py-1.5 text-sm transition-colors duration-200 cursor-pointer ${
               selectedCategory === null
@@ -48,23 +49,29 @@ export default function CategoryTree() {
           </button>
 
           {/* 分类列表 */}
-          {categories.map((cat) => (
-            <button
-              key={cat.name}
-              onClick={() => setCategory(cat.name)}
-              className={`flex items-center gap-2 w-full px-4 py-1.5 text-sm transition-colors duration-200 cursor-pointer ${
-                selectedCategory === cat.name
-                  ? "border-l-2 border-[hsl(var(--primary))] bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-medium pl-[14px]"
-                  : "border-l-2 border-transparent text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] pl-[14px]"
-              }`}
-            >
-              <Folder size={16} />
-              <span className="flex-1 text-left">{cat.displayName}</span>
-              <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
-                {cat.skillCount}
-              </Badge>
-            </button>
-          ))}
+          <div
+            data-testid="category-tree"
+            data-active={selectedCategory ?? undefined}
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat.name}
+                data-testid={`category-${cat.name}`}
+                onClick={() => setCategory(cat.name)}
+                className={`flex items-center gap-2 w-full px-4 py-1.5 text-sm transition-colors duration-200 cursor-pointer ${
+                  selectedCategory === cat.name
+                    ? "border-l-2 border-[hsl(var(--primary))] bg-[hsl(var(--accent))] text-[hsl(var(--primary))] font-medium pl-[14px]"
+                    : "border-l-2 border-transparent text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] pl-[14px]"
+                }`}
+              >
+                <Folder size={16} />
+                <span className="flex-1 text-left">{cat.displayName}</span>
+                <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
+                  {cat.skillCount}
+                </Badge>
+              </button>
+            ))}
+          </div>
 
           {/* 无分类时的提示 */}
           {categories.length === 0 && (

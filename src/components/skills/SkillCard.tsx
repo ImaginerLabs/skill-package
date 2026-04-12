@@ -21,6 +21,7 @@ export default function SkillCard({ skill }: SkillCardProps) {
 
   return (
     <button
+      data-testid="skill-card"
       onClick={() => selectSkill(skill.id)}
       className={`group w-full text-left rounded-lg border p-4 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[hsl(var(--primary))] ${
         isSelected
@@ -41,20 +42,30 @@ export default function SkillCard({ skill }: SkillCardProps) {
             className="mt-0.5 shrink-0 text-[hsl(var(--primary))]"
           />
         )}
-        <h3 className="font-medium text-sm text-[hsl(var(--foreground))] leading-tight line-clamp-1">
+        <h3
+          data-testid="skill-name"
+          className="font-medium text-sm text-[hsl(var(--foreground))] leading-tight line-clamp-1"
+        >
           {skill.name}
         </h3>
       </div>
 
       {/* 描述（截断 2 行） */}
-      <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 mb-3 min-h-[2.5em]">
+      <p
+        data-testid="skill-description"
+        className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 mb-3 min-h-[2.5em]"
+      >
         {skill.description || "暂无描述"}
       </p>
 
       {/* 底部标签 */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* 分类标签 */}
-        <Badge variant="default" className="h-5 px-1.5 text-[10px]">
+        <Badge
+          data-testid="skill-category"
+          variant="default"
+          className="h-5 px-1.5 text-[10px]"
+        >
           {skill.category}
         </Badge>
 
@@ -67,7 +78,12 @@ export default function SkillCard({ skill }: SkillCardProps) {
 
         {/* 标签 */}
         {skill.tags.slice(0, 2).map((tag) => (
-          <Badge key={tag} variant="outline" className="h-5 px-1.5 text-[10px]">
+          <Badge
+            data-testid="skill-tag"
+            key={tag}
+            variant="outline"
+            className="h-5 px-1.5 text-[10px]"
+          >
             {tag}
           </Badge>
         ))}
