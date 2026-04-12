@@ -691,6 +691,35 @@ interface AsyncState<T> {
 9. **每个 Story 通过 qa 后，必须进入 review 阶段执行代码审查（bmad-code-review），禁止跳过**
 10. **Story 状态流转必须严格遵循 backlog → ready-for-dev → in-progress → qa → review → done，禁止跳过任何阶段**
 
+#### 🔴 测试覆盖强制规则（quick-dev 与全流程 dev 均适用）
+
+> ⚠️ 以下规则适用于**所有开发路径**，包括 `bmad-quick-dev`（含 one-shot 路径）和 `bmad-dev-story` 全流程。**任何路径均不得跳过测试步骤。**
+
+11. **Vitest 单元/集成测试（必须）：**
+    - 每个新增或修改的业务逻辑函数（service 层、utils 层）**必须**有对应的 Vitest 单元测试
+    - 每个新增或修改的 React 组件**必须**有对应的 Vitest + Testing Library 组件测试
+    - 每个新增或修改的 API 路由**必须**有对应的 supertest 集成测试
+    - 测试文件位置：`tests/unit/`（镜像源码结构）或与源文件同目录（co-located）
+    - 测试命令：`npm run test:run`，**必须全部通过，零失败**
+
+12. **Playwright E2E 测试（必须）：**
+    - 每个涉及用户可见功能的变更**必须**有对应的 Playwright E2E 测试
+    - E2E 测试覆盖该功能的**主流程**（happy path）和**关键错误场景**
+    - E2E 测试文件位置：`tests/e2e/`，使用 `.spec.ts` 后缀
+    - 测试命令：`npm run test:e2e`，**必须全部通过，零失败**
+    - 纯后端逻辑变更（无 UI 影响）可豁免 E2E，但**必须**在 PR/Story 中明确说明豁免理由
+
+13. **测试完成门禁（所有路径均适用）：**
+    - `bmad-quick-dev` plan-code-review 路径：step-03-implement 完成后，**必须**在 spec 的 `## Verification` 中列出测试命令并执行通过，方可进入 step-04-review
+    - `bmad-quick-dev` one-shot 路径：实现完成后，**必须**补充 Vitest 测试和 E2E 测试，全部通过后方可提交
+    - `bmad-dev-story` 全流程：每个 task 完成时**必须**同步完成对应测试（红-绿-重构循环），Step 6 为测试验证而非补充，**禁止**在所有 task 完成后才统一补写测试
+    - 进入 `review` 阶段前，`npm run test:run` + `npm run test:e2e` **必须全部通过**
+
+14. **测试覆盖率要求：**
+    - 新增代码的单元测试覆盖率**不低于 80%**（通过 `npm run test:coverage` 验证）
+    - 核心业务逻辑（service 层）覆盖率**不低于 90%**
+    - 覆盖率不达标时，**禁止**将 Story 状态推进到 `review`
+
 ---
 
 ## Project Structure & Boundaries

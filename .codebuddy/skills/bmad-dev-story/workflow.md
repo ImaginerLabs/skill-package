@@ -262,21 +262,32 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 
   <step n="5" goal="Implement task following red-green-refactor cycle">
     <critical>FOLLOW THE STORY FILE TASKS/SUBTASKS SEQUENCE EXACTLY AS WRITTEN - NO DEVIATION</critical>
+    <critical>TESTS ARE NOT OPTIONAL — every task MUST have vitest unit tests. E2E tests are REQUIRED for any task that touches a user-facing flow. NO EXCEPTIONS.</critical>
 
     <action>Review the current task/subtask from the story file - this is your authoritative implementation guide</action>
     <action>Plan implementation following red-green-refactor cycle</action>
 
+    <!-- PRE-CODING: IDENTIFY TEST SCOPE -->
+    <action>Before writing any code, identify the test scope for this task:
+      - Vitest unit tests: ALWAYS required for every task (business logic, utils, services, components, stores)
+      - Vitest integration tests: required when task involves API routes or multi-layer interactions
+      - Playwright E2E tests: required when task introduces or modifies any user-facing flow, page, or interaction
+    </action>
+    <action if="task touches UI or user flow">Mark this task as requiring E2E coverage — do NOT skip Playwright tests</action>
+
     <!-- RED PHASE -->
-    <action>Write FAILING tests first for the task/subtask functionality</action>
-    <action>Confirm tests fail before implementation - this validates test correctness</action>
+    <action>Write FAILING vitest unit tests first for the task/subtask functionality</action>
+    <action>Write FAILING Playwright E2E test(s) if this task has user-facing scope (identified above)</action>
+    <action>Confirm ALL tests fail before implementation - this validates test correctness</action>
 
     <!-- GREEN PHASE -->
-    <action>Implement MINIMAL code to make tests pass</action>
-    <action>Run tests to confirm they now pass</action>
+    <action>Implement MINIMAL code to make vitest tests pass</action>
+    <action>Run vitest tests to confirm they now pass</action>
+    <action>Implement or update code to make Playwright E2E tests pass (if applicable)</action>
     <action>Handle error conditions and edge cases as specified in task/subtask</action>
 
     <!-- REFACTOR PHASE -->
-    <action>Improve code structure while keeping tests green</action>
+    <action>Improve code structure while keeping ALL tests green (vitest + Playwright)</action>
     <action>Ensure code follows architecture patterns and coding standards from Dev Notes</action>
 
     <action>Document technical approach and decisions in Dev Agent Record → Implementation Plan</action>
@@ -286,16 +297,33 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
     <action if="required configuration is missing">HALT: "Cannot proceed without necessary configuration files"</action>
 
     <critical>NEVER implement anything not mapped to a specific task/subtask in the story file</critical>
-    <critical>NEVER proceed to next task until current task/subtask is complete AND tests pass</critical>
+    <critical>NEVER proceed to next task until current task/subtask is complete AND ALL tests (vitest + E2E if applicable) pass</critical>
+    <critical>NEVER skip writing tests — "I'll add tests later" is a HALT condition, not an option</critical>
     <critical>Execute continuously without pausing until all tasks/subtasks are complete or explicit HALT condition</critical>
     <critical>Do NOT propose to pause for review until Step 9 completion gates are satisfied</critical>
   </step>
 
-  <step n="6" goal="Author comprehensive tests">
-    <action>Create unit tests for business logic and core functionality introduced/changed by the task</action>
-    <action>Add integration tests for component interactions specified in story requirements</action>
-    <action>Include end-to-end tests for critical user flows when story requirements demand them</action>
-    <action>Cover edge cases and error handling scenarios identified in story Dev Notes</action>
+  <step n="6" goal="Verify test completeness — gate before proceeding">
+    <critical>This step is a MANDATORY GATE. Do NOT proceed to Step 7 until ALL checks pass.</critical>
+
+    <!-- VITEST COVERAGE CHECK -->
+    <action>Confirm vitest unit tests exist for EVERY task completed in Step 5</action>
+    <action>Confirm vitest integration tests exist for any API routes or multi-layer interactions introduced</action>
+    <action if="any task has no vitest tests">HALT: "Missing vitest tests for task(s): {{task_list}}. Write them before continuing."</action>
+
+    <!-- E2E COVERAGE CHECK -->
+    <action>Identify all user-facing flows introduced or modified across ALL tasks in this story</action>
+    <action>Confirm Playwright E2E test(s) exist in tests/e2e/ covering each identified user-facing flow</action>
+    <action if="user-facing flow has no E2E test">HALT: "Missing Playwright E2E test for flow: {{flow_description}}. Write it before continuing."</action>
+
+    <!-- EDGE CASE CHECK -->
+    <action>Verify error handling and edge cases identified in story Dev Notes are covered by tests</action>
+
+    <output>✅ Test completeness verified:
+      - Vitest unit tests: {{vitest_test_count}} tests covering {{task_count}} tasks
+      - Playwright E2E tests: {{e2e_test_count}} tests covering {{flow_count}} user flows
+      - All edge cases from Dev Notes: covered
+    </output>
   </step>
 
   <step n="7" goal="Run validations and tests">
