@@ -193,4 +193,118 @@ describe("Toast", () => {
       expect(container.innerHTML).toBe("");
     });
   });
+
+  describe("toast.undoable（撤销功能）", () => {
+    it("显示带撤销按钮的 toast", () => {
+      render(<ToastContainer />);
+
+      act(() => {
+        toast.undoable("已删除", vi.fn(), vi.fn());
+      });
+
+      expect(screen.getByText("已删除")).toBeInTheDocument();
+      expect(screen.getByText("撤销")).toBeInTheDocument();
+    });
+
+    it("超时后执行 onConfirm 回调", () => {
+      render(<ToastContainer />);
+      const onConfirm = vi.fn();
+
+      act(() => {
+        toast.undoable("已删除", onConfirm, vi.fn(), 5000);
+      });
+
+      expect(onConfirm).not.toHaveBeenCalled();
+
+      act(() => {
+        vi.advanceTimersByTime(5100);
+      });
+
+      expect(onConfirm).toHaveBeenCalledOnce();
+    });
+
+    it("点击撤销按钮执行 onUndo 回调并移除 toast", () => {
+      render(<ToastContainer />);
+      const onConfirm = vi.fn();
+      const onUndo = vi.fn();
+
+      act(() => {
+        toast.undoable("已删除", onConfirm, onUndo, 5000);
+      });
+
+      // 点击撤销
+      fireEvent.click(screen.getByText("撤销"));
+
+      expect(onUndo).toHaveBeenCalledOnce();
+      // toast 应被移除
+      expect(screen.queryByText("已删除")).not.toBeInTheDocument();
+
+      // 超时后不应再执行 onConfirm
+      act(() => {
+        vi.advanceTimersByTime(5100);
+      });
+
+      expect(onConfirm).not.toHaveBeenCalled();
+    });
+
+    it("撤销按钮有正确的 aria-label", () => {
+      render(<ToastContainer />);
+
+      act(() => {
+        toast.undoable("已删除", vi.fn(), vi.fn());
+      });
+
+      expect(screen.getByLabelText("撤销")).toBeInTheDocument();
+    });
+
+    it("默认 5 秒倒计时", () => {
+      render(<ToastContainer />);
+      const onConfirm = vi.fn();
+
+      act(() => {
+        toast.undoable("已删除", onConfirm);
+      });
+
+      // 4 秒后仍在
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+      expect(screen.getByText("已删除")).toBeInTheDocument();
+      expect(onConfirm).not.toHaveBeenCalled();
+
+      // 5 秒后执行
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+      expect(onConfirm).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("action 按钮", () => {
+    it("渲染自定义 action 按钮", () => {
+      render(<ToastContainer />);
+
+      act(() => {
+        toast("info", "提示", {
+          action: { label: "自定义操作", onClick: vi.fn() },
+        });
+      });
+
+      expect(screen.getByText("自定义操作")).toBeInTheDocument();
+    });
+
+    it("点击 action 按钮触发回调", () => {
+      render(<ToastContainer />);
+      const onClick = vi.fn();
+
+      act(() => {
+        toast("info", "提示", {
+          action: { label: "点我", onClick },
+        });
+      });
+
+      fireEvent.click(screen.getByText("点我"));
+      expect(onClick).toHaveBeenCalledOnce();
+    });
+  });
 });

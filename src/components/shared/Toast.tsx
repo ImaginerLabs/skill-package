@@ -74,6 +74,16 @@ export default function ToastContainer() {
                   查看详情
                 </button>
               )}
+              {/* 操作按钮（如撤销） */}
+              {item.action && (
+                <button
+                  onClick={item.action.onClick}
+                  className="text-xs font-medium text-[hsl(var(--primary))] mt-1.5 px-2 py-0.5 rounded border border-[hsl(var(--primary)/0.3)] hover:bg-[hsl(var(--primary)/0.1)] transition-colors"
+                  aria-label={item.action.label}
+                >
+                  {item.action.label}
+                </button>
+              )}
             </div>
             <button
               onClick={() => dismissToast(item.id)}
