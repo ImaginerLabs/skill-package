@@ -161,6 +161,17 @@ export interface SyncResult {
   details: SyncDetail[];
 }
 
+// ---- 路径预设类型 ----
+
+/** 路径预设 */
+export interface PathPreset {
+  id: string;
+  /** 绝对路径 */
+  path: string;
+  /** 可选备注 */
+  label?: string;
+}
+
 // ---- 分类与配置类型 ----
 
 /** 分类 */
@@ -177,6 +188,7 @@ export interface AppConfig {
   sync: {
     targets: SyncTarget[];
   };
+  pathPresets: PathPreset[];
   categories: Category[];
   ui: {
     defaultView: "grid" | "list";

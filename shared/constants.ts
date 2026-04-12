@@ -29,6 +29,9 @@ export const ErrorCode = {
   // 扫描相关
   SCAN_PATH_NOT_FOUND: "SCAN_PATH_NOT_FOUND",
   SCAN_PERMISSION_DENIED: "SCAN_PERMISSION_DENIED",
+
+  // 路径预设相关
+  PATH_PRESET_NOT_FOUND: "PATH_PRESET_NOT_FOUND",
 } as const;
 
 /** 错误码类型 */

@@ -362,7 +362,7 @@ export async function validateSyncPath(
 
 // ---- Sync Push API ----
 
-import type { SyncResult } from "../../shared/types";
+import type { PathPreset, SyncResult } from "../../shared/types";
 
 /** 执行同步推送（将选定 Skill 复制到启用的同步目标目录） */
 export async function pushSync(
@@ -372,5 +372,41 @@ export async function pushSync(
   return apiCall<SyncResult>("/api/sync/push", {
     method: "POST",
     body: JSON.stringify({ skillIds, targetIds }),
+  });
+}
+
+// ---- Path Preset API ----
+
+/** 获取所有路径预设 */
+export async function fetchPathPresets(): Promise<PathPreset[]> {
+  return apiCall<PathPreset[]>("/api/path-presets");
+}
+
+/** 添加路径预设 */
+export async function addPathPreset(data: {
+  path: string;
+  label?: string;
+}): Promise<PathPreset> {
+  return apiCall<PathPreset>("/api/path-presets", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/** 更新路径预设 */
+export async function updatePathPreset(
+  id: string,
+  data: { path?: string; label?: string },
+): Promise<PathPreset> {
+  return apiCall<PathPreset>(`/api/path-presets/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+/** 删除路径预设 */
+export async function deletePathPreset(id: string): Promise<void> {
+  return apiCall<void>(`/api/path-presets/${encodeURIComponent(id)}`, {
+    method: "DELETE",
   });
 }

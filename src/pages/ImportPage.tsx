@@ -1,6 +1,11 @@
 import { FolderOpen, Loader2, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { Category, ScanResult, ScanResultItem } from "../../shared/types";
+import type {
+  Category,
+  PathPreset,
+  ScanResult,
+  ScanResultItem,
+} from "../../shared/types";
 import { toast } from "../components/shared/toast-store";
 import {
   AlertDialog,
@@ -26,6 +31,7 @@ import {
   ApiError,
   cleanupSourceFiles,
   fetchCategories,
+  fetchPathPresets,
   importFiles,
   scanDirectory,
 } from "../lib/api";
@@ -61,11 +67,17 @@ export default function ImportPage() {
     scanRoot?: string;
   }>({ open: false, paths: [] });
 
+  // 路径预设
+  const [pathPresets, setPathPresets] = useState<PathPreset[]>([]);
+
   // 加载分类列表
   useEffect(() => {
     fetchCategories()
       .then(setCategories)
       .catch((err) => console.error("[ImportPage] 加载分类失败:", err));
+    fetchPathPresets()
+      .then(setPathPresets)
+      .catch(() => {});
   }, []);
 
   const handleScan = useCallback(async () => {
@@ -217,13 +229,32 @@ export default function ImportPage() {
           >
             扫描路径
           </label>
-          <Input
-            id="scan-path"
-            type="text"
-            value={scanPath}
-            onChange={(e) => setScanPath(e.target.value)}
-            placeholder="~/.codebuddy/skills"
-          />
+          <div className="flex gap-2">
+            <Input
+              id="scan-path"
+              type="text"
+              value={scanPath}
+              onChange={(e) => setScanPath(e.target.value)}
+              placeholder="~/.codebuddy/skills"
+            />
+            {pathPresets.length > 0 && (
+              <select
+                className="h-9 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-2 text-xs text-[hsl(var(--foreground))] cursor-pointer shrink-0"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) setScanPath(e.target.value);
+                }}
+                title="从预设选择"
+              >
+                <option value="">从预设选择</option>
+                {pathPresets.map((p) => (
+                  <option key={p.id} value={p.path}>
+                    {p.label ? `${p.label} (${p.path})` : p.path}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
         <Button onClick={handleScan} disabled={scanState.status === "loading"}>
           {scanState.status === "loading" ? (

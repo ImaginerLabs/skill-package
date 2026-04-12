@@ -139,6 +139,27 @@ export const SyncResultSchema = z.object({
   details: z.array(SyncDetailSchema),
 });
 
+// ---- 路径预设 Schema ----
+
+/** PathPreset Zod Schema */
+export const PathPresetSchema = z.object({
+  id: z.string().min(1),
+  path: z.string().min(1),
+  label: z.string().optional(),
+});
+
+/** POST /api/path-presets 请求体 */
+export const PathPresetCreateSchema = z.object({
+  path: z.string().min(1, "path 为必填项"),
+  label: z.string().optional(),
+});
+
+/** PUT /api/path-presets/:id 请求体 */
+export const PathPresetUpdateSchema = z.object({
+  path: z.string().min(1).optional(),
+  label: z.string().optional(),
+});
+
 // ---- 分类与配置 Schema ----
 
 /** Category Zod Schema */
@@ -155,6 +176,7 @@ export const AppConfigSchema = z.object({
   sync: z.object({
     targets: z.array(SyncTargetSchema),
   }),
+  pathPresets: z.array(PathPresetSchema).default([]),
   categories: z.array(CategorySchema),
   ui: z.object({
     defaultView: z.enum(["grid", "list"]),
@@ -257,3 +279,4 @@ export type CategoryInferred = z.infer<typeof CategorySchema>;
 export type AppConfigInferred = z.infer<typeof AppConfigSchema>;
 export type ScanResultItemInferred = z.infer<typeof ScanResultItemSchema>;
 export type ScanResultInferred_Import = z.infer<typeof ScanResultSchema_Import>;
+export type PathPresetInferred = z.infer<typeof PathPresetSchema>;

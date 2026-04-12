@@ -4,7 +4,8 @@
 
 import { Check, Edit2, FolderOpen, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { validateSyncPath } from "../../lib/api";
+import type { PathPreset } from "../../../shared/types";
+import { fetchPathPresets, validateSyncPath } from "../../lib/api";
 import { useSyncStore } from "../../stores/sync-store";
 import { toast } from "../shared/toast-store";
 import {
@@ -46,6 +47,7 @@ export default function SyncTargetManager() {
   const [newName, setNewName] = useState("");
   const [newPath, setNewPath] = useState("");
   const [adding, setAdding] = useState(false);
+  const [pathPresets, setPathPresets] = useState<PathPreset[]>([]);
   const [editing, setEditing] = useState<EditingState>({
     id: null,
     name: "",
@@ -61,6 +63,9 @@ export default function SyncTargetManager() {
 
   useEffect(() => {
     fetchTargets();
+    fetchPathPresets()
+      .then(setPathPresets)
+      .catch(() => {});
   }, [fetchTargets]);
 
   // 路径校验（防抖）
@@ -190,17 +195,39 @@ export default function SyncTargetManager() {
             aria-label="同步目标名称"
           />
           <div className="space-y-1">
-            <Input
-              placeholder="绝对路径（如：/Users/alex/project/.codebuddy/skills）"
-              value={newPath}
-              onChange={(e) => {
-                setNewPath(e.target.value);
-                setPathStatus(null);
-              }}
-              onBlur={() => handleValidatePath(newPath)}
-              className="h-9 text-sm font-[var(--font-code)]"
-              aria-label="同步目标路径"
-            />
+            <div className="flex gap-2">
+              <Input
+                placeholder="绝对路径（如：/Users/alex/project/.codebuddy/skills）"
+                value={newPath}
+                onChange={(e) => {
+                  setNewPath(e.target.value);
+                  setPathStatus(null);
+                }}
+                onBlur={() => handleValidatePath(newPath)}
+                className="h-9 text-sm font-[var(--font-code)]"
+                aria-label="同步目标路径"
+              />
+              {pathPresets.length > 0 && (
+                <select
+                  className="h-9 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-2 text-xs text-[hsl(var(--foreground))] cursor-pointer shrink-0"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setNewPath(e.target.value);
+                      setPathStatus(null);
+                    }
+                  }}
+                  title="从预设选择"
+                >
+                  <option value="">从预设选择</option>
+                  {pathPresets.map((p) => (
+                    <option key={p.id} value={p.path}>
+                      {p.label ? `${p.label} (${p.path})` : p.path}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
             {validating && (
               <p className="text-xs text-[hsl(var(--muted-foreground))]">
                 校验路径中...

@@ -1,6 +1,7 @@
 import {
   BookOpen,
   Download,
+  FolderOpen,
   GitBranch,
   RefreshCw,
   Settings,
@@ -15,6 +16,7 @@ const navItems = [
   { to: "/workflow", icon: GitBranch, label: "工作流" },
   { to: "/sync", icon: RefreshCw, label: "同步" },
   { to: "/import", icon: Download, label: "导入" },
+  { to: "/paths", icon: FolderOpen, label: "路径配置" },
   { to: "/settings", icon: Settings, label: "设置" },
 ];
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
 import CommandPalette from "../shared/CommandPalette";
@@ -17,9 +17,11 @@ import StatusBar from "./StatusBar";
 export default function AppLayout() {
   const { previewOpen, toggleSidebar, togglePreview } = useUIStore();
   const { selectedSkillId } = useSkillStore();
+  const location = useLocation();
 
-  // 预览面板在有选中 Skill 时自动显示
-  const showPreview = previewOpen || !!selectedSkillId;
+  // 预览面板仅在 Skill 浏览页（/）下生效，切换到其他页面自动关闭
+  const isSkillBrowsePage = location.pathname === "/";
+  const showPreview = isSkillBrowsePage && (previewOpen || !!selectedSkillId);
 
   // 全局键盘快捷键
   useEffect(() => {

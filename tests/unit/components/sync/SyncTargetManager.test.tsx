@@ -13,6 +13,7 @@ vi.mock("../../../../src/lib/api", () => ({
   updateSyncTarget: vi.fn(),
   deleteSyncTarget: vi.fn(),
   validateSyncPath: vi.fn(),
+  fetchPathPresets: vi.fn(() => Promise.resolve([])),
 }));
 
 // Mock stores

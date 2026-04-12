@@ -1,11 +1,12 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
-import SkillBrowsePage from "./pages/SkillBrowsePage";
-import WorkflowPage from "./pages/WorkflowPage";
-import SyncPage from "./pages/SyncPage";
 import ImportPage from "./pages/ImportPage";
-import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import PathsPage from "./pages/PathsPage";
+import SettingsPage from "./pages/SettingsPage";
+import SkillBrowsePage from "./pages/SkillBrowsePage";
+import SyncPage from "./pages/SyncPage";
+import WorkflowPage from "./pages/WorkflowPage";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "/import",
         element: <ImportPage />,
+      },
+      {
+        path: "/paths",
+        element: <PathsPage />,
       },
       {
         path: "/settings",

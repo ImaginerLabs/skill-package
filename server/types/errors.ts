@@ -114,4 +114,13 @@ export class AppError extends Error {
       HttpStatus.FORBIDDEN,
     );
   }
+
+  /** 路径预设未找到 */
+  static pathPresetNotFound(id: string): AppError {
+    return new AppError(
+      ErrorCode.PATH_PRESET_NOT_FOUND,
+      `路径预设 "${id}" 未找到`,
+      HttpStatus.NOT_FOUND,
+    );
+  }
 }
