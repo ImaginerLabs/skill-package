@@ -108,6 +108,7 @@ export default function WorkflowPreview({
     editingWorkflowId,
     fetchSkills,
     reset,
+    onSaveSuccess,
   ]);
 
   return (

@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-13T15:05:00
+last_updated: 2026-04-13T15:24:35
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -230,3 +230,14 @@ development_status:
   epic-nav-fix: done
   nav-01-skill-library-navigation-fix: done
   epic-nav-fix-retrospective: optional
+
+  # ============================================================
+  # Epic 7: Sidebar 重设计与交互优化
+  # Sidebar 升级为系统状态仪表盘：分类迁移至二级 Sidebar，新增统计面板 + 热力图，Tab 滑块动画
+  # Dependencies: Epic 1（CategoryTree）、Epic 5（SettingsPage Tab 结构）
+  # ============================================================
+  epic-7: in-progress
+  7-1-secondary-sidebar-category-navigation: review
+  7-2-sidebar-stats-panel-and-activity-heatmap: review
+  7-3-settings-tab-slider-animation: review
+  epic-7-retrospective: optional

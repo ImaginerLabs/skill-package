@@ -6,6 +6,7 @@ import CommandPalette from "../shared/CommandPalette";
 import ToastContainer from "../shared/Toast";
 import SkillPreview from "../skills/SkillPreview";
 import Header from "./Header";
+import SecondarySidebar from "./SecondarySidebar";
 import Sidebar from "./Sidebar";
 import StatusBar from "./StatusBar";
 
@@ -65,6 +66,9 @@ export default function AppLayout() {
       <div className="flex flex-1 overflow-hidden">
         {/* 左侧边栏 */}
         <Sidebar />
+
+        {/* 二级侧边栏 — 仅在 Skill 库页面显示分类目录 */}
+        {isSkillBrowsePage && <SecondarySidebar />}
 
         {/* 主内容区 */}
         <main className="flex-1 overflow-auto p-6 min-w-[480px]">

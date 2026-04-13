@@ -4,13 +4,12 @@ import {
   FolderOpen,
   GitBranch,
   RefreshCw,
-  Settings,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
-import CategoryTree from "../skills/CategoryTree";
-import { ScrollArea } from "../ui/scroll-area";
+import ActivityHeatmap from "../stats/ActivityHeatmap";
+import StatsPanel from "../stats/StatsPanel";
 
 // 除"Skill 库"外的其他导航项（使用标准 NavLink）
 const navItems = [
@@ -18,17 +17,18 @@ const navItems = [
   { to: "/sync", icon: RefreshCw, label: "同步" },
   { to: "/import", icon: Download, label: "导入" },
   { to: "/paths", icon: FolderOpen, label: "路径配置" },
-  { to: "/settings", icon: Settings, label: "分类" },
 ];
 
 /**
- * 左侧边栏 — 导航菜单 + 分类目录树
+ * 左侧边栏 — 导航菜单
  * 活跃状态左侧 2px Run Green 竖线指示器
  *
  * "Skill 库"单独处理：点击时清除分类筛选状态，支持三态视觉：
  *   - 强激活（在 / 且无分类筛选）：左侧绿线 + accent 背景 + primary 文字
  *   - 弱激活/父级态（在 / 且有分类筛选）：无绿线 + accent 背景 + foreground 文字
  *   - 非激活（在其他路由）：无背景 + muted 文字
+ *
+ * 分类目录树已迁移至 SecondarySidebar（仅在 Skill 库页面显示）
  */
 export default function Sidebar() {
   const { sidebarOpen } = useUIStore();
@@ -100,10 +100,11 @@ export default function Sidebar() {
       {/* 分隔线 */}
       <div className="border-t border-[hsl(var(--border))]" />
 
-      {/* 分类目录树 — 使用 ScrollArea */}
-      <ScrollArea className="flex-1">
-        <CategoryTree />
-      </ScrollArea>
+      {/* 系统统计面板 */}
+      <StatsPanel />
+
+      {/* 活跃度热力图 */}
+      <ActivityHeatmap />
     </aside>
   );
 }

@@ -159,7 +159,7 @@ describe("WorkflowList", () => {
         },
       ]);
 
-      const { rerender } = render(<WorkflowList />);
+      render(<WorkflowList />);
 
       await vi.waitFor(() => {
         expect(screen.getByText("测试工作流")).toBeInTheDocument();

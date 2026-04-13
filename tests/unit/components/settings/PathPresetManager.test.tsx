@@ -264,7 +264,7 @@ describe("PathPresetManager", () => {
 
       const editBtns = screen.getAllByRole("button");
       // 找到编辑按钮（Pencil 图标按钮）
-      const editBtn = editBtns.find((btn) => btn.querySelector("svg"));
+      const _editBtn = editBtns.find((btn) => btn.querySelector("svg"));
       // 点击第一个图标按钮（编辑）
       const iconBtns = screen
         .getAllByRole("button")

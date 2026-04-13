@@ -15,7 +15,7 @@ lastStep: 8
 status: "updated"
 completedAt: "2026-04-10"
 lastUpdatedAt: "2026-04-13"
-updateReason: "Epic UX-IMPROVEMENT 实施后补充 AD-13~AD-16 及架构审查结果；新增分类设置页重组织 & 套件功能 AD-17~AD-21；Epic NAV-FIX 完成后补充 AD-22 导航交互修复模式"
+updateReason: "Epic UX-IMPROVEMENT 实施后补充 AD-13~AD-16 及架构审查结果；新增分类设置页重组织 & 套件功能 AD-17~AD-21；Epic NAV-FIX 完成后补充 AD-22 导航交互修复模式；新增 Sidebar 重设计 AD-23~AD-25（二级 Sidebar、系统状态面板 + 热力图、Tab 滑块动画）"
 ---
 
 # Architecture Decision Document — Skill Manager
@@ -1548,3 +1548,239 @@ cd skill-manager
 # Step 4: 实现 Skill 文件扫描和缓存
 # Step 5: 实现 Skill 浏览 API + 前端列表
 ```
+
+---
+
+### AD-23: 分类导航迁移至 Skill 库二级 Sidebar
+
+**决策：** 将分类目录树（`CategoryTree`）从主 Sidebar 中剥离，改为在 Skill 库页面（路由 `/`）激活时，在主 Sidebar 右侧条件渲染一个独立的**二级 Sidebar** 组件。主导航中移除「分类」导航项。
+
+**背景：**
+当前 Sidebar 同时承担「顶层导航」和「分类筛选」两个职责，导致「分类」作为顶层导航项与嵌入 Sidebar 底部的 `CategoryTree` 存在语义重叠，用户困惑。
+
+**组件结构：**
+
+```
+AppLayout
+├── Sidebar（主，固定宽度 var(--sidebar-width)）
+│   ├── nav（导航项：Skill 库 / 工作流 / 同步 / 导入 / 路径配置 / 设置）
+│   ├── StatsPanel（新增，见 AD-24）
+│   └── ActivityHeatmap（新增，见 AD-24）
+└── SecondarySidebar（新增，条件渲染，仅在 pathname === "/" 时显示）
+    ├── 标题「分类」
+    ├── CategoryTree（现有组件，零改动）
+    └── 分类管理入口链接（→ /settings）
+```
+
+**条件渲染逻辑：**
+
+```tsx
+// AppLayout.tsx 或 Layout.tsx
+const location = useLocation();
+const showSecondarySidebar = location.pathname === "/";
+
+// ...
+{
+  showSecondarySidebar && <SecondarySidebar />;
+}
+```
+
+**显示/隐藏动画：**
+
+- 使用 CSS `transition: width 200ms ease-in-out, opacity 200ms ease-in-out`
+- 隐藏时 `width: 0; opacity: 0; overflow: hidden`，避免布局抖动
+- 或使用条件渲染（`&&`）配合 `AnimatePresence`（若项目已引入 framer-motion）
+
+**二级 Sidebar 规格：**
+
+| 属性 | 值                                                    |
+| ---- | ----------------------------------------------------- |
+| 宽度 | `180px`（固定，CSS 变量 `--secondary-sidebar-width`） |
+| 边框 | 左侧 `border-l border-[hsl(var(--border))]`           |
+| 背景 | `bg-[hsl(var(--card))]`（与主 Sidebar 一致）          |
+| 内容 | `CategoryTree` + 底部「管理分类」链接                 |
+
+**主 Sidebar 变更：**
+
+| 变更项              | 说明                                                                          |
+| ------------------- | ----------------------------------------------------------------------------- |
+| 移除「分类」导航项  | 从 `navItems` 数组中删除 `{ to: "/settings", icon: Settings, label: "分类" }` |
+| 移除 `CategoryTree` | 从 Sidebar 底部 `ScrollArea` 中移除                                           |
+| 移除 `ScrollArea`   | 若 Sidebar 不再需要滚动，可移除该包裹层                                       |
+
+**文件变更清单：**
+
+| 文件                                         | 操作                                             |
+| -------------------------------------------- | ------------------------------------------------ |
+| `src/components/layout/Sidebar.tsx`          | 移除「分类」导航项、`CategoryTree`、`ScrollArea` |
+| `src/components/layout/SecondarySidebar.tsx` | **新建**，包含 `CategoryTree` + 管理入口         |
+| `src/components/layout/AppLayout.tsx`        | 条件渲染 `SecondarySidebar`                      |
+
+**零改动文件：** `CategoryTree.tsx`（内容完全不变）
+
+---
+
+### AD-24: Sidebar 系统状态面板 + 活跃度热力图
+
+**决策：** 在主 Sidebar 导航区域下方新增两个组件：`StatsPanel`（系统统计信息）和 `ActivityHeatmap`（活跃度豆点图），将 Sidebar 从纯导航工具升级为系统状态仪表盘。
+
+**StatsPanel 组件规格：**
+
+```tsx
+// src/components/stats/StatsPanel.tsx
+interface StatItem {
+  icon: LucideIcon;
+  count: number;
+  label: string;
+}
+// 展示：Skill 总数 / 工作流总数 / 分类总数
+// 数据来源：useSkillStore selector（已有数据，无需新 API）
+const skillCount = useSkillStore(
+  (s) => s.skills.filter((sk) => sk.type !== "workflow").length,
+);
+const workflowCount = useSkillStore(
+  (s) => s.skills.filter((sk) => sk.type === "workflow").length,
+);
+const categoryCount = useCategoryStore((s) => s.categories.length);
+```
+
+**ActivityHeatmap 组件规格：**
+
+```tsx
+// src/components/stats/ActivityHeatmap.tsx
+// 展示近 12 周（84 天）每日 Skill 文件修改次数
+// 数据来源：后端新增 GET /api/stats/activity
+interface ActivityDay {
+  date: string; // YYYY-MM-DD
+  count: number; // 当日修改文件数
+}
+```
+
+**后端 API：**
+
+```
+GET /api/stats/activity?weeks=12
+Response: ApiResponse<ActivityDay[]>
+```
+
+实现逻辑：
+
+1. 扫描 `skills/` 目录下所有 `.md` 文件
+2. 读取每个文件的 `fs.stat().mtime`
+3. 按日期聚合，统计每天修改的文件数量
+4. 返回过去 N 周的数据（默认 12 周）
+
+**热力图颜色映射（基于项目主题色）：**
+
+| 修改次数 | CSS 变量 / 颜色             |
+| -------- | --------------------------- |
+| 0        | `hsl(var(--muted))`         |
+| 1–2      | `hsl(var(--primary) / 0.3)` |
+| 3–5      | `hsl(var(--primary) / 0.6)` |
+| 6+       | `hsl(var(--primary))`       |
+
+**热力图布局：**
+
+- 7 列（周一至周日）× 12 行（12 周）= 84 个豆点
+- 豆点大小：`8px × 8px`，间距 `2px`
+- 宽度自适应 Sidebar 宽度（`width: 100%`，豆点大小固定）
+- Tooltip：鼠标悬停显示 `YYYY-MM-DD · N 次修改`
+
+**数据刷新策略：**
+
+- 应用启动时请求一次
+- 用户执行导入、同步、删除操作后，通过 `invalidate` 触发重新请求
+- 使用 React Query 或 Zustand 异步 action 管理（与项目现有数据获取模式保持一致）
+
+**文件变更清单：**
+
+| 文件                                       | 操作                                       |
+| ------------------------------------------ | ------------------------------------------ |
+| `src/components/stats/StatsPanel.tsx`      | **新建**                                   |
+| `src/components/stats/ActivityHeatmap.tsx` | **新建**                                   |
+| `src/components/layout/Sidebar.tsx`        | 引入并渲染 `StatsPanel`、`ActivityHeatmap` |
+| `src/lib/api.ts`                           | 新增 `fetchActivityStats(weeks?: number)`  |
+| `server/routes/statsRoutes.ts`             | **新建**，实现 `GET /api/stats/activity`   |
+| `server/app.ts`                            | 注册 `statsRoutes`                         |
+
+**无障碍要求：**
+
+- 热力图整体提供 `aria-label="近 12 周 Skill 修改活跃度"`
+- 每个豆点提供 `title` 属性作为 Tooltip 降级方案
+- 遵循 `prefers-reduced-motion`：若用户开启减少动画，豆点颜色变化无过渡动画
+
+---
+
+### AD-25: 分类管理 Tab 滑块平移动画
+
+**决策：** 「分类管理」页面（`/settings`）的 Tab 切换组件，使用 CSS `transform: translateX()` 实现背景滑块的平移动画，替代当前的硬切换。
+
+**实现方案：自定义滑块覆盖层（不依赖 shadcn/ui Tabs 内部实现）**
+
+```tsx
+// src/components/settings/AnimatedTabSwitcher.tsx
+// 或直接在 SettingsPage.tsx 中实现
+
+const tabs = ["分类设置", "套件管理"];
+const [activeIndex, setActiveIndex] = useState(0);
+
+// 滑块使用绝对定位 + transform 平移
+<div className="relative flex bg-[hsl(var(--muted))] rounded-md p-1">
+  {/* 滑块背景层 */}
+  <div
+    className="absolute top-1 bottom-1 rounded-sm bg-[hsl(var(--background))] shadow-sm"
+    style={{
+      width: `calc(50% - 4px)`,
+      transform: `translateX(${activeIndex * 100}%)`,
+      transition: "transform 200ms ease-in-out",
+    }}
+  />
+  {/* Tab 按钮层 */}
+  {tabs.map((tab, i) => (
+    <button
+      key={tab}
+      onClick={() => setActiveIndex(i)}
+      className="relative z-10 flex-1 py-1.5 text-sm font-medium text-center"
+    >
+      {tab}
+    </button>
+  ))}
+</div>;
+```
+
+**关键技术决策：**
+
+| 决策点   | 选择                                           | 原因                                                 |
+| -------- | ---------------------------------------------- | ---------------------------------------------------- |
+| 动画属性 | `transform: translateX()`                      | GPU 加速，不触发 layout reflow                       |
+| 动画时长 | `200ms`                                        | 与项目现有 `transition-colors duration-200` 保持一致 |
+| 缓动函数 | `ease-in-out`                                  | 自然感，与项目风格统一                               |
+| 滑块定位 | `position: absolute` + `transform`             | 避免使用 `left/margin-left` 触发 layout              |
+| 内容切换 | 条件渲染（`activeIndex === i && <Content />`） | 简单可靠，无需额外动画                               |
+
+**无障碍支持：**
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .tab-slider {
+    transition: none;
+  }
+}
+```
+
+或在内联样式中：
+
+```tsx
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+style={{
+  transition: prefersReducedMotion ? 'none' : 'transform 200ms ease-in-out',
+}}
+```
+
+**文件变更清单：**
+
+| 文件                                              | 操作                                      |
+| ------------------------------------------------- | ----------------------------------------- |
+| `src/pages/SettingsPage.tsx`                      | 将现有 Tab 切换逻辑替换为带滑块动画的实现 |
+| `src/components/settings/AnimatedTabSwitcher.tsx` | 可选：抽取为独立组件，供其他页面复用      |

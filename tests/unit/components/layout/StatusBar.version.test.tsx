@@ -60,7 +60,7 @@ describe("StatusBar — 版本号注入 (Story 2.4)", () => {
     it("版本号位于状态栏左侧", () => {
       render(<StatusBar />);
       const footer = screen.getByRole("contentinfo");
-      const versionEl = screen.getByText("vtest");
+      screen.getByText("vtest");
       // 版本号应是 footer 的第一个子元素（左侧）
       expect(footer.firstElementChild?.textContent).toBe("vtest");
     });

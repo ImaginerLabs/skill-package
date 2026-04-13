@@ -3,11 +3,12 @@
 // ============================================================
 
 import { Check, Edit2, FolderOpen, Plus, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { PathPreset } from "../../../shared/types";
 import { fetchPathPresets, validateSyncPath } from "../../lib/api";
 import { useSyncStore } from "../../stores/sync-store";
+import { matchIDEByPath } from "../settings/ide-icons/ide-matcher";
 import { toast } from "../shared/toast-store";
 import {
   AlertDialog,
@@ -23,6 +24,55 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+// ─── 预设选项 IDE Icon 展示 ───────────────────────────────────────────────────
+
+interface PresetOptionProps {
+  preset: PathPreset;
+}
+
+/** 在下拉选项中展示 IDE icon + 标签 + 路径 */
+function PresetOption({ preset }: PresetOptionProps) {
+  const ide = useMemo(() => matchIDEByPath(preset.path), [preset.path]);
+
+  return (
+    <span className="flex items-center gap-2 min-w-0">
+      {/* IDE icon 或通用文件夹 */}
+      <span className="shrink-0 flex items-center justify-center w-4 h-4">
+        {ide ? (
+          <ide.Icon
+            width={14}
+            height={14}
+            style={{ color: ide.Icon.colorPrimary }}
+          />
+        ) : (
+          <FolderOpen
+            size={13}
+            className="text-[hsl(var(--muted-foreground))]"
+          />
+        )}
+      </span>
+      {/* 标签 + 路径 */}
+      <span className="flex flex-col min-w-0">
+        <span className="text-xs font-medium leading-tight truncate">
+          {preset.label ?? ide?.label ?? "通用路径"}
+        </span>
+        <span className="text-[10px] font-mono text-[hsl(var(--muted-foreground))] leading-tight truncate">
+          {preset.path}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+// ─── 主组件 ───────────────────────────────────────────────────────────────────
 
 interface EditingState {
   id: string | null;
@@ -219,24 +269,33 @@ export default function SyncTargetManager() {
                 aria-label="同步目标路径"
               />
               {pathPresets.length > 0 && (
-                <select
-                  className="h-9 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-2 text-xs text-[hsl(var(--foreground))] cursor-pointer shrink-0"
+                <Select
                   value=""
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setNewPath(e.target.value);
+                  onValueChange={(val) => {
+                    if (val) {
+                      setNewPath(val);
                       setPathStatus(null);
                     }
                   }}
-                  title="从预设选择"
                 >
-                  <option value="">从预设选择</option>
-                  {pathPresets.map((p) => (
-                    <option key={p.id} value={p.path}>
-                      {p.label ? `${p.label} (${p.path})` : p.path}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger
+                    className="h-9 w-auto min-w-[120px] max-w-[200px] shrink-0 text-xs"
+                    title="从预设选择"
+                  >
+                    <SelectValue placeholder="从预设选择" />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[320px]">
+                    {pathPresets.map((p) => (
+                      <SelectItem
+                        key={p.id}
+                        value={p.path}
+                        className="py-2 pl-2 pr-3"
+                      >
+                        <PresetOption preset={p} />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
             {validating && (

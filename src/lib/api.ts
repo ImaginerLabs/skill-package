@@ -463,3 +463,16 @@ export async function applySkillBundle(id: string): Promise<ApplyBundleResult> {
     { method: "PUT" },
   );
 }
+
+// ---- Stats API ----
+
+/** 活跃度数据点 */
+export interface ActivityDay {
+  date: string; // YYYY-MM-DD
+  count: number; // 当日修改文件数
+}
+
+/** 获取近 N 周 Skill 文件修改活跃度 */
+export async function fetchActivityStats(weeks = 12): Promise<ActivityDay[]> {
+  return apiCall<ActivityDay[]>(`/api/stats/activity?weeks=${weeks}`);
+}

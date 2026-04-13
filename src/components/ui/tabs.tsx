@@ -52,22 +52,61 @@ const Tabs = ({
 };
 Tabs.displayName = "Tabs";
 
-// ---- TabsList（Tab 按钮容器） ----
+// ---- TabsList（Tab 按鈕容器）----
 
 const TabsList = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="tablist"
-    className={cn(
-      "inline-flex h-9 items-center justify-start rounded-lg bg-[hsl(var(--muted))] p-1 text-[hsl(var(--muted-foreground))] mb-4",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, children, ...props }, ref) => {
+  const { activeTab } = React.useContext(TabsContext);
+
+  // 统计 TabsTrigger 子元素数量和当前激活索引
+  const triggers = React.Children.toArray(children).filter(
+    (child) =>
+      React.isValidElement(child) &&
+      (child.props as { value?: string }).value !== undefined,
+  );
+  const tabCount = triggers.length;
+  const activeIndex = triggers.findIndex(
+    (child) =>
+      React.isValidElement(child) &&
+      (child.props as { value?: string }).value === activeTab,
+  );
+
+  // 检测 prefers-reduced-motion
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  return (
+    <div
+      ref={ref}
+      role="tablist"
+      className={cn(
+        "relative inline-flex h-9 items-center justify-start rounded-lg bg-[hsl(var(--muted))] p-1 text-[hsl(var(--muted-foreground))] mb-4",
+        className,
+      )}
+      {...props}
+    >
+      {/* 滑块背景层 — 使用 transform: translateX() 实现平移动画 */}
+      {tabCount > 0 && activeIndex >= 0 && (
+        <div
+          aria-hidden="true"
+          data-testid="tab-slider"
+          className="absolute top-1 bottom-1 rounded-md bg-[hsl(var(--background))] shadow-sm"
+          style={{
+            width: `calc((100% - 8px) / ${tabCount})`,
+            transform: `translateX(calc(${activeIndex} * 100%))`,
+            transition: prefersReducedMotion
+              ? "none"
+              : "transform 200ms ease-in-out",
+          }}
+        />
+      )}
+      {children}
+    </div>
+  );
+});
 TabsList.displayName = "TabsList";
 
 // ---- TabsTrigger（单个 Tab 按钮） ----
@@ -89,10 +128,10 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         data-state={isActive ? "active" : "inactive"}
         onClick={() => setActiveTab(value)}
         className={cn(
-          "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "relative z-10 inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           isActive
-            ? "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow"
-            : "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+            ? "text-[hsl(var(--foreground))]"
+            : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]",
           className,
         )}
         {...props}
