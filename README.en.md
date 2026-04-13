@@ -25,6 +25,9 @@
 | 📦 Bundles       | Save category combinations as bundles; one-click activate to switch entire category config; broken-reference warning       |
 | ⌨️ Hotkeys       | `⌘K` command palette (with description & type groups), `Alt+↑/↓` step reorder                                              |
 | 📋 Quick Actions | Copy Skill path from detail panel; version number auto-synced with `package.json`                                          |
+| 🗂️ Secondary Nav  | Left-side secondary sidebar on home page; filter Skills by category with route-linked highlight                            |
+| 📊 Stats Panel   | Sidebar footer shows total Skills, categories, and sync count                                                              |
+| 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style                                    |
 
 ---
 
@@ -94,7 +97,8 @@ skill-package/
 ├── src/                    # Frontend source
 │   ├── components/         # React components (feature-based)
 │   │   ├── ui/             # Base UI components (shadcn/ui)
-│   │   ├── layout/         # Layout components
+│   │   ├── layout/         # Layout components (AppLayout, Sidebar, SecondarySidebar)
+│   │   ├── stats/          # Stats components (StatsPanel, ActivityHeatmap)
 │   │   ├── skills/         # Skill browsing
 │   │   ├── workflow/       # Workflow orchestration
 │   │   ├── sync/           # IDE sync
@@ -184,6 +188,7 @@ POST   /api/skill-bundles                 # Create bundle
 PUT    /api/skill-bundles/:id             # Update bundle
 DELETE /api/skill-bundles/:id             # Delete bundle
 PUT    /api/skill-bundles/:id/apply       # Activate bundle (set activeCategories)
+GET    /api/stats/activity                # Get recent activity data (supports ?weeks= param)
 ```
 
 ---

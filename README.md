@@ -24,8 +24,11 @@
 | ⚙️ 配置管理   | 管理 IDE 路径、分类定义、路径预设；分类批量操作（多选移出）                                |
 | 📦 套件管理   | 将常用分类组合保存为套件，一键激活整套分类配置；损坏引用自动警告                           |
 | ⌨️ 键盘快捷键 | `⌘K` 全局搜索（含描述摘要 + 类型分组），`Alt+↑/↓` 步骤排序                                 |
-| 📋 快捷操作   | Skill 详情侧边栏支持一键复制路径；版本号与 `package.json` 自动同步                         |
-
+| 📋 快捷操作   | Skill 详情侧边栏支持一键复制路径；版本号与 `package.json` 自动
+同步                         |
+| 🗂️ 二级导航   | 主页左侧二级侧边栏，按分类快速筛选 Skill，路由联动高亮当前分类  |
+| 📊 统计面板   | Sidebar 底部展示 Skill 总数、分类数、同步数等关键指标           |
+| 🔥 活跃度热力图 | 可视化近期 Skill 文件修改活跃度，类 GitHub 贡献热力图风格      |
 ---
 
 ## 技术栈
@@ -94,7 +97,8 @@ skill-package/
 ├── src/                    # 前端源码
 │   ├── components/         # React 组件（按功能域划分）
 │   │   ├── ui/             # shadcn/ui 基础组件
-│   │   ├── layout/         # 布局组件
+│   │   ├── layout/         # 布局组件（AppLayout、Sidebar、SecondarySidebar）
+│   │   ├── stats/          # 统计组件（StatsPanel、ActivityHeatmap）
 │   │   ├── skills/         # Skill 浏览
 │   │   ├── workflow/       # 工作流编排
 │   │   ├── sync/           # IDE 同步
@@ -184,6 +188,7 @@ POST   /api/skill-bundles       # 创建套件
 PUT    /api/skill-bundles/:id   # 更新套件
 DELETE /api/skill-bundles/:id   # 删除套件
 PUT    /api/skill-bundles/:id/apply  # 一键激活套件
+GET    /api/stats/activity           # 获取近期活跃度数据（支持 ?weeks= 参数）
 ```
 
 ---
