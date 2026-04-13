@@ -1,7 +1,7 @@
 ---
 project_name: skill-package
 user_name: Alex
-date: "2026-04-11"
+date: "2026-04-13"
 sections_completed:
   [
     "technology_stack",
@@ -13,7 +13,7 @@ sections_completed:
     "anti_patterns",
   ]
 status: "complete"
-rule_count: 52
+rule_count: 58
 optimized_for_llm: true
 ---
 
@@ -163,18 +163,23 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
   - Sync Push: `pushSync(skillIds, targetIds?)`
   - Path Preset: `fetchPathPresets`、`addPathPreset`、`updatePathPreset`、`deletePathPreset`
   - Skill Bundle: `fetchSkillBundles`、`createSkillBundle`、`updateSkillBundle`、`deleteSkillBundle`、`applySkillBundle`
+  - Stats: `fetchActivityStats(weeks?: number): Promise<ActivityDay[]>` — 调用 `GET /api/stats/activity?weeks={n}`；`ActivityDay = { date: string; count: number }`（YYYY-MM-DD 格式）
 
 ### 组件结构
 
 - **页面组件**：`src/pages/` — PascalCase 命名（如 `SkillBrowsePage.tsx`）
-- **功能组件**：`src/components/{feature}/` — 按功能域分组（`skills/`、`layout/`、`shared/`、`ui/`、`import/`、`sync/`、`workflow/`、`settings/`）
+- **功能组件**：`src/components/{feature}/` — 按功能域分组（`skills/`、`layout/`、`shared/`、`ui/`、`import/`、`sync/`、`workflow/`、`settings/`、`stats/`）
+  - `stats/` — 统计组件：`StatsPanel.tsx`（Skill/工作流/分类数量统计）、`ActivityHeatmap.tsx`（近 12 周活跃度热力图）
 - **UI 基础组件**：`src/components/ui/` — shadcn/ui 风格，使用 `cva` + `cn()` 工具函数
   - variants 逻辑拆分到独立文件：`badge-variants.ts`、`button-variants.ts`
 - **共享组件**：`src/components/shared/` — `CommandPalette`、`ErrorBoundary`、`Toast`、`toast-store.ts`
 - **自定义 Hooks**：`src/hooks/` — 如 `useSkillSearch.ts`（基于 fuse.js 的模糊搜索）
 - **路由配置**：`src/App.tsx` 使用 `createBrowserRouter`，`AppLayout` 作为根布局组件
 - **路由列表**：`/`（SkillBrowsePage）、`/workflow`（WorkflowPage）、`/sync`（SyncPage）、`/import`（ImportPage）、`/settings`（SettingsPage，Tab 化：「分类设置」+ 「套件管理」）、`/paths`（PathsPage，路径预设管理）
-- **侧边栏导航**：「设置」导航项已重命名为「分类」，路由 `/settings` 保持不变
+- **侧边栏布局（Epic 7 重设计）**：
+  - 主 `Sidebar`（`src/components/layout/Sidebar.tsx`）：导航菜单 + 底部 `StatsPanel` + `ActivityHeatmap`；**不再**包含「分类」导航项和 `CategoryTree`
+  - `SecondarySidebar`（`src/components/layout/SecondarySidebar.tsx`）：仅在路由 `/` 时由 `AppLayout` 条件渲染（`isSkillBrowsePage && <SecondarySidebar />`），内含 `CategoryTree` + 底部「管理分类」NavLink（跳转 `/settings`）；宽度固定 `180px`
+  - `AppLayout` 中布局顺序：`<Sidebar />` → `{isSkillBrowsePage && <SecondarySidebar />}` → `<main>`
 
 ### Toast 通知
 
@@ -206,6 +211,7 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
 - `workflowRoutes.ts` — 工作流 CRUD（`/api/workflows`、`/api/workflows/:id`、`POST /api/workflows/preview`）
 - `pathPresetRoutes.ts` — 路径预设 CRUD（`/api/path-presets`、`/api/path-presets/:id`）
 - `bundleRoutes.ts` — 套件 CRUD + 激活（`GET/POST /api/skill-bundles`、`PUT/DELETE /api/skill-bundles/:id`、`PUT /api/skill-bundles/:id/apply`、`GET /api/skill-bundles/export`（501 占位）、`POST /api/skill-bundles/import`（501 占位））
+- `statsRoutes.ts` — 统计数据（`GET /api/stats/activity?weeks=12`）；扫描 `SKILLS_ROOT` 下所有 `.md` 文件的 `fs.stat().mtime`，按日期聚合，返回完整日期序列（含 0 次的日期）
 
 ### 服务文件列表
 
@@ -408,6 +414,11 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
 - ⚠️ `applyBundle` 激活套件时以**覆盖模式**写入 `activeCategories`（不叠加），自动跳过已删除分类
 - ⚠️ 套件数据存储在 `config/settings.yaml` 的 `skillBundles` 字段；`activeCategories` 字段记录当前激活的分类列表
 - ⚠️ `SettingsPage.tsx` 使用 shadcn/ui `Tabs` 组件实现 Tab 化，「分类设置」Tab 渲染 `CategoryManager`（零改动），「套件管理」Tab 渲染 `BundleManager`
+- ⚠️ **Tabs 滑块动画（Epic 7）**：`TabsList` 组件内部有绝对定位的滑块 `div`（`data-testid="tab-slider"`），使用 `transform: translateX(activeIndex * 100%)` + `transition: transform 200ms ease-in-out` 实现平移动画；`TabsTrigger` 已移除激活背景样式（`bg-[hsl(var(--background))] shadow`），改为仅文字颜色区分（激活：`text-[hsl(var(--foreground))]`，非激活：`text-[hsl(var(--muted-foreground))]`）；`TabsTrigger` 必须有 `relative z-10` 确保文字在滑块层之上；`prefers-reduced-motion` 时 `transition: none`
+- ⚠️ `ActivityHeatmap` 颜色映射：0 次 → `hsl(var(--muted))`；1-2 次 → `hsl(var(--primary) / 0.3)`；3-5 次 → `hsl(var(--primary) / 0.6)`；6+ 次 → `hsl(var(--primary))`；豆点 `title` 格式：`YYYY-MM-DD · N 次修改`
+- ⚠️ `StatsPanel` 统计逻辑：`skillCount = skills.filter(sk => sk.type !== 'workflow').length`；`workflowCount = skills.filter(sk => sk.type === 'workflow').length`；数据来源 `useSkillStore`，无需额外 API
+- ⚠️ `statsRoutes` 中 `weeks` 参数范围限制：`Math.max(1, Math.min(52, parseInt(...) || 12))`，防止异常值
+- ⚠️ `SecondarySidebar` 中 `CategoryTree` **零改动**原则：分类筛选交互行为与之前完全一致，`CategoryTree.tsx` 不做任何修改
 - ⚠️ `bundle-store.ts` 的 `activeBundleId` 为前端本地状态，激活后通过 `set({ activeBundleId: id })` 更新，用于控制套件卡片的「已激活」视觉标识
 - ⚠️ `POST /api/workflows/preview` 必须在 `GET /api/workflows/:id` 之前注册（否则 "preview" 被当作 `:id`）
 - ⚠️ `workflowService.findWorkflowFile` 通过 `slugify(file) === id` 匹配文件，区分大小写
@@ -432,4 +443,4 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
 - 定期审查移除过时规则
 - 保持精简，聚焦于 LLM 容易遗漏的细节
 
-最后更新：2026-04-13（Epic BUNDLE 完成后更新）
+最后更新：2026-04-13（Epic 7 Sidebar 重设计完成后更新）
