@@ -1,7 +1,13 @@
-# Skill Manager 默认设置
-version: "0.1.0"
+version: 0.1.0
 sync:
   targets: []
 ui:
   defaultView: grid
   sidebarWidth: 240
+pathPresets:
+  - id: preset-mnwkif64-47uj
+    path: /Users/alex/.cursor/rules
+  - id: preset-mnwkjc8v-4wdu
+    path: /Users/alex/projects/claude-code
+  - id: preset-mnwkx5sh-0ek5
+    path: /Users/alex/trae/workspace
