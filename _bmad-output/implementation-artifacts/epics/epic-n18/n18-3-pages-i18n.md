@@ -116,20 +116,20 @@ so that 切换语言后整个应用界面完整地呈现目标语言，没有遗
 
 ### 关键文件路径
 
-| 文件 | 操作 |
-|------|------|
-| `src/pages/SkillBrowsePage.tsx` | 修改：全页面文本 i18n 化 |
-| `src/pages/SyncPage.tsx` | 修改：标题/副标题 i18n 化 |
-| `src/components/sync/SyncExecutor.tsx` | 修改：同步按钮/结果/Toast i18n 化 |
-| `src/components/sync/SyncSkillSelector.tsx` | 修改：选择区域文本 i18n 化 |
-| `src/pages/SettingsPage.tsx` | 修改：标题/Tab 标签 i18n 化 |
-| `src/pages/WorkflowPage.tsx` | 修改：Tab/空状态/Toast i18n 化 |
-| `src/pages/import/index.tsx` | 修改：页面文本 i18n 化 |
-| `src/pages/import/ScanPathInput.tsx` | 修改：扫描文本 i18n 化 |
-| `src/pages/import/ImportFileList.tsx` | 修改：导入列表文本 i18n 化 |
-| `src/pages/import/CleanupConfirmDialog.tsx` | 修改：确认弹窗文本 i18n 化 |
-| `src/pages/PathsPage.tsx` | 修改：标题/副标题 i18n 化 |
-| `src/components/shared/CommandPalette.tsx` | 修改：全组件文本 i18n 化 |
+| 文件                                        | 操作                              |
+| ------------------------------------------- | --------------------------------- |
+| `src/pages/SkillBrowsePage.tsx`             | 修改：全页面文本 i18n 化          |
+| `src/pages/SyncPage.tsx`                    | 修改：标题/副标题 i18n 化         |
+| `src/components/sync/SyncExecutor.tsx`      | 修改：同步按钮/结果/Toast i18n 化 |
+| `src/components/sync/SyncSkillSelector.tsx` | 修改：选择区域文本 i18n 化        |
+| `src/pages/SettingsPage.tsx`                | 修改：标题/Tab 标签 i18n 化       |
+| `src/pages/WorkflowPage.tsx`                | 修改：Tab/空状态/Toast i18n 化    |
+| `src/pages/import/index.tsx`                | 修改：页面文本 i18n 化            |
+| `src/pages/import/ScanPathInput.tsx`        | 修改：扫描文本 i18n 化            |
+| `src/pages/import/ImportFileList.tsx`       | 修改：导入列表文本 i18n 化        |
+| `src/pages/import/CleanupConfirmDialog.tsx` | 修改：确认弹窗文本 i18n 化        |
+| `src/pages/PathsPage.tsx`                   | 修改：标题/副标题 i18n 化         |
+| `src/components/shared/CommandPalette.tsx`  | 修改：全组件文本 i18n 化          |
 
 ### WorkflowPage.tsx Toast 消息提升模式
 
@@ -143,7 +143,9 @@ toast.success(t("toast.workflowLoaded", { name: workflow.name }));
 // 工作流删除（undoable）
 toast.undoable(
   t("toast.workflowDeleted", { name: workflow.name }),
-  async () => { /* onConfirm */ },
+  async () => {
+    /* onConfirm */
+  },
   () => {
     // onUndo
     toast.success(t("toast.workflowUndoDelete", { name: workflow.name }));
@@ -180,17 +182,21 @@ export default function CommandPalette() {
 
 ```tsx
 // 原代码：
-{searchQuery
-  ? `${filteredSkills.length} / ${skills.length} 个 Skill`
-  : `${skills.length} 个 Skill`}
+{
+  searchQuery
+    ? `${filteredSkills.length} / ${skills.length} 个 Skill`
+    : `${skills.length} 个 Skill`;
+}
 
 // 修改后：
-{searchQuery
-  ? t("skillBrowse.skillCountFiltered", {
-      filtered: filteredSkills.length,
-      total: skills.length,
-    })
-  : t("skillBrowse.skillCount", { count: skills.length })}
+{
+  searchQuery
+    ? t("skillBrowse.skillCountFiltered", {
+        filtered: filteredSkills.length,
+        total: skills.length,
+      })
+    : t("skillBrowse.skillCount", { count: skills.length });
+}
 ```
 
 ### 测试 Mock 模式

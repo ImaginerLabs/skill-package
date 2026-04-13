@@ -86,7 +86,7 @@ So that 我可以在统一的开发环境中开始构建功能。
     - `src/pages/SyncPage.tsx`（/sync）
     - `src/pages/ImportPage.tsx`（/import）
     - `src/pages/SettingsPage.tsx`（/settings）
-    - `src/pages/NotFound.tsx`（*）
+    - `src/pages/NotFound.tsx`（\*）
 
 - [x] Task 4: Express 后端骨架 (AC: #2, #3)
   - [x] 4.1 创建 `server/index.ts`：Express 入口，绑定 `127.0.0.1`，启动服务
@@ -150,16 +150,16 @@ So that 我可以在统一的开发环境中开始构建功能。
 
 ### 技术栈版本要求
 
-| 技术 | 版本要求 | 说明 |
-|------|----------|------|
-| Node.js | >= 18 | LTS 版本，支持 ESM |
-| TypeScript | ~5.x | strict mode |
-| React | ^18.x | 使用 React 18 |
-| React Router | ^6.x | 使用 v6 data router |
-| Vite | ^5.x | 构建工具 |
-| Express | ^4.x | 后端框架 |
-| concurrently | ^8.x | 并行启动前后端 |
-| tsx | ^4.x | TypeScript 执行器（替代 ts-node） |
+| 技术         | 版本要求 | 说明                              |
+| ------------ | -------- | --------------------------------- |
+| Node.js      | >= 18    | LTS 版本，支持 ESM                |
+| TypeScript   | ~5.x     | strict mode                       |
+| React        | ^18.x    | 使用 React 18                     |
+| React Router | ^6.x     | 使用 v6 data router               |
+| Vite         | ^5.x     | 构建工具                          |
+| Express      | ^4.x     | 后端框架                          |
+| concurrently | ^8.x     | 并行启动前后端                    |
+| tsx          | ^4.x     | TypeScript 执行器（替代 ts-node） |
 
 ### Vite 配置关键点
 
@@ -167,13 +167,13 @@ So that 我可以在统一的开发环境中开始构建功能。
 // vite.config.ts 关键配置
 export default defineConfig({
   plugins: [react()],
-  root: '.',
-  build: { outDir: 'dist' },
+  root: ".",
+  build: { outDir: "dist" },
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
+      "/api": {
+        target: "http://localhost:3001",
         changeOrigin: true,
       },
     },
@@ -185,23 +185,28 @@ export default defineConfig({
 
 ```typescript
 // server/index.ts 生产模式关键逻辑
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   // serve Vite 构建产物
-  app.use(express.static(path.join(__dirname, '../dist')));
+  app.use(express.static(path.join(__dirname, "../dist")));
 }
 
 // API 路由注册（所有模式）
-app.use('/api', apiRouter);
+app.use("/api", apiRouter);
 
 // API 404 处理器：未匹配的 /api/* 路由返回 JSON 404
-app.all('/api/*', (req, res) => {
-  res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'API endpoint not found' } });
+app.all("/api/*", (req, res) => {
+  res
+    .status(404)
+    .json({
+      success: false,
+      error: { code: "NOT_FOUND", message: "API endpoint not found" },
+    });
 });
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   // SPA fallback：所有非 API 路由返回 index.html
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
   });
 }
 ```
@@ -238,6 +243,7 @@ if (!noOpen) {
 ```
 
 > **注意：** `tsx` 必须在 dependencies（而非 devDependencies）中，因为 CLI 和 `npm start` 在生产模式下依赖它运行 TypeScript。这是本地开发者工具的有意设计选择。
+
 ```
 
 ### 模块系统策略（⚠️ 关键决策）
@@ -275,50 +281,52 @@ if (!noOpen) {
 本 Story 建立的目录结构严格遵循架构文档定义：
 
 ```
+
 skill-manager/
 ├── package.json
-├── tsconfig.json              # 根配置（引用 client + server）
-├── tsconfig.client.json       # 前端 TS 配置
-├── tsconfig.server.json       # 后端 TS 配置
+├── tsconfig.json # 根配置（引用 client + server）
+├── tsconfig.client.json # 前端 TS 配置
+├── tsconfig.server.json # 后端 TS 配置
 ├── vite.config.ts
 ├── .nvmrc
 ├── .gitignore
 ├── .env.example
 ├── bin/
-│   └── cli.js                 # 全局命令入口
-├── src/                       # 前端源码
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── vite-env.d.ts
-│   ├── pages/                 # 页面组件
-│   │   ├── SkillBrowsePage.tsx
-│   │   ├── WorkflowPage.tsx
-│   │   ├── SyncPage.tsx
-│   │   ├── ImportPage.tsx
-│   │   └── SettingsPage.tsx
-│   ├── components/            # 组件目录（空骨架）
-│   ├── stores/                # Zustand Store（空骨架）
-│   ├── hooks/                 # 自定义 Hooks（空骨架）
-│   ├── lib/                   # 工具库（空骨架）
-│   └── types/                 # 类型定义（空骨架）
-├── server/                    # 后端源码
-│   ├── index.ts               # Express 入口
-│   ├── app.ts                 # Express app 配置
-│   ├── routes/
-│   │   └── healthRoutes.ts
-│   ├── services/              # 业务逻辑（空骨架）
-│   ├── utils/                 # 工具函数（空骨架）
-│   ├── middleware/            # 中间件（空骨架）
-│   └── types/                 # 后端类型（空骨架）
-├── shared/                    # 前后端共享（空骨架）
-├── skills/                    # 用户 Skill 文件（分类子目录由 Story 0.5 创建）
-├── config/                    # 用户配置
+│ └── cli.js # 全局命令入口
+├── src/ # 前端源码
+│ ├── main.tsx
+│ ├── App.tsx
+│ ├── vite-env.d.ts
+│ ├── pages/ # 页面组件
+│ │ ├── SkillBrowsePage.tsx
+│ │ ├── WorkflowPage.tsx
+│ │ ├── SyncPage.tsx
+│ │ ├── ImportPage.tsx
+│ │ └── SettingsPage.tsx
+│ ├── components/ # 组件目录（空骨架）
+│ ├── stores/ # Zustand Store（空骨架）
+│ ├── hooks/ # 自定义 Hooks（空骨架）
+│ ├── lib/ # 工具库（空骨架）
+│ └── types/ # 类型定义（空骨架）
+├── server/ # 后端源码
+│ ├── index.ts # Express 入口
+│ ├── app.ts # Express app 配置
+│ ├── routes/
+│ │ └── healthRoutes.ts
+│ ├── services/ # 业务逻辑（空骨架）
+│ ├── utils/ # 工具函数（空骨架）
+│ ├── middleware/ # 中间件（空骨架）
+│ └── types/ # 后端类型（空骨架）
+├── shared/ # 前后端共享（空骨架）
+├── skills/ # 用户 Skill 文件（分类子目录由 Story 0.5 创建）
+├── config/ # 用户配置
 ├── public/
-│   └── fonts/
+│ └── fonts/
 ├── tests/
-│   ├── integration/
-│   └── fixtures/sample-skills/
+│ ├── integration/
+│ └── fixtures/sample-skills/
 └── index.html
+
 ```
 
 ### References
@@ -413,3 +421,4 @@ Claude claude-4.6-opus (Amelia — Senior Software Engineer)
 - public/fonts/.gitkeep (新建)
 - tests/integration/.gitkeep (新建)
 - tests/fixtures/sample-skills/.gitkeep (新建)
+```

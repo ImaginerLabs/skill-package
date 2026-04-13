@@ -57,16 +57,19 @@ So that 我的分类和 IDE 路径设置在每次启动时都能正确加载。
 ## Dev Notes
 
 ### 已有工具
+
 - `readYaml<T>()` 和 `writeYaml()` 来自 server/utils/yamlUtils.ts
 - `AppError` 来自 server/types/errors.ts
 - `AppConfig`、`Category` 类型来自 shared/types.ts
 
 ### 默认分类
+
 coding, writing, devops, workflows
 
 ## Dev Agent Record
 
 ### Agent Model Used
+
 Claude claude-4.6-opus (Amelia)
 
 ### Completion Notes List

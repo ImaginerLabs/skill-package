@@ -138,6 +138,7 @@ So that 后续所有功能开发都有一致的基础设施。
   - [x] 9.1 运行 `tsc --noEmit` 确认编译通过
   - [x] 9.2 运行 `npm run build` 确认构建成功
   - [x] 9.3 验证 Express 错误中间件正常工作
+
 ## Dev Notes
 
 ### 架构约束（必须遵守）
@@ -155,22 +156,22 @@ So that 后续所有功能开发都有一致的基础设施。
 // shared/types.ts — 核心数据类型
 
 interface SkillMeta {
-  id: string;              // slug 化文件名（不含扩展名）
-  name: string;            // Frontmatter: name
-  description: string;     // Frontmatter: description
-  category: string;        // Frontmatter: category
-  tags: string[];          // Frontmatter: tags
-  type?: 'workflow';       // Frontmatter: type
-  author?: string;         // Frontmatter: author
-  version?: string;        // Frontmatter: version
-  filePath: string;        // 相对于 skills/ 的路径
-  fileSize: number;        // 文件大小（bytes）
-  lastModified: string;    // ISO 8601 时间戳
+  id: string; // slug 化文件名（不含扩展名）
+  name: string; // Frontmatter: name
+  description: string; // Frontmatter: description
+  category: string; // Frontmatter: category
+  tags: string[]; // Frontmatter: tags
+  type?: "workflow"; // Frontmatter: type
+  author?: string; // Frontmatter: author
+  version?: string; // Frontmatter: version
+  filePath: string; // 相对于 skills/ 的路径
+  fileSize: number; // 文件大小（bytes）
+  lastModified: string; // ISO 8601 时间戳
 }
 
 interface SkillFull extends SkillMeta {
-  content: string;         // Markdown 正文（不含 Frontmatter）
-  rawContent: string;      // 原始文件内容（含 Frontmatter）
+  content: string; // Markdown 正文（不含 Frontmatter）
+  rawContent: string; // 原始文件内容（含 Frontmatter）
 }
 
 interface Category {
@@ -184,7 +185,7 @@ interface AppConfig {
   version: string;
   sync: { targets: SyncTarget[] };
   categories: Category[];
-  ui: { defaultView: 'grid' | 'list'; sidebarWidth: number };
+  ui: { defaultView: "grid" | "list"; sidebarWidth: number };
 }
 
 // API 响应格式
@@ -211,10 +212,10 @@ type ApiResponse<T> = ApiSuccess<T> | ApiError;
 // 后端：全局错误中间件
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const code = err instanceof AppError ? err.code : 'INTERNAL_ERROR';
+  const code = err instanceof AppError ? err.code : "INTERNAL_ERROR";
   res.status(statusCode).json({
     success: false,
-    error: { code, message: err.message }
+    error: { code, message: err.message },
   });
 });
 

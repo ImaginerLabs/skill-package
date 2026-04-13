@@ -113,20 +113,20 @@ so that 整个应用没有任何遗漏的硬编码中文文本，语言切换后
 
 ### 关键文件路径
 
-| 文件 | 操作 |
-|------|------|
-| `src/components/settings/BundleManager.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/settings/CategoryManager.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/settings/PathPresetManager.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/skills/MetadataEditor.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/skills/SkillCard.tsx` | 修改：noDescription + 工作流标签 |
-| `src/components/skills/SkillList.tsx` | 修改：noDescription + 标签计数 |
-| `src/components/skills/EmptyState.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/sync/SyncTargetManager.tsx` | 修改：全组件文本 i18n 化 |
-| `src/components/ui/dialog.tsx` | 修改：sr-only 关闭文本 |
-| `src/stores/bundle-store.ts` | 修改：移除中文 Toast，改为 throw |
-| `src/stores/skill-store.ts` | 修改：移除中文错误消息，改为 throw |
-| `src/stores/sync-store.ts` | 修改：移除中文 Toast，改为 throw |
+| 文件                                            | 操作                               |
+| ----------------------------------------------- | ---------------------------------- |
+| `src/components/settings/BundleManager.tsx`     | 修改：全组件文本 i18n 化           |
+| `src/components/settings/CategoryManager.tsx`   | 修改：全组件文本 i18n 化           |
+| `src/components/settings/PathPresetManager.tsx` | 修改：全组件文本 i18n 化           |
+| `src/components/skills/MetadataEditor.tsx`      | 修改：全组件文本 i18n 化           |
+| `src/components/skills/SkillCard.tsx`           | 修改：noDescription + 工作流标签   |
+| `src/components/skills/SkillList.tsx`           | 修改：noDescription + 标签计数     |
+| `src/components/skills/EmptyState.tsx`          | 修改：全组件文本 i18n 化           |
+| `src/components/sync/SyncTargetManager.tsx`     | 修改：全组件文本 i18n 化           |
+| `src/components/ui/dialog.tsx`                  | 修改：sr-only 关闭文本             |
+| `src/stores/bundle-store.ts`                    | 修改：移除中文 Toast，改为 throw   |
+| `src/stores/skill-store.ts`                     | 修改：移除中文错误消息，改为 throw |
+| `src/stores/sync-store.ts`                      | 修改：移除中文 Toast，改为 throw   |
 
 ### Store 消息提升模式（AD-29 规范）
 
@@ -153,17 +153,19 @@ try {
 
 ```typescript
 // 原代码：
-const msg = result.skipped.length > 0
-  ? `已激活 ${result.applied.length} 个分类，跳过 ${result.skipped.length} 个已删除分类`
-  : `已激活 ${result.applied.length} 个分类`;
+const msg =
+  result.skipped.length > 0
+    ? `已激活 ${result.applied.length} 个分类，跳过 ${result.skipped.length} 个已删除分类`
+    : `已激活 ${result.applied.length} 个分类`;
 
 // 修改后：
-const msg = result.skipped.length > 0
-  ? t("bundle.activateSuccess_withSkipped", {
-      applied: result.applied.length,
-      skipped: result.skipped.length,
-    })
-  : t("bundle.activateSuccess", { applied: result.applied.length });
+const msg =
+  result.skipped.length > 0
+    ? t("bundle.activateSuccess_withSkipped", {
+        applied: result.applied.length,
+        skipped: result.skipped.length,
+      })
+    : t("bundle.activateSuccess", { applied: result.applied.length });
 ```
 
 ### CategoryManager.tsx 批量操作文本（含插值）
@@ -176,24 +178,33 @@ toast.success(`已将 ${ids.length} 个 Skill 移出分类`);
 toast.success(t("category.batchRemoveSuccess", { count: ids.length }));
 
 // 原代码（批量操作按钮）：
-{batchLoading === cat.name ? "处理中..." : `移出此分类 (${selectedCount})`}
+{
+  batchLoading === cat.name ? "处理中..." : `移出此分类 (${selectedCount})`;
+}
 
 // 修改后：
-{batchLoading === cat.name
-  ? t("common.processing")
-  : t("category.batchRemoveButton", { count: selectedCount })}
+{
+  batchLoading === cat.name
+    ? t("common.processing")
+    : t("category.batchRemoveButton", { count: selectedCount });
+}
 ```
 
 ### SkillList.tsx 标签计数文本
 
 ```tsx
 // 原代码：
-{skill.tags.length} 标签
+{
+  skill.tags.length;
+}
+标签;
 
 // 修改后（需在 zh.ts/en.ts 中添加 skillList.tagCount 键）：
 // zh: tagCount: "{{count}} 标签"
 // en: tagCount: "{{count}} tags"
-{t("skillList.tagCount", { count: skill.tags.length })}
+{
+  t("skillList.tagCount", { count: skill.tags.length });
+}
 ```
 
 > **注意**：如果 `skillList` 域在 N18-1 的翻译文件中未包含，需要在本 story 中补充到 `zh.ts` 和 `en.ts`。

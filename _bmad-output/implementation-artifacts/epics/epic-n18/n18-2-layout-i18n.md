@@ -60,11 +60,11 @@ so that 我可以随时切换界面语言，并且全局导航始终以我选择
 
 ### 关键文件路径
 
-| 文件 | 操作 |
-|------|------|
-| `src/components/layout/Header.tsx` | 修改：添加语言切换按钮，文本 i18n 化 |
-| `src/components/layout/Sidebar.tsx` | 修改：导航标签 i18n 化 |
-| `src/components/layout/SecondarySidebar.tsx` | 修改：文本 i18n 化 |
+| 文件                                         | 操作                                 |
+| -------------------------------------------- | ------------------------------------ |
+| `src/components/layout/Header.tsx`           | 修改：添加语言切换按钮，文本 i18n 化 |
+| `src/components/layout/Sidebar.tsx`          | 修改：导航标签 i18n 化               |
+| `src/components/layout/SecondarySidebar.tsx` | 修改：文本 i18n 化                   |
 
 ### Header.tsx 修改参考（语言切换按钮）
 

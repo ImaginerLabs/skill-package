@@ -95,31 +95,37 @@ So that 后续所有 Skill 文件读取和配置操作都有可靠的基础。
 ### 已有代码上下文（来自 Story 0-1 和 0-2）
 
 **已安装的相关依赖：**
+
 - `gray-matter` ^4.0.3 — Frontmatter 解析
 - `js-yaml` ^4.1.1 — YAML 读写
 - `fs-extra` ^11.3.4 — 增强文件操作（ensureDir 等）
 - `zod` ^4.3.6 — 运行时 Schema 校验
 
 **已有的类型定义（`shared/types.ts`）：**
+
 - `SkillMeta` — Skill 元数据接口（id, name, description, category, tags, type, author, version, filePath, fileSize, lastModified）
 - `SkillFull` — 完整 Skill（extends SkillMeta + content, rawContent）
 
 **已有的 Zod Schema（`shared/schemas.ts`）：**
+
 - `SkillMetaSchema` — 校验 SkillMeta 数据
 - `SkillFullSchema` — 校验 SkillFull 数据
 
 **已有的错误处理（`server/types/errors.ts`）：**
+
 - `AppError` 类 — 含 `code` 和 `statusCode` 属性
 - 工厂方法：`AppError.parseError(message)`、`AppError.notFound(message)`、`AppError.internal(message)` 等
 
 **已有的常量（`shared/constants.ts`）：**
+
 - `ErrorCode.PARSE_ERROR`、`ErrorCode.FILE_READ_ERROR`、`ErrorCode.PATH_TRAVERSAL` 等
 
 ### 关键实现细节
 
 **gray-matter 使用方式：**
+
 ```typescript
-import matter from 'gray-matter';
+import matter from "gray-matter";
 
 // 解析 Frontmatter
 const { data, content } = matter(rawContent);
@@ -128,30 +134,32 @@ const { data, content } = matter(rawContent);
 ```
 
 **js-yaml 使用方式：**
+
 ```typescript
-import yaml from 'js-yaml';
+import yaml from "js-yaml";
 
 // 读取
 const data = yaml.load(fileContent) as T;
 
 // 写入
-const yamlString = yaml.dump(data, { 
-  indent: 2, 
-  lineWidth: -1,  // 不自动换行
-  noRefs: true     // 不使用 YAML 引用
+const yamlString = yaml.dump(data, {
+  indent: 2,
+  lineWidth: -1, // 不自动换行
+  noRefs: true, // 不使用 YAML 引用
 });
 ```
 
 **fs-extra 使用方式：**
+
 ```typescript
-import fs from 'fs-extra';
+import fs from "fs-extra";
 
 // 读取文件
-const content = await fs.readFile(filePath, 'utf-8');
+const content = await fs.readFile(filePath, "utf-8");
 
 // 写入文件（确保目录存在）
 await fs.ensureDir(path.dirname(filePath));
-await fs.writeFile(filePath, content, 'utf-8');
+await fs.writeFile(filePath, content, "utf-8");
 
 // 获取文件信息
 const stat = await fs.stat(filePath);
@@ -160,8 +168,9 @@ const stat = await fs.stat(filePath);
 ```
 
 **Zod 校验使用方式（Zod v4）：**
+
 ```typescript
-import { SkillMetaSchema } from '../../shared/schemas.js';
+import { SkillMetaSchema } from "../../shared/schemas.js";
 
 // 校验数据
 const result = SkillMetaSchema.safeParse(data);
@@ -174,21 +183,23 @@ if (result.success) {
 ```
 
 **slugify 实现参考：**
+
 ```typescript
 // 输入: "My Awesome Skill.md" → 输出: "my-awesome-skill"
 // 输入: "代码审查工具.md" → 输出: "代码审查工具"（保留中文）
 // 输入: "skill--name.md" → 输出: "skill-name"（合并连续连字符）
 function slugify(filename: string): string {
   return filename
-    .replace(/\.md$/i, '')           // 去除 .md 扩展名
-    .replace(/[^\w\u4e00-\u9fff-]/g, '-')  // 非字母数字中文转连字符
-    .replace(/-+/g, '-')             // 合并连续连字符
-    .replace(/^-|-$/g, '')           // 去除首尾连字符
+    .replace(/\.md$/i, "") // 去除 .md 扩展名
+    .replace(/[^\w\u4e00-\u9fff-]/g, "-") // 非字母数字中文转连字符
+    .replace(/-+/g, "-") // 合并连续连字符
+    .replace(/^-|-$/g, "") // 去除首尾连字符
     .toLowerCase();
 }
 ```
 
 **ParseResult 类型定义：**
+
 ```typescript
 export interface ParseSuccess {
   success: true;
@@ -221,12 +232,12 @@ export type ParseResult = ParseSuccess | ParseFailure;
 
 ### 文件创建清单
 
-| 文件 | 操作 | 说明 |
-|------|------|------|
-| `server/utils/pathUtils.ts` | 新建 | 跨平台路径工具函数 |
+| 文件                                | 操作 | 说明                        |
+| ----------------------------------- | ---- | --------------------------- |
+| `server/utils/pathUtils.ts`         | 新建 | 跨平台路径工具函数          |
 | `server/utils/frontmatterParser.ts` | 新建 | Frontmatter 解析 + Zod 校验 |
-| `server/utils/yamlUtils.ts` | 新建 | YAML 配置文件读写 |
-| `server/utils/.gitkeep` | 删除 | 目录不再为空 |
+| `server/utils/yamlUtils.ts`         | 新建 | YAML 配置文件读写           |
+| `server/utils/.gitkeep`             | 删除 | 目录不再为空                |
 
 ### Project Structure Notes
 

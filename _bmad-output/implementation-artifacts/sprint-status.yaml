@@ -3,7 +3,7 @@
 # project: skill-package
 # project_key: NOKEY
 # tracking_system: file-system
-# story_location: "{project-root}/_bmad-output/implementation-artifacts"
+# story_location: "{project-root}/_bmad-output/implementation-artifacts/epics/{epic-id}"
 
 # STATUS DEFINITIONS:
 # ==================
@@ -78,7 +78,7 @@ last_updated: 2026-04-13T17:04:54
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
-story_location: "{project-root}/_bmad-output/implementation-artifacts"
+story_location: "{project-root}/_bmad-output/implementation-artifacts/epics/{epic-id}"
 
 development_status:
   # ============================================================
