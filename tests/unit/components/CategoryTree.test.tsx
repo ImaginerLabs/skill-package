@@ -3,6 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import CategoryTree from "../../../src/components/skills/CategoryTree";
 import { useSkillStore } from "../../../src/stores/skill-store";
 
+// Mock react-router-dom
+const mockNavigate = vi.fn();
+let mockPathname = "/";
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname: mockPathname }),
+}));
+
 // Mock skill-store
 vi.mock("../../../src/stores/skill-store", () => ({
   useSkillStore: vi.fn(),
@@ -34,6 +43,7 @@ function setupStore(overrides: Record<string, unknown> = {}) {
 describe("CategoryTree", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPathname = "/";
     setupStore();
   });
 

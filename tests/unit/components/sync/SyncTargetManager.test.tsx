@@ -6,6 +6,40 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock react-i18next
+vi.mock("react-i18next", async () => {
+  const { zh } = await import("../../../../src/i18n/locales/zh");
+  function resolve(key: string, obj: Record<string, unknown>): string {
+    const parts = key.split(".");
+    let cur: unknown = obj;
+    for (const p of parts) {
+      if (cur && typeof cur === "object" && p in cur)
+        cur = (cur as Record<string, unknown>)[p];
+      else return key;
+    }
+    return typeof cur === "string" ? cur : key;
+  }
+  return {
+    useTranslation: () => ({
+      t: (key: string, params?: Record<string, unknown>) => {
+        let text = resolve(key, zh as unknown as Record<string, unknown>);
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
+          }
+        }
+        return text;
+      },
+      i18n: { language: "zh", changeLanguage: vi.fn() },
+    }),
+  };
+});
+
+// Mock ide-matcher（避免 @lobehub/icons → @lobehub/ui ESM 解析问题）
+vi.mock("@/components/settings/ide-icons/ide-matcher", () => ({
+  matchIDEByPath: vi.fn().mockReturnValue(null),
+}));
+
 // Mock API
 vi.mock("@/lib/api", () => ({
   fetchSyncTargets: vi.fn().mockResolvedValue([]),

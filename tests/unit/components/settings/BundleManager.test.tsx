@@ -7,6 +7,35 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock react-i18next（使用 zh 翻译资源）
+vi.mock("react-i18next", async () => {
+  const { zh } = await import("../../../../src/i18n/locales/zh");
+  function resolve(key: string, obj: Record<string, unknown>): string {
+    const parts = key.split(".");
+    let cur: unknown = obj;
+    for (const p of parts) {
+      if (cur && typeof cur === "object" && p in cur)
+        cur = (cur as Record<string, unknown>)[p];
+      else return key;
+    }
+    return typeof cur === "string" ? cur : key;
+  }
+  return {
+    useTranslation: () => ({
+      t: (key: string, params?: Record<string, unknown>) => {
+        let text = resolve(key, zh as unknown as Record<string, unknown>);
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
+          }
+        }
+        return text;
+      },
+      i18n: { language: "zh", changeLanguage: vi.fn() },
+    }),
+  };
+});
+
 // Mock bundle-store
 const mockFetchBundles = vi.fn();
 const mockCreateBundle = vi.fn();
@@ -119,7 +148,7 @@ describe("BundleManager", () => {
         expect(screen.getByText("前端日常开发")).toBeInTheDocument();
       });
       expect(screen.getByText("frontend-dev")).toBeInTheDocument();
-      expect(screen.getByText("2 个分类")).toBeInTheDocument();
+      expect(screen.getByText("2 Skill")).toBeInTheDocument();
     });
 
     it("点击展开按钮后显示分类 Tag 列表", async () => {
@@ -260,7 +289,7 @@ describe("BundleManager", () => {
       ).toBeInTheDocument();
       // 对话框描述
       expect(
-        screen.getByText(/此操作不会影响套件中引用的分类/),
+        screen.getByText(/确定要删除分类.*前端日常开发.*吗/),
       ).toBeInTheDocument();
     });
   });
@@ -290,7 +319,7 @@ describe("BundleManager", () => {
         expect(screen.getByText("前端日常开发")).toBeInTheDocument();
       });
 
-      expect(screen.getByTitle("激活套件")).toBeInTheDocument();
+      expect(screen.getByTitle("激活")).toBeInTheDocument();
     });
 
     it("点击激活按钮后调用 applyBundle 并显示成功 toast", async () => {
@@ -302,10 +331,10 @@ describe("BundleManager", () => {
       render(<BundleManager />);
 
       await waitFor(() => {
-        expect(screen.getByTitle("激活套件")).toBeInTheDocument();
+        expect(screen.getByTitle("激活")).toBeInTheDocument();
       });
 
-      await user.click(screen.getByTitle("激活套件"));
+      await user.click(screen.getByTitle("激活"));
 
       await waitFor(() => {
         expect(mockApplyBundle).toHaveBeenCalledWith(mockBundle.id);
@@ -322,10 +351,10 @@ describe("BundleManager", () => {
       render(<BundleManager />);
 
       await waitFor(() => {
-        expect(screen.getByTitle("激活套件")).toBeInTheDocument();
+        expect(screen.getByTitle("激活")).toBeInTheDocument();
       });
 
-      await user.click(screen.getByTitle("激活套件"));
+      await user.click(screen.getByTitle("激活"));
 
       await waitFor(() => {
         expect(mockToastSuccess).toHaveBeenCalledWith(
@@ -354,7 +383,7 @@ describe("BundleManager", () => {
       });
 
       // 激活按钮文字变为"已激活"
-      expect(screen.getByTitle("激活套件")).toHaveTextContent("已激活");
+      expect(screen.getByTitle("激活")).toHaveTextContent("已激活");
     });
   });
 
@@ -389,7 +418,7 @@ describe("BundleManager", () => {
         expect(screen.getByText("前端日常开发")).toBeInTheDocument();
       });
 
-      expect(screen.getByText("包含 1 个已删除分类")).toBeInTheDocument();
+      expect(screen.getByText("1 个分类引用已失效")).toBeInTheDocument();
     });
 
     it("展开损坏套件时已删除分类 Tag 显示删除线样式", async () => {
@@ -403,7 +432,7 @@ describe("BundleManager", () => {
       await user.click(screen.getByRole("button", { name: "展开" }));
 
       // 已删除分类显示"(已删除)"标注
-      expect(screen.getByText(/deleted-category.*已删除/)).toBeInTheDocument();
+      expect(screen.getByText(/deleted-category.*deleted/)).toBeInTheDocument();
     });
   });
 });

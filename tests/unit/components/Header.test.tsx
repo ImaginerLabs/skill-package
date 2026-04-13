@@ -4,11 +4,31 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Header from "../../../src/components/layout/Header";
 
+// Mock react-i18next
+vi.mock("react-i18next", () => {
+  const zh = {
+    "header.searchPlaceholder": "⌘K 搜索 Skill...",
+    "header.searchAriaLabel": "全局搜索",
+    "header.toggleTheme": "切换主题",
+    "header.switchLanguage": "切换语言",
+    "header.langZh": "中",
+    "header.langEn": "EN",
+  };
+  return {
+    useTranslation: () => ({
+      t: (key: string) => (zh as Record<string, string>)[key] ?? key,
+      i18n: { language: "zh", changeLanguage: vi.fn() },
+    }),
+  };
+});
+
 // Mock stores
 const mockSetCommandPaletteOpen = vi.fn();
 vi.mock("../../../src/stores/ui-store", () => ({
   useUIStore: vi.fn(() => ({
     setCommandPaletteOpen: mockSetCommandPaletteOpen,
+    theme: "dark",
+    toggleTheme: vi.fn(),
   })),
 }));
 

@@ -3,6 +3,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SkillMeta } from "../../../shared/types";
 import SkillCard from "../../../src/components/skills/SkillCard";
 
+// Mock react-i18next
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "common.noDescription": "暂无描述",
+        "skillList.workflowBadge": "工作流",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
 // Mock 数据
 const mockSkill: SkillMeta = {
   id: "skill-1",

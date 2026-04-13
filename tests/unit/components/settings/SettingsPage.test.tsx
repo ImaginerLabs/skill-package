@@ -7,6 +7,21 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock react-i18next
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "settings.title": "分类管理",
+        "settings.tabCategories": "分类设置",
+        "settings.tabBundles": "套件管理",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
 // Mock CategoryManager（避免复杂的 API 依赖）
 vi.mock("../../../../src/components/settings/CategoryManager", () => ({
   default: () => <div data-testid="category-manager">CategoryManager</div>,

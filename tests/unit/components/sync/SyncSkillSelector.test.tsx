@@ -2,6 +2,40 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock react-i18next（使用 zh 翻译资源）
+vi.mock("react-i18next", async () => {
+  const { zh } = await import("../../../../src/i18n/locales/zh");
+  function resolve(key: string, obj: Record<string, unknown>): string {
+    const parts = key.split(".");
+    let cur: unknown = obj;
+    for (const p of parts) {
+      if (cur && typeof cur === "object" && p in cur)
+        cur = (cur as Record<string, unknown>)[p];
+      else return key;
+    }
+    return typeof cur === "string" ? cur : key;
+  }
+  return {
+    useTranslation: () => ({
+      t: (key: string, params?: Record<string, unknown>) => {
+        let text = resolve(key, zh as unknown as Record<string, unknown>);
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
+          }
+        }
+        return text;
+      },
+      i18n: { language: "zh", changeLanguage: vi.fn() },
+    }),
+  };
+});
+
+// Mock fetchSkillBundles API
+vi.mock("../../../../src/lib/api", () => ({
+  fetchSkillBundles: vi.fn().mockResolvedValue([]),
+}));
+
 // Mock stores
 const mockToggleSkillSelection = vi.fn();
 const mockSelectByCategory = vi.fn();

@@ -8,6 +8,35 @@ import { describe, expect, it, vi } from "vitest";
 import type { PathPreset } from "../../../../shared/types";
 import { ScanPathInput } from "../../../../src/pages/import/ScanPathInput";
 
+// Mock react-i18next（使用 zh 翻译资源）
+vi.mock("react-i18next", async () => {
+  const { zh } = await import("../../../../src/i18n/locales/zh");
+  function resolve(key: string, obj: Record<string, unknown>): string {
+    const parts = key.split(".");
+    let cur: unknown = obj;
+    for (const p of parts) {
+      if (cur && typeof cur === "object" && p in cur)
+        cur = (cur as Record<string, unknown>)[p];
+      else return key;
+    }
+    return typeof cur === "string" ? cur : key;
+  }
+  return {
+    useTranslation: () => ({
+      t: (key: string, params?: Record<string, unknown>) => {
+        let text = resolve(key, zh as unknown as Record<string, unknown>);
+        if (params) {
+          for (const [k, v] of Object.entries(params)) {
+            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
+          }
+        }
+        return text;
+      },
+      i18n: { language: "zh", changeLanguage: vi.fn() },
+    }),
+  };
+});
+
 const mockPresets: PathPreset[] = [
   { id: "p1", path: "/Users/alex/projects", label: "我的项目" },
   { id: "p2", path: "/Users/alex/backup" },
@@ -30,19 +59,19 @@ describe("ScanPathInput", () => {
       render(<ScanPathInput {...defaultProps} />);
 
       expect(screen.getByLabelText("扫描路径")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /扫描/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /搜索/ })).toBeInTheDocument();
     });
 
     it("无预设时不渲染「从预设选择」下拉", () => {
       render(<ScanPathInput {...defaultProps} pathPresets={[]} />);
 
-      expect(screen.queryByTitle("从预设选择")).not.toBeInTheDocument();
+      expect(screen.queryByTitle("搜索")).not.toBeInTheDocument();
     });
 
     it("有预设时渲染「从预设选择」下拉", () => {
       render(<ScanPathInput {...defaultProps} pathPresets={mockPresets} />);
 
-      expect(screen.getByTitle("从预设选择")).toBeInTheDocument();
+      expect(screen.getByTitle("搜索")).toBeInTheDocument();
     });
 
     it("预设下拉包含所有预设选项", () => {
@@ -62,19 +91,19 @@ describe("ScanPathInput", () => {
       expect(screen.getByDisplayValue("/current/path")).toBeInTheDocument();
     });
 
-    it("扫描中时按钮显示「扫描中...」并禁用", () => {
+    it("扫描中时按钮显示「加载中...」并禁用", () => {
       render(
         <ScanPathInput {...defaultProps} scanState={{ status: "loading" }} />,
       );
 
-      expect(screen.getByText("扫描中...")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /扫描中/ })).toBeDisabled();
+      expect(screen.getByText("加载中...")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /加载中/ })).toBeDisabled();
     });
 
-    it("非扫描中时按钮显示「扫描」且可点击", () => {
+    it("非扫描中时按钮显示「搜索」且可点击", () => {
       render(<ScanPathInput {...defaultProps} />);
 
-      const btn = screen.getByRole("button", { name: /^扫描$/ });
+      const btn = screen.getByRole("button", { name: /^搜索$/ });
       expect(btn).not.toBeDisabled();
     });
   });
@@ -102,7 +131,7 @@ describe("ScanPathInput", () => {
 
       render(<ScanPathInput {...defaultProps} onScan={onScan} />);
 
-      await user.click(screen.getByRole("button", { name: /^扫描$/ }));
+      await user.click(screen.getByRole("button", { name: /^搜索$/ }));
 
       expect(onScan).toHaveBeenCalledOnce();
     });
@@ -119,7 +148,7 @@ describe("ScanPathInput", () => {
         />,
       );
 
-      const select = screen.getByTitle("从预设选择");
+      const select = screen.getByTitle("搜索");
       await user.selectOptions(select, "/Users/alex/projects");
 
       expect(onScanPathChange).toHaveBeenCalledWith("/Users/alex/projects");
@@ -137,7 +166,7 @@ describe("ScanPathInput", () => {
         />,
       );
 
-      const select = screen.getByTitle("从预设选择");
+      const select = screen.getByTitle("搜索");
       await user.selectOptions(select, "/Users/alex/backup");
 
       expect(onScanPathChange).toHaveBeenCalledWith("/Users/alex/backup");
@@ -155,7 +184,7 @@ describe("ScanPathInput", () => {
         />,
       );
 
-      const btn = screen.getByRole("button", { name: /扫描中/ });
+      const btn = screen.getByRole("button", { name: /加载中/ });
       await user.click(btn);
 
       expect(onScan).not.toHaveBeenCalled();
