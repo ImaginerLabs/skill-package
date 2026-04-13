@@ -76,7 +76,7 @@ test.describe("Epic 2: 导入页面 — 基础功能", () => {
   test("初始状态显示空状态引导", async ({ page }) => {
     await expect(page.locator("text=开始扫描")).toBeVisible();
     await expect(
-      page.locator("text=输入 CodeBuddy IDE 的 Skill 目录路径"),
+      page.locator("p", { hasText: /输入 CodeBuddy IDE 的 Skill 目录路径/ }),
     ).toBeVisible();
   });
 
@@ -138,7 +138,7 @@ test.describe("Epic 2: 导入页面 — 基础功能", () => {
     await expect(page.locator("text=broken-skill")).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.locator("text=解析失败")).toBeVisible();
+    await expect(page.locator("text=扫描失败")).toBeVisible();
   });
 });
 
@@ -180,10 +180,8 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
     });
     await expect(page.locator("text=Mock Skill 2")).toBeVisible();
 
-    // 已选统计显示（JSX 中文本被分割为多个节点，用正则匹配）
-    await expect(
-      page.locator("span", { hasText: /已选 0 \/ 2 个文件/ }),
-    ).toBeVisible();
+    // 已选统计显示（格式为 "0 / 2"）
+    await expect(page.locator("span", { hasText: /^0 \/ 2$/ })).toBeVisible();
   });
 
   test("勾选单个文件 — 已选统计更新", async ({ page }) => {
@@ -217,10 +215,8 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .locator('input[type="checkbox"]')
       .click();
 
-    // 使用正则匹配 JSX 多节点文本
-    await expect(
-      page.locator("*", { hasText: /已选 1 \/ 2 个文件/ }).last(),
-    ).toBeVisible();
+    // 已选统计更新为 "1 / 2"
+    await expect(page.locator("span", { hasText: /^1 \/ 2$/ })).toBeVisible();
   });
 
   test("全选功能 — 勾选所有文件", async ({ page }) => {
@@ -251,9 +247,7 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
     // 点击全选 checkbox（第一个）
     await page.locator('input[type="checkbox"]').first().click();
 
-    await expect(
-      page.locator("*", { hasText: /已选 2 \/ 2 个文件/ }).last(),
-    ).toBeVisible();
+    await expect(page.locator("span", { hasText: /^2 \/ 2$/ })).toBeVisible();
   });
 
   // Story 2.2 AC-4: 导入按钮状态
@@ -279,10 +273,8 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
     await page.locator("button", { hasText: "扫描" }).click();
     await expect(page.locator("text=Skill A")).toBeVisible({ timeout: 5000 });
 
-    // 未选文件时导入按钮禁用
-    await expect(
-      page.locator("button", { hasText: /导入选中/ }),
-    ).toBeDisabled();
+    // 未选文件时导入按钮禁用（按钮文本为 "确认 (0)"）
+    await expect(page.locator("button", { hasText: /确认/ })).toBeDisabled();
   });
 
   test("选了文件但未选分类时导入按钮禁用", async ({ page }) => {
@@ -312,14 +304,10 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .locator("label", { hasText: "Skill A" })
       .locator('input[type="checkbox"]')
       .click();
-    await expect(
-      page.locator("*", { hasText: /已选 1 \/ 1 个文件/ }).last(),
-    ).toBeVisible();
+    await expect(page.locator("span", { hasText: /^1 \/ 1$/ })).toBeVisible();
 
-    // 导入按钮仍然禁用（未选分类）
-    await expect(
-      page.locator("button", { hasText: /导入选中/ }),
-    ).toBeDisabled();
+    // 导入按钮仍然禁用（未选分类，按钮文本为 "确认 (1)"）
+    await expect(page.locator("button", { hasText: /确认/ })).toBeDisabled();
   });
 
   test("选了文件且选了分类时导入按钮启用", async ({ page }) => {
@@ -361,8 +349,8 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .locator("[data-testid='category-select']")
       .selectOption("frontend");
 
-    // 导入按钮启用
-    await expect(page.locator("button", { hasText: /导入选中/ })).toBeEnabled();
+    // 导入按钮启用（按钮文本为 "确认 (1)"）
+    await expect(page.locator("button", { hasText: /确认/ })).toBeEnabled();
   });
 
   // Story 2.3 AC-3: 导入执行与 Toast 通知
@@ -424,8 +412,8 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .locator("[data-testid='category-select']")
       .selectOption("frontend");
 
-    // 点击导入
-    await page.locator("button", { hasText: /导入选中/ }).click();
+    // 点击导入（按钮文本为 "确认 (1)"）
+    await page.locator("button", { hasText: /确认/ }).click();
 
     // 验证 Toast 成功通知
     await expect(page.locator("text=成功导入 1 个文件")).toBeVisible({
@@ -470,7 +458,7 @@ test.describe("Epic 2: 冷启动引导", () => {
 
     await expect(page.getByText("5 个文件")).toBeVisible();
 
-    await page.locator("button", { hasText: "开始导入" }).click();
+    await page.locator("button", { hasText: /开始导入/ }).click();
     await expect(page).toHaveURL(/\/import/);
   });
 

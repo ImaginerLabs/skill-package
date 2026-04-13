@@ -18,10 +18,12 @@ test.describe("Skill Manager 应用", () => {
 
   test("侧边栏显示分类列表", async ({ page }) => {
     // 等待侧边栏加载
-    await page.waitForSelector("aside", { timeout: 10000 });
+    await page.waitForSelector('[data-testid="primary-sidebar"]', {
+      timeout: 10000,
+    });
 
     // 检查侧边栏存在
-    const sidebar = page.locator("aside");
+    const sidebar = page.locator('[data-testid="primary-sidebar"]');
     await expect(sidebar).toBeVisible();
   });
 
@@ -138,7 +140,7 @@ test.describe("Skill Manager 应用", () => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // 检查布局元素
-    const sidebar = page.locator("aside");
+    const sidebar = page.locator('[data-testid="primary-sidebar"]');
     await expect(sidebar).toBeVisible();
 
     const mainContent = page.locator("main");

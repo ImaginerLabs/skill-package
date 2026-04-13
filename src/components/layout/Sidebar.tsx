@@ -65,6 +65,7 @@ export default function Sidebar() {
 
   return (
     <aside
+      data-testid="primary-sidebar"
       className="flex flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] shrink-0"
       style={{ width: "var(--sidebar-width)" }}
     >

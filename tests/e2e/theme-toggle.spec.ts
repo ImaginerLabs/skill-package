@@ -61,6 +61,16 @@ test.describe("主题切换", () => {
     const toggleBtn = page.locator('button[aria-label="切换主题"]');
     await toggleBtn.click();
 
+    // 验证已切换到亮色
+    expect(
+      await page.evaluate(() => document.documentElement.dataset.theme),
+    ).toBe("light");
+
+    // 注入 initScript：reload 时写入 light 而非清除（覆盖 beforeEach 的清除脚本）
+    await page.addInitScript(() => {
+      localStorage.setItem("skill-manager-theme", "light");
+    });
+
     // 刷新页面
     await page.reload();
     await page.waitForSelector('button[aria-label="切换主题"]', {
