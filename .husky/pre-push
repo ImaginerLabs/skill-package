@@ -21,19 +21,19 @@ if [ -z "$COMMITS" ]; then
   exit 0
 fi
 
-# 语义分析
+# 语义分析（SemVer 映射规则）
+# BREAKING CHANGE / feat! / fix! → minor（早期项目不做 major 自动发版）
+# feat / fix / perf             → patch
+# docs / chore / refactor 等    → 跳过
 HAS_BREAKING=$(echo "$COMMITS" | grep -E "(BREAKING CHANGE|^[a-z]+(\(.*\))?!:)" | wc -l | tr -d ' ')
 HAS_FEAT=$(echo "$COMMITS" | grep -E "^feat(\(.*\))?:" | wc -l | tr -d ' ')
-HAS_FIX=$(echo "$COMMITS" | grep -E "^fix(\(.*\))?:" | wc -l | tr -d ' ')
+HAS_FIX=$(echo "$COMMITS" | grep -E "^(fix|perf)(\(.*\))?:" | wc -l | tr -d ' ')
 
 if [ "$HAS_BREAKING" -gt 0 ]; then
-  echo "🚀 检测到 BREAKING CHANGE，执行 major 发版..."
-  npm run release:major
-elif [ "$HAS_FEAT" -gt 0 ]; then
-  echo "🚀 检测到 feat commit，执行 minor 发版..."
+  echo "🚀 检测到 BREAKING CHANGE，执行 minor 发版..."
   npm run release:minor
-elif [ "$HAS_FIX" -gt 0 ]; then
-  echo "🚀 检测到 fix commit，执行 patch 发版..."
+elif [ "$HAS_FEAT" -gt 0 ] || [ "$HAS_FIX" -gt 0 ]; then
+  echo "🚀 检测到 feat/fix commit，执行 patch 发版..."
   npm run release:patch
 else
   echo "ℹ️  无 feat/fix/BREAKING commit（docs/chore/refactor 等），跳过自动发版"

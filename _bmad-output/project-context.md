@@ -337,6 +337,17 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
 - **pre-commit**：Husky + lint-staged 自动运行
   - `*.{ts,tsx,js,jsx,cjs,mjs}` → `eslint --max-warnings=0` + `prettier --check`
   - `*.{json,css,md,html,yaml,yml}` → `prettier --check`
+- **pre-push**：仅在 `main` / `master` 分支触发，基于 Conventional Commits 语义自动发版
+  - 分析上一个 tag 到 HEAD 之间的 commit message
+  - **SemVer 映射规则**：
+    | commit 类型 | 触发动作 |
+    |---|---|
+    | `feat!:` / `fix!:` / `BREAKING CHANGE` | `npm run release:minor`（+0.1.0） |
+    | `feat:` / `fix:` / `perf:` | `npm run release:patch`（+0.0.1） |
+    | `docs:` / `chore:` / `refactor:` 等 | 跳过，不发版 |
+  - ⚠️ **`feat:` 只触发 patch**，不触发 minor；只有带 `!` 的破坏性变更才触发 minor
+  - ⚠️ 非主分支 push 直接跳过，不执行任何发版操作
+  - ⚠️ 无新 commit（相对上一 tag）时跳过
 
 ### 开发命令
 
