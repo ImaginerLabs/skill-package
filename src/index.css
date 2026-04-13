@@ -86,6 +86,7 @@
 
   /* 侧边栏 */
   --sidebar-width: 240px;
+  --secondary-sidebar-width: 180px;
   --preview-width: 400px;
 }
 

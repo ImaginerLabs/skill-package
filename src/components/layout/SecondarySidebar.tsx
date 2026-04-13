@@ -4,6 +4,7 @@
 // ============================================================
 
 import { Layers, Settings } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import CategoryTree from "../skills/CategoryTree";
 
@@ -17,17 +18,18 @@ import CategoryTree from "../skills/CategoryTree";
  * 显示条件：由 AppLayout 在 pathname === "/" 时条件渲染
  */
 export default function SecondarySidebar() {
+  const { t } = useTranslation();
   return (
     <aside
       data-testid="secondary-sidebar"
       className="flex flex-col border-l border-[hsl(var(--border))] bg-[hsl(var(--card))] shrink-0"
-      style={{ width: "220px" }}
+      style={{ width: "var(--secondary-sidebar-width)" }}
     >
       {/* 标题栏 */}
       <div className="flex items-center gap-2 px-4 py-3.5 border-b border-[hsl(var(--border))]">
         <Layers size={14} className="text-[hsl(var(--primary))] shrink-0" />
         <span className="text-xs font-semibold text-[hsl(var(--foreground))] uppercase tracking-wider">
-          分类
+          {t("nav.categories")}
         </span>
       </div>
 
@@ -50,7 +52,7 @@ export default function SecondarySidebar() {
           }
         >
           <Settings size={13} />
-          <span>管理分类</span>
+          <span>{t("nav.manageCategories")}</span>
         </NavLink>
       </div>
     </aside>

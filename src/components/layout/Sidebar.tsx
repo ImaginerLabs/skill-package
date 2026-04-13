@@ -5,19 +5,12 @@ import {
   GitBranch,
   RefreshCw,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
 import ActivityHeatmap from "../stats/ActivityHeatmap";
 import StatsPanel from "../stats/StatsPanel";
-
-// 除"Skill 库"外的其他导航项（使用标准 NavLink）
-const navItems = [
-  { to: "/workflow", icon: GitBranch, label: "工作流" },
-  { to: "/sync", icon: RefreshCw, label: "同步" },
-  { to: "/import", icon: Download, label: "导入" },
-  { to: "/paths", icon: FolderOpen, label: "路径配置" },
-];
 
 /**
  * 左侧边栏 — 导航菜单
@@ -36,6 +29,15 @@ export default function Sidebar() {
   const location = useLocation();
   const setCategory = useSkillStore((s) => s.setCategory);
   const selectedCategory = useSkillStore((s) => s.selectedCategory);
+  const { t } = useTranslation();
+
+  // 导航项在组件内动态生成，以便使用 t() 翻译标签
+  const navItems = [
+    { to: "/workflow", icon: GitBranch, label: t("nav.workflow") },
+    { to: "/sync", icon: RefreshCw, label: t("nav.sync") },
+    { to: "/import", icon: Download, label: t("nav.import") },
+    { to: "/paths", icon: FolderOpen, label: t("nav.pathConfig") },
+  ];
 
   // 处理"Skill 库"点击：始终清除分类筛选，若不在 / 则导航过去
   const handleSkillLibraryClick = () => {
@@ -75,7 +77,7 @@ export default function Sidebar() {
           className={skillLibraryClassName}
         >
           <BookOpen size={18} />
-          Skill 库
+          {t("nav.skillLibrary")}
         </button>
 
         {/* 其他导航项：标准 NavLink */}

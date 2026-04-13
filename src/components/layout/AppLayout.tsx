@@ -16,7 +16,8 @@ import StatusBar from "./StatusBar";
  * 中间区域：侧边栏(240px) + 主内容区(flex-1) + 预览面板(400px)
  */
 export default function AppLayout() {
-  const { previewOpen, toggleSidebar, togglePreview } = useUIStore();
+  const { previewOpen, toggleSidebar, togglePreview, sidebarOpen } =
+    useUIStore();
   const { selectedSkillId, fetchSkills } = useSkillStore();
   const location = useLocation();
 
@@ -67,8 +68,8 @@ export default function AppLayout() {
         {/* 左侧边栏 */}
         <Sidebar />
 
-        {/* 二级侧边栏 — 仅在 Skill 库页面显示分类目录 */}
-        {isSkillBrowsePage && <SecondarySidebar />}
+        {/* 二级侧边栏 — 仅在 Skill 库页面且主 Sidebar 展开时显示分类目录 */}
+        {isSkillBrowsePage && sidebarOpen && <SecondarySidebar />}
 
         {/* 主内容区 */}
         <main className="flex-1 overflow-auto p-6 min-w-[480px]">
