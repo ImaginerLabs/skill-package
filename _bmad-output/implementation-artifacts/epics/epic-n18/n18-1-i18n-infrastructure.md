@@ -1,6 +1,6 @@
 # Story N18-1: i18n 基础设施 — 依赖安装、初始化与翻译资源文件
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

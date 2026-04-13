@@ -1,6 +1,6 @@
 # Story N18-3: 核心页面 i18n 化 — SkillBrowse + Sync + Settings + Workflow + Import + Paths
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-13T20:20:00
+last_updated: 2026-04-13T21:49:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -237,7 +237,7 @@ development_status:
   # Dependencies: Epic 1（CategoryTree）、Epic 5（SettingsPage Tab 结构）
   # ============================================================
   epic-7: done
-  7-1-secondary-sidebar-category-navigation: review
+  7-1-secondary-sidebar-category-navigation: done
   7-2-sidebar-stats-panel-and-activity-heatmap: done
   7-3-settings-tab-slider-animation: done
   epic-7-retrospective: optional
@@ -248,11 +248,11 @@ development_status:
   # 来源：DD-4 升级为正式实现（架构决策 AD-26~AD-30）
   # Dependencies: Epic 0~7（全部完成）
   # ============================================================
-  epic-n18: in-progress
-  n18-1-i18n-infrastructure: ready-for-dev
-  n18-2-layout-i18n: ready-for-dev
-  n18-3-pages-i18n: ready-for-dev
-  n18-4-components-i18n: ready-for-dev
+  epic-n18: done
+  n18-1-i18n-infrastructure: done
+  n18-2-layout-i18n: done
+  n18-3-pages-i18n: done
+  n18-4-components-i18n: done
   epic-n18-retrospective: optional
 
   # ============================================================
@@ -260,6 +260,6 @@ development_status:
   # hover 热力图豆点时展示当日修改的具体 Skill 文件列表（类 GitHub Contribution Graph 浮窗）
   # Dependencies: Epic 7（热力图基础实现）
   # ============================================================
-  epic-heatmap-tooltip: in-progress
-  heatmap-tooltip-1-activity-heatmap-hover-tooltip: review
+  epic-heatmap-tooltip: done
+  heatmap-tooltip-1-activity-heatmap-hover-tooltip: done
   epic-heatmap-tooltip-retrospective: optional

@@ -1,6 +1,6 @@
 # Story N18-4: 组件层 i18n 化 — BundleManager + CategoryManager + MetadataEditor + SkillCard + Store 消息提升
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

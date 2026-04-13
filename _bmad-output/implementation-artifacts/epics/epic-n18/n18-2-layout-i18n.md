@@ -1,6 +1,6 @@
 # Story N18-2: Layout 层 i18n 化 — Header 语言切换 + Sidebar/SecondarySidebar 导航标签
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
