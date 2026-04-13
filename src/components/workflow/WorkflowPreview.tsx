@@ -14,6 +14,24 @@ import { useWorkflowStore } from "../../stores/workflow-store";
 import { toast } from "../shared/toast-store";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+
+/**
+ * 根据当前状态返回按钮禁用原因
+ */
+function getDisabledReason(
+  workflowName: string,
+  steps: { skillId: string }[],
+): string | null {
+  if (workflowName.trim() === "") return "请先填写工作流名称";
+  if (steps.length === 0) return "请至少添加一个 Skill 步骤";
+  return null;
+}
 
 /**
  * WorkflowPreview — 工作流生成结果预览与保存
@@ -33,6 +51,7 @@ export default function WorkflowPreview({
 
   const isEditing = editingWorkflowId !== null;
   const canGenerate = workflowName.trim() !== "" && steps.length > 0;
+  const disabledReason = getDisabledReason(workflowName, steps);
 
   const handlePreview = useCallback(async () => {
     if (!canGenerate) return;
@@ -92,56 +111,88 @@ export default function WorkflowPreview({
   ]);
 
   return (
-    <div className="flex flex-col gap-3 p-4 border-t border-[hsl(var(--border))]">
-      {/* 操作按钮 */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handlePreview}
-          disabled={!canGenerate || loading}
-          className="gap-1.5"
-        >
-          <Eye size={14} />
-          {loading ? "生成中..." : "预览"}
-        </Button>
-        <Button
-          size="sm"
-          onClick={handleSave}
-          disabled={!canGenerate || saving}
-          className="gap-1.5"
-        >
-          <Save size={14} />
-          {saving ? "保存中..." : isEditing ? "更新工作流" : "生成工作流"}
-        </Button>
-        {isEditing && (
-          <span className="text-xs text-[hsl(var(--muted-foreground))]">
-            正在编辑：{workflowName}
-          </span>
+    <TooltipProvider>
+      <div className="flex flex-col gap-3 p-4 border-t border-[hsl(var(--border))]">
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-2">
+          {/* 预览按钮 */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handlePreview}
+                  disabled={!canGenerate || loading}
+                  className="gap-1.5"
+                >
+                  <Eye size={14} />
+                  {loading ? "生成中..." : "预览"}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {disabledReason && (
+              <TooltipContent side="top">
+                <p>{disabledReason}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          {/* 生成/更新工作流按钮 */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={!canGenerate || saving}
+                  className="gap-1.5"
+                >
+                  <Save size={14} />
+                  {saving
+                    ? "保存中..."
+                    : isEditing
+                      ? "更新工作流"
+                      : "生成工作流"}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {disabledReason && (
+              <TooltipContent side="top">
+                <p>{disabledReason}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          {isEditing && (
+            <span className="text-xs text-[hsl(var(--muted-foreground))]">
+              正在编辑：{workflowName}
+            </span>
+          )}
+        </div>
+
+        {/* 预览内容 */}
+        {preview && (
+          <div className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))]">
+            <div className="px-3 py-2 border-b border-[hsl(var(--border))] flex items-center justify-between">
+              <span className="text-xs font-medium font-[var(--font-code)] text-[hsl(var(--muted-foreground))]">
+                预览：{workflowName}.md
+              </span>
+              <button
+                onClick={() => setPreview(null)}
+                className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+              >
+                关闭
+              </button>
+            </div>
+            <ScrollArea className="max-h-[300px]">
+              <pre className="p-3 text-xs font-[var(--font-code)] text-[hsl(var(--foreground))] whitespace-pre-wrap">
+                {preview}
+              </pre>
+            </ScrollArea>
+          </div>
         )}
       </div>
-
-      {/* 预览内容 */}
-      {preview && (
-        <div className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-          <div className="px-3 py-2 border-b border-[hsl(var(--border))] flex items-center justify-between">
-            <span className="text-xs font-medium font-[var(--font-code)] text-[hsl(var(--muted-foreground))]">
-              预览：{workflowName}.md
-            </span>
-            <button
-              onClick={() => setPreview(null)}
-              className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-            >
-              关闭
-            </button>
-          </div>
-          <ScrollArea className="max-h-[300px]">
-            <pre className="p-3 text-xs font-[var(--font-code)] text-[hsl(var(--foreground))] whitespace-pre-wrap">
-              {preview}
-            </pre>
-          </ScrollArea>
-        </div>
-      )}
-    </div>
+    </TooltipProvider>
   );
 }

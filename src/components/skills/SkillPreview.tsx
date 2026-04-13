@@ -2,8 +2,17 @@
 // components/skills/SkillPreview.tsx — Skill Markdown 预览内容
 // ============================================================
 
-import { Clock, FileText, GitBranch, Pencil, Tag, User, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Clock,
+  Copy,
+  FileText,
+  GitBranch,
+  Pencil,
+  Tag,
+  User,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -11,6 +20,7 @@ import type { SkillFull } from "../../../shared/types";
 import { fetchSkillById } from "../../lib/api";
 import { useSkillStore } from "../../stores/skill-store";
 import { useUIStore } from "../../stores/ui-store";
+import { toast } from "../shared/toast-store";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
@@ -26,6 +36,19 @@ export default function SkillPreview() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyPath = useCallback(async () => {
+    if (!skill?.filePath) return;
+    try {
+      await navigator.clipboard.writeText(skill.filePath);
+      setCopied(true);
+      toast.success("路径已复制到剪贴板");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("复制失败，请手动复制");
+    }
+  }, [skill?.filePath]);
 
   useEffect(() => {
     if (!selectedSkillId) {
@@ -101,6 +124,19 @@ export default function SkillPreview() {
           <h2 className="text-lg font-bold font-[var(--font-code)] text-[hsl(var(--foreground))] flex-1">
             {skill.name}
           </h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleCopyPath}
+            className="h-8 w-8"
+            title={copied ? "已复制" : "复制文件路径"}
+            aria-label="复制文件路径"
+          >
+            <Copy
+              size={14}
+              className={copied ? "text-[hsl(var(--primary))]" : ""}
+            />
+          </Button>
           <Button
             variant="ghost"
             size="icon"

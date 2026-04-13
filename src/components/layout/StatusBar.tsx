@@ -19,8 +19,8 @@ export default function StatusBar() {
 
   return (
     <footer className="flex items-center justify-between h-7 px-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--background))] text-xs text-[hsl(var(--muted-foreground))] shrink-0">
-      {/* 左侧：版本号 */}
-      <span className="font-[var(--font-code)]">v0.1.0</span>
+      {/* 左侧：版本号（由 Vite define 从 package.json 注入） */}
+      <span className="font-[var(--font-code)]">v{__APP_VERSION__}</span>
 
       {/* 中间：Skill 总数 */}
       <span>{skills.length} Skills</span>

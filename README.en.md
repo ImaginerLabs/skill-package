@@ -14,15 +14,16 @@
 
 ## Features
 
-| Feature     | Description                                                                                       |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| 📚 Browse   | Category tree, grid/list view, Markdown preview; case-insensitive category matching               |
-| 🔍 Search   | Fuse.js in-memory fuzzy search, < 200ms; Command Palette with description preview & type grouping |
-| 🔗 Workflow | Drag-and-drop orchestration, generate workflow `.md`; Tab layout to manage existing workflows     |
-| 🔄 Sync     | Push selected Skills to IDE directory (supports CodeBuddy); step-by-step onboarding guide         |
-| 📥 Import   | Scan and import Skills from IDE directory                                                         |
-| ⚙️ Settings | Manage IDE paths, category definitions, path presets                                              |
-| ⌨️ Hotkeys  | `⌘K` command palette (with description & type groups), `Alt+↑/↓` step reorder                     |
+| Feature          | Description                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 📚 Browse        | Category tree, grid/list view, Markdown preview; case-insensitive category matching; click row in list view to open detail |
+| 🔍 Search        | Fuse.js in-memory fuzzy search, < 200ms; Command Palette with description preview & type grouping                          |
+| 🔗 Workflow      | Drag-and-drop orchestration, generate workflow `.md`; Tab layout to manage existing workflows; draft auto-saved            |
+| 🔄 Sync          | Push selected Skills to IDE directory (supports CodeBuddy); step-by-step onboarding guide                                  |
+| 📥 Import        | Scan and import Skills from IDE directory                                                                                  |
+| ⚙️ Settings      | Manage IDE paths, category definitions, path presets; batch remove Skills from category                                    |
+| ⌨️ Hotkeys       | `⌘K` command palette (with description & type groups), `Alt+↑/↓` step reorder                                              |
+| 📋 Quick Actions | Copy Skill path from detail panel; version number auto-synced with `package.json`                                          |
 
 ---
 

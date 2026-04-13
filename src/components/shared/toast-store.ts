@@ -93,7 +93,7 @@ toast.info = (message: string, options?: { details?: string }) =>
  */
 toast.undoable = (
   message: string,
-  onConfirm: () => void,
+  onConfirm: () => void | Promise<void>,
   onUndo?: () => void,
   duration = 5000,
 ): string => {
@@ -123,7 +123,9 @@ toast.undoable = (
   const timer = setTimeout(() => {
     timerMap.delete(id);
     if (!undone) {
-      onConfirm();
+      Promise.resolve(onConfirm()).catch((err) => {
+        toast("error", err instanceof Error ? err.message : "操作失败");
+      });
     }
     // 移除 toast
     toasts = toasts.filter((t) => t.id !== id);
