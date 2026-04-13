@@ -14,20 +14,20 @@
 
 ## Features
 
-| Feature          | Description                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 📚 Browse        | Category tree, grid/list view, Markdown preview; case-insensitive category matching; click row in list view to open detail |
-| 🔍 Search        | Fuse.js in-memory fuzzy search, < 200ms; Command Palette with description preview & type grouping                          |
-| 🔗 Workflow      | Drag-and-drop orchestration, generate workflow `.md`; Tab layout to manage existing workflows; draft auto-saved            |
-| 🔄 Sync          | Push selected Skills to IDE directory (supports CodeBuddy); step-by-step onboarding guide                                  |
-| 📥 Import        | Scan and import Skills from IDE directory                                                                                  |
-| 🗂️ Category      | Tab-based settings page: category management + bundle management; batch remove Skills from category                        |
-| 📦 Bundles       | Save category combinations as bundles; one-click activate to switch entire category config; broken-reference warning       |
-| ⌨️ Hotkeys       | `⌘K` command palette (with description & type groups), `Alt+↑/↓` step reorder                                              |
-| 📋 Quick Actions | Copy Skill path from detail panel; version number auto-synced with `package.json`                                          |
-| 🗂️ Secondary Nav  | Left-side secondary sidebar on home page; filter Skills by category with route-linked highlight                            |
-| 📊 Stats Panel   | Sidebar footer shows total Skills, categories, and sync count                                                              |
-| 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style                                    |
+| Feature             | Description                                                                                                                                                     |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📚 Browse           | Category tree, grid/list view, Markdown preview; case-insensitive category matching; click row in list view to open detail                                      |
+| 🔍 Search           | Fuse.js in-memory fuzzy search, < 200ms; Command Palette with description preview & type grouping                                                               |
+| 🔗 Workflow         | Drag-and-drop orchestration, generate workflow `.md`; Tab layout to manage existing workflows; draft auto-saved                                                 |
+| 🔄 Sync             | Push selected Skills to IDE directory (supports CodeBuddy); step-by-step onboarding guide                                                                       |
+| 📥 Import           | Scan and import Skills from IDE directory                                                                                                                       |
+| 🗂️ Category         | Tab-based settings page: category management + bundle management; batch remove Skills from category                                                             |
+| 📦 Bundles          | Save category combinations as bundles; one-click activate to switch entire category config; broken-reference warning                                            |
+| ⌨️ Hotkeys          | `⌘K` command palette (with description & type groups), `Alt+↑/↓` step reorder                                                                                   |
+| 📋 Quick Actions    | Copy Skill path from detail panel; version number auto-synced with `package.json`                                                                               |
+| 🗂️ Secondary Nav    | Left-side secondary sidebar (220px) on home page; filter Skills by category with route-linked highlight; header with icon, bottom shortcut to manage categories |
+| 📊 Stats Panel      | Sidebar footer shows total Skills, categories, and sync count                                                                                                   |
+| 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style                                                                            |
 
 ---
 

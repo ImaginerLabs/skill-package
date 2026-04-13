@@ -70,10 +70,10 @@ describe("SecondarySidebar — Story 7.1", () => {
     expect(aside).toBeInTheDocument();
   });
 
-  it("组件宽度为 180px", () => {
+  it("组件宽度为 220px", () => {
     render(<SecondarySidebar />);
     const aside = screen.getByTestId("secondary-sidebar");
-    expect(aside).toHaveStyle({ width: "180px" });
+    expect(aside).toHaveStyle({ width: "220px" });
   });
 
   it("组件包含左侧边框样式（视觉分隔线）", () => {

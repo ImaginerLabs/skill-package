@@ -3,7 +3,7 @@
 // 仅在 Skill 库页面（路由 /）时由 AppLayout 条件渲染
 // ============================================================
 
-import { Settings } from "lucide-react";
+import { Layers, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import CategoryTree from "../skills/CategoryTree";
 
@@ -21,17 +21,18 @@ export default function SecondarySidebar() {
     <aside
       data-testid="secondary-sidebar"
       className="flex flex-col border-l border-[hsl(var(--border))] bg-[hsl(var(--card))] shrink-0"
-      style={{ width: "180px" }}
+      style={{ width: "220px" }}
     >
       {/* 标题栏 */}
-      <div className="px-4 py-3 border-b border-[hsl(var(--border))]">
-        <span className="text-xs font-medium text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-[hsl(var(--border))]">
+        <Layers size={14} className="text-[hsl(var(--primary))] shrink-0" />
+        <span className="text-xs font-semibold text-[hsl(var(--foreground))] uppercase tracking-wider">
           分类
         </span>
       </div>
 
       {/* 分类目录树 */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <CategoryTree />
       </div>
 
@@ -41,15 +42,15 @@ export default function SecondarySidebar() {
           to="/settings"
           data-testid="secondary-sidebar-manage-link"
           className={({ isActive }) =>
-            `flex items-center gap-2 px-2 py-1.5 text-xs rounded-md transition-colors duration-200 ${
+            `flex items-center gap-2 w-full px-3 py-2 text-xs rounded-md transition-colors duration-200 ${
               isActive
                 ? "text-[hsl(var(--primary))] bg-[hsl(var(--accent))]"
                 : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))]"
             }`
           }
         >
-          <Settings size={12} />
-          管理分类
+          <Settings size={13} />
+          <span>管理分类</span>
         </NavLink>
       </div>
     </aside>
