@@ -31,7 +31,8 @@ describe("StatusBar", () => {
 
   it("渲染版本号", () => {
     render(<StatusBar />);
-    expect(screen.getByText("v0.1.0")).toBeInTheDocument();
+    // __APP_VERSION__ 在测试环境由 vitest.config.ts define 注入为 "test"
+    expect(screen.getByText("vtest")).toBeInTheDocument();
   });
 
   it("渲染 Skill 总数", () => {
