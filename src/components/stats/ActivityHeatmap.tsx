@@ -5,6 +5,12 @@
 
 import { useEffect, useState } from "react";
 import { type ActivityDay, fetchActivityStats } from "../../lib/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 /**
  * 根据修改次数返回对应的热力颜色
@@ -79,31 +85,61 @@ export default function ActivityHeatmap() {
         活跃度
       </p>
       {/* CSS Grid 12 列自适应宽度，豆点撑满容器 */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, 1fr)",
-          gap: "2px",
-        }}
-      >
-        {gridItems.map((day, idx) =>
-          day ? (
-            <div
-              key={day.date}
-              title={`${day.date} · ${day.count} 次修改`}
-              data-testid={`heatmap-dot-${day.date}`}
-              style={{
-                aspectRatio: "1",
-                borderRadius: 2,
-                backgroundColor: getHeatColor(day.count),
-                transition: "none",
-              }}
-            />
-          ) : (
-            <div key={`empty-${idx}`} style={{ aspectRatio: "1" }} />
-          ),
-        )}
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(12, 1fr)",
+            gap: "2px",
+          }}
+        >
+          {gridItems.map((day, idx) =>
+            day ? (
+              <Tooltip key={day.date}>
+                <TooltipTrigger asChild>
+                  <div
+                    data-testid={`heatmap-dot-${day.date}`}
+                    style={{
+                      aspectRatio: "1",
+                      borderRadius: 2,
+                      backgroundColor: getHeatColor(day.count),
+                      transition: "none",
+                    }}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[200px]">
+                  <p className="font-bold text-xs">{day.date}</p>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                    {day.count > 0 ? `${day.count} 次修改` : "无修改"}
+                  </p>
+                  {day.files.length > 0 && (
+                    <>
+                      <div className="my-1 border-t border-[hsl(var(--border))]" />
+                      <ul className="space-y-0.5">
+                        {day.files.slice(0, 10).map((f, i) => (
+                          <li
+                            key={i}
+                            className="text-xs truncate text-[hsl(var(--muted-foreground))]"
+                          >
+                            • {f}
+                          </li>
+                        ))}
+                        {day.files.length > 10 && (
+                          <li className="text-xs text-[hsl(var(--muted-foreground))]">
+                            +{day.files.length - 10} more
+                          </li>
+                        )}
+                      </ul>
+                    </>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <div key={`empty-${idx}`} style={{ aspectRatio: "1" }} />
+            ),
+          )}
+        </div>
+      </TooltipProvider>
     </div>
   );
 }

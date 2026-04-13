@@ -22,6 +22,13 @@
 - **CategoryTree 无 ErrorBoundary 包裹** — `src/components/layout/SecondarySidebar.tsx` 中 `CategoryTree` 若抛出异常会导致整个布局崩溃，建议后续在 SecondarySidebar 或 AppLayout 层添加 ErrorBoundary。属于预存在问题，非本次引入。
 - **isSkillBrowsePage 精确匹配 "/" 未来扩展性有限** — `src/components/layout/AppLayout.tsx:33`，若未来路由扩展为子路径（如 `/skills/xxx`），条件会失效。当前路由结构固定，可接受，推迟处理。
 
+## Deferred from: code review of heatmap-tooltip-1 (2026-04-13)
+
+- **`toISOString()` 使用 UTC 时间导致日期与用户本地时区不一致** — `server/routes/statsRoutes.ts` 中 `mtime.toISOString().slice(0, 10)` 和日期序列生成都使用 UTC，在 UTC+ 时区用户看到的日期可能与直觉不一致。预存在问题，非本次引入。
+- **触屏设备无法触发 Tooltip** — Radix Tooltip 依赖 hover 事件，移动端无法触发。项目定位桌面端工具，可接受。
+- **`ActivityDay` 接口在前后端重复定义** — `server/routes/statsRoutes.ts` 和 `src/lib/api.ts` 各自定义 `ActivityDay`。Story 明确保持现有模式，避免引入重构风险。
+- **测试依赖 `new Date()` 当前日期** — UTC 午夜边界可能导致测试不稳定。预存在测试模式，非本次引入。
+
 ## Completed: 目录结构审计与清理 (2026-04-11)
 
 **已完成的清理工作：**

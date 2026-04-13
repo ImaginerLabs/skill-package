@@ -470,6 +470,7 @@ export async function applySkillBundle(id: string): Promise<ApplyBundleResult> {
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
   count: number; // 当日修改文件数
+  files: string[]; // 当日修改的文件名列表（不含路径和 .md 后缀）
 }
 
 /** 获取近 N 周 Skill 文件修改活跃度 */

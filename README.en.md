@@ -27,7 +27,7 @@
 | 📋 Quick Actions    | Copy Skill path from detail panel; version number auto-synced with `package.json`                                                                               |
 | 🗂️ Secondary Nav    | Left-side secondary sidebar (220px) on home page; filter Skills by category with route-linked highlight; header with icon, bottom shortcut to manage categories |
 | 📊 Stats Panel      | Sidebar footer shows total Skills, categories, and sync count                                                                                                   |
-| 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style                                                                            |
+| 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style; hover tooltip shows daily change count and file list                      |
 | 🌓 Theme Toggle     | Light/dark theme switch via Sun/Moon button in Header; preference persisted to localStorage, initialized from system `prefers-color-scheme`                     |
 
 ---

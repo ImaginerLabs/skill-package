@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-13T17:04:54
+last_updated: 2026-04-13T20:20:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -254,3 +254,12 @@ development_status:
   n18-3-pages-i18n: ready-for-dev
   n18-4-components-i18n: ready-for-dev
   epic-n18-retrospective: optional
+
+  # ============================================================
+  # Epic HEATMAP-TOOLTIP: 活跃度热力图 Hover 浮窗
+  # hover 热力图豆点时展示当日修改的具体 Skill 文件列表（类 GitHub Contribution Graph 浮窗）
+  # Dependencies: Epic 7（热力图基础实现）
+  # ============================================================
+  epic-heatmap-tooltip: in-progress
+  heatmap-tooltip-1-activity-heatmap-hover-tooltip: review
+  epic-heatmap-tooltip-retrospective: optional

@@ -163,7 +163,7 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
   - Sync Push: `pushSync(skillIds, targetIds?)`
   - Path Preset: `fetchPathPresets`、`addPathPreset`、`updatePathPreset`、`deletePathPreset`
   - Skill Bundle: `fetchSkillBundles`、`createSkillBundle`、`updateSkillBundle`、`deleteSkillBundle`、`applySkillBundle`
-  - Stats: `fetchActivityStats(weeks?: number): Promise<ActivityDay[]>` — 调用 `GET /api/stats/activity?weeks={n}`；`ActivityDay = { date: string; count: number }`（YYYY-MM-DD 格式）
+  - Stats: `fetchActivityStats(weeks?: number): Promise<ActivityDay[]>` — 调用 `GET /api/stats/activity?weeks={n}`；`ActivityDay = { date: string; count: number; files: string[] }`（YYYY-MM-DD 格式，files 为当日修改的文件名列表，不含路径和 .md 后缀）
 
 ### 组件结构
 
@@ -426,7 +426,7 @@ _本文件包含 AI 代理在本项目中编写代码时必须遵循的关键规
 - ⚠️ 套件数据存储在 `config/settings.yaml` 的 `skillBundles` 字段；`activeCategories` 字段记录当前激活的分类列表
 - ⚠️ `SettingsPage.tsx` 使用 shadcn/ui `Tabs` 组件实现 Tab 化，「分类设置」Tab 渲染 `CategoryManager`（零改动），「套件管理」Tab 渲染 `BundleManager`
 - ⚠️ **Tabs 滑块动画（Epic 7）**：`TabsList` 组件内部有绝对定位的滑块 `div`（`data-testid="tab-slider"`），使用 `transform: translateX(activeIndex * 100%)` + `transition: transform 200ms ease-in-out` 实现平移动画；`TabsTrigger` 已移除激活背景样式（`bg-[hsl(var(--background))] shadow`），改为仅文字颜色区分（激活：`text-[hsl(var(--foreground))]`，非激活：`text-[hsl(var(--muted-foreground))]`）；`TabsTrigger` 必须有 `relative z-10` 确保文字在滑块层之上；`prefers-reduced-motion` 时 `transition: none`
-- ⚠️ `ActivityHeatmap` 颜色映射：0 次 → `hsl(var(--muted))`；1-2 次 → `hsl(var(--primary) / 0.3)`；3-5 次 → `hsl(var(--primary) / 0.6)`；6+ 次 → `hsl(var(--primary))`；豆点 `title` 格式：`YYYY-MM-DD · N 次修改`
+- ⚠️ `ActivityHeatmap` 颜色映射：0 次 → `hsl(var(--muted))`；1-2 次 → `hsl(var(--primary) / 0.3)`；3-5 次 → `hsl(var(--primary) / 0.6)`；6+ 次 → `hsl(var(--primary))`；hover 豆点时显示 Radix Tooltip 浮窗（日期粗体 + 修改次数 + 文件名列表，最多 10 个，超出显示 `+N more`；count=0 时显示「无修改」）；`TooltipProvider` 包裹整个 grid，`delayDuration={200}`
 - ⚠️ `StatsPanel` 统计逻辑：`skillCount = skills.filter(sk => sk.type !== 'workflow').length`；`workflowCount = skills.filter(sk => sk.type === 'workflow').length`；数据来源 `useSkillStore`，无需额外 API
 - ⚠️ `statsRoutes` 中 `weeks` 参数范围限制：`Math.max(1, Math.min(52, parseInt(...) || 12))`，防止异常值
 - ⚠️ `SecondarySidebar` 中 `CategoryTree` **零改动**原则：分类筛选交互行为与之前完全一致，`CategoryTree.tsx` 不做任何修改

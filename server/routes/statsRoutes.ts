@@ -13,6 +13,7 @@ const statsRoutes = Router();
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
   count: number;
+  files: string[]; // 当日修改的文件名列表（不含路径和 .md 后缀）
 }
 
 /**
@@ -54,8 +55,9 @@ statsRoutes.get("/stats/activity", async (req, res, next) => {
     startDate.setDate(startDate.getDate() - weeks * 7);
     startDate.setHours(0, 0, 0, 0);
 
-    // 聚合每日修改次数
+    // 聚合每日修改次数和文件名
     const countMap = new Map<string, number>();
+    const filesMap = new Map<string, Set<string>>();
     for (const file of files) {
       try {
         const stat = await fs.stat(file);
@@ -63,6 +65,11 @@ statsRoutes.get("/stats/activity", async (req, res, next) => {
         if (mtime >= startDate) {
           const dateStr = mtime.toISOString().slice(0, 10); // YYYY-MM-DD
           countMap.set(dateStr, (countMap.get(dateStr) ?? 0) + 1);
+          // 记录文件名（去 .md 后缀，只取 basename），防止泄露服务器路径
+          const fileName = path.basename(file, ".md");
+          const existing = filesMap.get(dateStr) ?? new Set<string>();
+          existing.add(fileName);
+          filesMap.set(dateStr, existing);
         }
       } catch {
         // 单个文件 stat 失败不影响整体
@@ -75,7 +82,11 @@ statsRoutes.get("/stats/activity", async (req, res, next) => {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().slice(0, 10);
-      result.push({ date: dateStr, count: countMap.get(dateStr) ?? 0 });
+      result.push({
+        date: dateStr,
+        count: countMap.get(dateStr) ?? 0,
+        files: [...(filesMap.get(dateStr) ?? [])].sort(),
+      });
     }
 
     res.json({ success: true, data: result });
