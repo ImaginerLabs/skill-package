@@ -6,6 +6,8 @@ inputDocuments:
     "prd.md",
     "ux-design-specification.md",
     "epic-ux-improvement.md",
+    "prd-external-skills-hub.md",
+    "product-brief-external-skills-hub.md",
   ]
 workflowType: "architecture"
 project_name: "skill-package"
@@ -15,7 +17,7 @@ lastStep: 8
 status: "updated"
 completedAt: "2026-04-10"
 lastUpdatedAt: "2026-04-13"
-updateReason: "Epic UX-IMPROVEMENT 实施后补充 AD-13~AD-16 及架构审查结果；新增分类设置页重组织 & 套件功能 AD-17~AD-21；Epic NAV-FIX 完成后补充 AD-22 导航交互修复模式；新增 Sidebar 重设计 AD-23~AD-25（二级 Sidebar、系统状态面板 + 热力图、Tab 滑块动画）；DD-4 升级为正式决策：N18 国际化（中英文 + 浏览器语言检测）AD-26~AD-30"
+updateReason: "Epic UX-IMPROVEMENT 实施后补充 AD-13~AD-16 及架构审查结果；新增分类设置页重组织 & 套件功能 AD-17~AD-21；Epic NAV-FIX 完成后补充 AD-22 导航交互修复模式；新增 Sidebar 重设计 AD-23~AD-25（二级 Sidebar、系统状态面板 + 热力图、Tab 滑块动画）；DD-4 升级为正式决策：N18 国际化（中英文 + 浏览器语言检测）AD-26~AD-30；新增 External Skills Hub 外部技能仓库聚合 AD-31~AD-40"
 ---
 
 # Architecture Decision Document — Skill Manager
@@ -1799,14 +1801,15 @@ style={{
 
 **选项对比：**
 
-| 方案 | 优点 | 缺点 | 适合场景 |
-|------|------|------|----------|
-| **i18next + react-i18next** ✅ | 生态最成熟、TypeScript 支持完善、插值/复数/命名空间全支持、与 Vite/React 19 完全兼容 | 包体积略大（~30KB gzip） | 中大型项目，需要完整 i18n 能力 |
-| react-intl (FormatJS) | 标准化 ICU 格式、国际化规范完整 | API 较繁琐、Provider 模式侵入性强 | 企业级多语言项目 |
-| 手写 Context + JSON | 零依赖、完全可控 | 需自行实现插值、复数、语言检测 | 极简场景，<20 个字符串 |
-| lingui | 编译时提取、性能最优 | 需要 Babel 插件，与 Vite 集成复杂 | 性能敏感的大型应用 |
+| 方案                           | 优点                                                                                 | 缺点                              | 适合场景                       |
+| ------------------------------ | ------------------------------------------------------------------------------------ | --------------------------------- | ------------------------------ |
+| **i18next + react-i18next** ✅ | 生态最成熟、TypeScript 支持完善、插值/复数/命名空间全支持、与 Vite/React 19 完全兼容 | 包体积略大（~30KB gzip）          | 中大型项目，需要完整 i18n 能力 |
+| react-intl (FormatJS)          | 标准化 ICU 格式、国际化规范完整                                                      | API 较繁琐、Provider 模式侵入性强 | 企业级多语言项目               |
+| 手写 Context + JSON            | 零依赖、完全可控                                                                     | 需自行实现插值、复数、语言检测    | 极简场景，<20 个字符串         |
+| lingui                         | 编译时提取、性能最优                                                                 | 需要 Babel 插件，与 Vite 集成复杂 | 性能敏感的大型应用             |
 
 **选择理由：**
+
 - 项目已有 ~350 处中文 UI 字符串，需要完整的插值（`{{count}} 个 Skill`）和复数支持
 - `react-i18next` 的 `useTranslation` Hook 与项目现有函数组件 + Hooks 架构完全一致
 - `i18next-browser-languagedetector` 开箱即用的浏览器语言检测，无需自行实现
@@ -1838,11 +1841,11 @@ style={{
 
 **语言映射规则：**
 
-| 浏览器语言值 | 映射到 | 说明 |
-|-------------|--------|------|
-| `zh`, `zh-CN`, `zh-TW`, `zh-HK` | `zh` | 所有中文变体统一映射到 zh |
-| `en`, `en-US`, `en-GB`, `en-*` | `en` | 所有英文变体统一映射到 en |
-| 其他（`ja`, `ko`, `fr`...） | `zh`（fallback） | 不支持的语言降级到中文 |
+| 浏览器语言值                    | 映射到           | 说明                      |
+| ------------------------------- | ---------------- | ------------------------- |
+| `zh`, `zh-CN`, `zh-TW`, `zh-HK` | `zh`             | 所有中文变体统一映射到 zh |
+| `en`, `en-US`, `en-GB`, `en-*`  | `en`             | 所有英文变体统一映射到 en |
+| 其他（`ja`, `ko`, `fr`...）     | `zh`（fallback） | 不支持的语言降级到中文    |
 
 **i18next 初始化配置：**
 
@@ -1873,6 +1876,7 @@ export default i18next;
 ```
 
 **关键约束：**
+
 - `supportedLngs: ["zh", "en"]` 确保不支持的语言自动 fallback，不会出现空白 UI
 - `escapeValue: false`：React 已做 XSS 防护，无需 i18next 二次转义
 - localStorage key 使用项目命名空间前缀 `skill-manager-lang`，避免与其他应用冲突
@@ -1992,7 +1996,8 @@ export const zh = {
     updateFailed: "更新套件失败",
     deleteSuccess: "套件已删除",
     deleteFailed: "删除套件失败",
-    activateSuccess_withSkipped: "已激活 {{applied}} 个分类，跳过 {{skipped}} 个已删除分类",
+    activateSuccess_withSkipped:
+      "已激活 {{applied}} 个分类，跳过 {{skipped}} 个已删除分类",
     activateSuccess: "已激活 {{applied}} 个分类",
     activateFailed: "激活失败",
   },
@@ -2050,6 +2055,7 @@ declare module "i18next" {
 ```
 
 **关键约束：**
+
 - `zh.ts` 是 source of truth，`en.ts` 必须与其结构完全镜像（TypeScript 类型强制保证）
 - 使用 `as const` 确保键名不被意外修改
 - 禁止在组件中硬编码中文字符串，所有 UI 文本必须通过 `t()` 调用
@@ -2149,6 +2155,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 ```
 
 **关键约束：**
+
 - `import "./i18n/index"` 必须是 `main.tsx` 中的第一个 import（在 React 之前），确保同步初始化
 - Store 中禁止直接写中文 Toast 消息，统一提升到组件层
 - 语言切换无需页面刷新，`react-i18next` 的响应式机制自动触发组件重渲染
@@ -2161,29 +2168,29 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 **覆盖范围（必须翻译）：**
 
-| 类型 | 示例 | 处理方式 |
-|------|------|----------|
-| 导航标签 | "Skill 库"、"工作流" | `t("nav.skillLibrary")` |
-| 页面标题 | "IDE 同步"、"分类管理" | `t("sync.title")` |
-| 按钮文字 | "保存"、"取消"、"新建套件" | `t("common.save")` |
-| 表单标签 | "名称"、"描述"、"标签" | `t("metadata.fieldName")` |
-| 占位符文字 | "筛选 Skill..." | `t("skillBrowse.searchPlaceholder")` |
-| 状态文本 | "加载中..."、"同步中..." | `t("common.loading")` |
-| Toast 消息 | "套件创建成功" | `t("bundle.createSuccess")` |
-| 空状态文本 | "暂无 Skill" | `t("skillBrowse.emptyTitle")` |
-| 错误提示 | "名称只能包含小写字母..." | `t("bundle.nameError")` |
-| aria-label | "全局搜索"、"关闭" | `t("header.searchAriaLabel")` |
+| 类型       | 示例                       | 处理方式                             |
+| ---------- | -------------------------- | ------------------------------------ |
+| 导航标签   | "Skill 库"、"工作流"       | `t("nav.skillLibrary")`              |
+| 页面标题   | "IDE 同步"、"分类管理"     | `t("sync.title")`                    |
+| 按钮文字   | "保存"、"取消"、"新建套件" | `t("common.save")`                   |
+| 表单标签   | "名称"、"描述"、"标签"     | `t("metadata.fieldName")`            |
+| 占位符文字 | "筛选 Skill..."            | `t("skillBrowse.searchPlaceholder")` |
+| 状态文本   | "加载中..."、"同步中..."   | `t("common.loading")`                |
+| Toast 消息 | "套件创建成功"             | `t("bundle.createSuccess")`          |
+| 空状态文本 | "暂无 Skill"               | `t("skillBrowse.emptyTitle")`        |
+| 错误提示   | "名称只能包含小写字母..."  | `t("bundle.nameError")`              |
+| aria-label | "全局搜索"、"关闭"         | `t("header.searchAriaLabel")`        |
 
 **不覆盖范围（保持原样）：**
 
-| 类型 | 原因 |
-|------|------|
-| Skill 文件内容（Markdown 正文） | 用户自己创建的内容，不属于 UI 文本 |
-| Skill 的 `name`、`description` 字段 | 用户数据，不翻译 |
-| 分类名称（`displayName`） | 用户自定义数据 |
-| 代码注释 | 不影响用户界面 |
-| 错误码（`SKILL_NOT_FOUND` 等） | 技术标识符，不面向用户 |
-| 后端 API 响应中的 `message` 字段 | 后端不做 i18n，前端根据 `code` 显示翻译后的消息 |
+| 类型                                | 原因                                            |
+| ----------------------------------- | ----------------------------------------------- |
+| Skill 文件内容（Markdown 正文）     | 用户自己创建的内容，不属于 UI 文本              |
+| Skill 的 `name`、`description` 字段 | 用户数据，不翻译                                |
+| 分类名称（`displayName`）           | 用户自定义数据                                  |
+| 代码注释                            | 不影响用户界面                                  |
+| 错误码（`SKILL_NOT_FOUND` 等）      | 技术标识符，不面向用户                          |
+| 后端 API 响应中的 `message` 字段    | 后端不做 i18n，前端根据 `code` 显示翻译后的消息 |
 
 **后端错误消息处理策略：**
 
@@ -2241,36 +2248,976 @@ Phase 4 — 共享组件
 
 **文件变更清单：**
 
-| 文件 | 操作 | 说明 |
-|------|------|------|
-| `package.json` | 新增依赖 | `i18next`、`react-i18next`、`i18next-browser-languagedetector` |
-| `src/i18n/index.ts` | 新建 | i18next 初始化配置 |
-| `src/i18n/types.ts` | 新建 | TypeScript 类型声明 |
-| `src/i18n/locales/zh.ts` | 新建 | 中文翻译资源（~350 个键） |
-| `src/i18n/locales/en.ts` | 新建 | 英文翻译资源（与 zh.ts 结构镜像） |
-| `src/main.tsx` | 修改 | 首行导入 `./i18n/index` |
-| `src/components/layout/Header.tsx` | 修改 | 添加语言切换按钮，文本 i18n 化 |
-| `src/components/layout/Sidebar.tsx` | 修改 | 导航标签 i18n 化 |
-| `src/components/layout/SecondarySidebar.tsx` | 修改 | 文本 i18n 化 |
-| `src/pages/SkillBrowsePage.tsx` | 修改 | 全页面文本 i18n 化 |
-| `src/pages/SyncPage.tsx` | 修改 | 文本 i18n 化 |
-| `src/pages/SettingsPage.tsx` | 修改 | Tab 标签 i18n 化 |
-| `src/pages/WorkflowPage.tsx` | 修改 | 文本 i18n 化 |
-| `src/pages/PathsPage.tsx` | 修改 | 文本 i18n 化 |
-| `src/pages/import/index.tsx` 等 | 修改 | 导入流程文本 i18n 化 |
-| `src/components/settings/BundleManager.tsx` | 修改 | 全组件文本 i18n 化 |
-| `src/components/settings/CategoryManager.tsx` | 修改 | 全组件文本 i18n 化 |
-| `src/components/settings/PathPresetManager.tsx` | 修改 | 全组件文本 i18n 化 |
-| `src/components/sync/SyncExecutor.tsx` | 修改 | 文本 i18n 化 + Toast 提升 |
-| `src/components/sync/SyncSkillSelector.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/sync/SyncTargetManager.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/skills/MetadataEditor.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/skills/SkillCard.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/skills/SkillList.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/skills/EmptyState.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/shared/CommandPalette.tsx` | 修改 | 文本 i18n 化 |
-| `src/components/ui/dialog.tsx` | 修改 | sr-only 关闭按钮文本 i18n 化 |
-| `src/components/workflow/` 子组件 | 修改 | 文本 i18n 化 |
-| `src/stores/sync-store.ts` | 修改 | 移除中文 Toast 消息，改为抛出错误 |
-| `src/stores/bundle-store.ts` | 修改 | 移除中文 Toast 消息，改为抛出错误 |
-| `src/stores/skill-store.ts` | 修改 | 移除中文错误消息，改为错误码 |
+| 文件                                            | 操作     | 说明                                                           |
+| ----------------------------------------------- | -------- | -------------------------------------------------------------- |
+| `package.json`                                  | 新增依赖 | `i18next`、`react-i18next`、`i18next-browser-languagedetector` |
+| `src/i18n/index.ts`                             | 新建     | i18next 初始化配置                                             |
+| `src/i18n/types.ts`                             | 新建     | TypeScript 类型声明                                            |
+| `src/i18n/locales/zh.ts`                        | 新建     | 中文翻译资源（~350 个键）                                      |
+| `src/i18n/locales/en.ts`                        | 新建     | 英文翻译资源（与 zh.ts 结构镜像）                              |
+| `src/main.tsx`                                  | 修改     | 首行导入 `./i18n/index`                                        |
+| `src/components/layout/Header.tsx`              | 修改     | 添加语言切换按钮，文本 i18n 化                                 |
+| `src/components/layout/Sidebar.tsx`             | 修改     | 导航标签 i18n 化                                               |
+| `src/components/layout/SecondarySidebar.tsx`    | 修改     | 文本 i18n 化                                                   |
+| `src/pages/SkillBrowsePage.tsx`                 | 修改     | 全页面文本 i18n 化                                             |
+| `src/pages/SyncPage.tsx`                        | 修改     | 文本 i18n 化                                                   |
+| `src/pages/SettingsPage.tsx`                    | 修改     | Tab 标签 i18n 化                                               |
+| `src/pages/WorkflowPage.tsx`                    | 修改     | 文本 i18n 化                                                   |
+| `src/pages/PathsPage.tsx`                       | 修改     | 文本 i18n 化                                                   |
+| `src/pages/import/index.tsx` 等                 | 修改     | 导入流程文本 i18n 化                                           |
+| `src/components/settings/BundleManager.tsx`     | 修改     | 全组件文本 i18n 化                                             |
+| `src/components/settings/CategoryManager.tsx`   | 修改     | 全组件文本 i18n 化                                             |
+| `src/components/settings/PathPresetManager.tsx` | 修改     | 全组件文本 i18n 化                                             |
+| `src/components/sync/SyncExecutor.tsx`          | 修改     | 文本 i18n 化 + Toast 提升                                      |
+| `src/components/sync/SyncSkillSelector.tsx`     | 修改     | 文本 i18n 化                                                   |
+| `src/components/sync/SyncTargetManager.tsx`     | 修改     | 文本 i18n 化                                                   |
+| `src/components/skills/MetadataEditor.tsx`      | 修改     | 文本 i18n 化                                                   |
+| `src/components/skills/SkillCard.tsx`           | 修改     | 文本 i18n 化                                                   |
+| `src/components/skills/SkillList.tsx`           | 修改     | 文本 i18n 化                                                   |
+| `src/components/skills/EmptyState.tsx`          | 修改     | 文本 i18n 化                                                   |
+| `src/components/shared/CommandPalette.tsx`      | 修改     | 文本 i18n 化                                                   |
+| `src/components/ui/dialog.tsx`                  | 修改     | sr-only 关闭按钮文本 i18n 化                                   |
+| `src/components/workflow/` 子组件               | 修改     | 文本 i18n 化                                                   |
+| `src/stores/sync-store.ts`                      | 修改     | 移除中文 Toast 消息，改为抛出错误                              |
+| `src/stores/bundle-store.ts`                    | 修改     | 移除中文 Toast 消息，改为抛出错误                              |
+| `src/stores/skill-store.ts`                     | 修改     | 移除中文错误消息，改为错误码                                   |
+
+---
+
+## 架构决策补充：External Skills Hub — 外部技能仓库聚合与管理（2026-04-13）
+
+**输入文档：** `prd-external-skills-hub.md`、`product-brief-external-skills-hub.md`
+**PRD 功能需求：** FR-EH-01 ~ FR-EH-36（36 条）
+**影响范围：** 新增同步脚本 + GitHub Action、SkillMeta 类型扩展、前端来源标签 + 只读保护、后端只读拦截、分类扩展、默认套件
+
+---
+
+### AD-31: 外部仓库配置文件设计与解析策略
+
+**决策：** 新增 `config/repositories.yaml` 配置文件，采用白名单 + 黑名单双重筛选模式，黑名单优先级高于白名单。配置文件不存在或格式错误时系统正常启动（降级为空数组）。
+
+**理由：**
+
+- 配置文件驱动而非硬编码，天然支持多仓库扩展（≥10 个仓库）
+- 白名单模式确保只有经过人工审核的通用 Skill 才会进入本地仓库，避免噪音
+- 黑名单作为安全阀，即使白名单误配也能快速排除
+- 降级策略与现有 `categories.yaml`、`settings.yaml` 的容错模式一致（FR-EH-05、FR-EH-06）
+
+**配置文件结构（`config/repositories.yaml`）：**
+
+```yaml
+repositories:
+  - id: anthropic-official # 唯一标识，用于 skill-repos/ 子目录名和 Frontmatter source 字段
+    name: "Anthropic Official Skills" # 显示名称，用于前端来源标签
+    url: "https://github.com/anthropics/skills.git"
+    branch: main
+    skillsPath: "skills" # 仓库内 Skill 目录的相对路径
+    enabled: true # 启用开关
+    include: # 白名单：只拉取这些 Skill
+      - name: "pdf"
+        targetCategory: "document-processing"
+      - name: "docx"
+        targetCategory: "document-processing"
+      - name: "xlsx"
+        targetCategory: "document-processing"
+      - name: "pptx"
+        targetCategory: "document-processing"
+      - name: "mcp-builder"
+        targetCategory: "dev-tools"
+      - name: "webapp-testing"
+        targetCategory: "testing"
+      - name: "skill-creator"
+        targetCategory: "meta-skills"
+      - name: "frontend-design"
+        targetCategory: "design"
+      - name: "claude-api"
+        targetCategory: "dev-tools"
+    exclude: # 黑名单：排除这些 Skill（优先级高于 include）
+      - "slack-gif-creator"
+      - "algorithmic-art"
+      - "brand-guidelines"
+      - "canvas-design"
+      - "theme-factory"
+      - "internal-comms"
+      - "web-artifacts-builder"
+      - "doc-coauthoring"
+```
+
+**新增类型定义（`shared/types.ts`）：**
+
+```typescript
+/** 外部仓库 Skill 映射项 */
+export interface RepoSkillMapping {
+  /** Skill 名称（对应仓库中的目录名） */
+  name: string;
+  /** 目标分类 */
+  targetCategory: string;
+}
+
+/** 外部仓库配置 */
+export interface ExternalRepository {
+  /** 唯一标识 */
+  id: string;
+  /** 显示名称 */
+  name: string;
+  /** Git 仓库 HTTPS URL */
+  url: string;
+  /** 分支名 */
+  branch: string;
+  /** 仓库内 Skill 目录的相对路径 */
+  skillsPath: string;
+  /** 是否启用 */
+  enabled: boolean;
+  /** 白名单：只拉取这些 Skill */
+  include: RepoSkillMapping[];
+  /** 黑名单：排除这些 Skill（优先级高于 include） */
+  exclude: string[];
+}
+
+/** 仓库配置文件结构 */
+export interface RepositoriesConfig {
+  repositories: ExternalRepository[];
+}
+```
+
+**新增 Zod Schema（`shared/schemas.ts`）：**
+
+```typescript
+/** RepoSkillMapping Schema */
+export const RepoSkillMappingSchema = z.object({
+  name: z.string().min(1),
+  targetCategory: z.string().min(1),
+});
+
+/** ExternalRepository Schema */
+export const ExternalRepositorySchema = z.object({
+  id: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1),
+  url: z
+    .string()
+    .url()
+    .regex(/^https:\/\/github\.com\//),
+  branch: z.string().min(1).default("main"),
+  skillsPath: z.string().min(1).default("skills"),
+  enabled: z.boolean().default(true),
+  include: z.array(RepoSkillMappingSchema).default([]),
+  exclude: z.array(z.string()).default([]),
+});
+
+/** RepositoriesConfig Schema */
+export const RepositoriesConfigSchema = z.object({
+  repositories: z.array(ExternalRepositorySchema).default([]),
+});
+```
+
+**解析策略（同步脚本中使用）：**
+
+```typescript
+// scripts/sync-external-skills.mjs
+import { readFileSync } from "fs";
+import { load } from "js-yaml";
+
+function loadRepositoriesConfig(configPath) {
+  try {
+    const raw = readFileSync(configPath, "utf-8");
+    const parsed = load(raw);
+    // Zod 校验（运行时安全）
+    return RepositoriesConfigSchema.parse(parsed);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      console.log("[sync] repositories.yaml 不存在，跳过外部仓库同步");
+      return { repositories: [] };
+    }
+    console.error("[sync] repositories.yaml 解析失败:", err.message);
+    return { repositories: [] };
+  }
+}
+```
+
+**关键约束：**
+
+- `id` 字段必须匹配 `/^[a-z0-9-]+$/`，与 `skill-repos/{id}/` 目录名一致
+- `url` 字段必须是 `https://github.com/` 开头的合法 URL（NFR-EH-08 安全要求）
+- 配置文件仅在同步脚本中读取，后端应用启动时**不**读取此文件（零运行时开销）
+
+---
+
+### AD-32: 外部仓库本地存储与 Git 隔离策略
+
+**决策：** 外部仓库 clone 到 `skill-repos/` 目录，该目录被 `.gitignore` 忽略。同步脚本负责 clone/pull 操作，`skill-repos/` 仅作为临时中转站。
+
+**理由：**
+
+- `skill-repos/` 是 clone 的完整 Git 仓库，体积大且频繁变更，不应纳入版本控制
+- 与 `node_modules/` 的忽略策略一致——运行时依赖，不提交
+- 同步脚本从 `skill-repos/` 读取 → 筛选 → 复制到 `skills/`，`skills/` 目录下的外部 Skill 文件**是**版本控制的（通过 PR 合并）
+- GitHub Action 环境中 `skill-repos/` 是临时的（每次 Action 运行都是全新环境），首次必须 `git clone`
+
+**目录结构：**
+
+```
+skill-package/
+├── skill-repos/                          # .gitignore 忽略
+│   └── anthropic-official/               # clone 的 anthropics/skills 仓库
+│       ├── skills/
+│       │   ├── pdf/
+│       │   ├── docx/
+│       │   ├── slack-gif-creator/        # 存在但不会被复制（黑名单）
+│       │   └── ...
+│       └── ...
+├── skills/                               # 版本控制
+│   ├── coding/                           # 原有
+│   ├── document-processing/              # 新增（外部 Skill 同步过来）
+│   │   ├── pdf/
+│   │   │   └── SKILL.md                  # 含注入的来源 Frontmatter
+│   │   ├── docx/
+│   │   ├── xlsx/
+│   │   └── pptx/
+│   ├── dev-tools/
+│   ├── testing/
+│   ├── design/
+│   └── meta-skills/
+```
+
+**`.gitignore` 变更：**
+
+```gitignore
+# External skill repositories (cloned by sync script)
+skill-repos/
+```
+
+**关键约束：**
+
+- `skill-repos/` 目录下的内容**绝不**手动修改，由同步脚本全权管理
+- `skills/` 目录下的外部 Skill 文件通过 PR 合并后成为版本控制的一部分
+- 同步脚本在 GitHub Action 中运行时，`skill-repos/` 在 Action 结束后自动清理（临时工作区）
+
+---
+
+### AD-33: GitHub Action 同步工作流设计
+
+**决策：** 新增 `.github/workflows/sync-external-skills.yml`，支持 cron 定时触发（每日 UTC 00:00）和 `workflow_dispatch` 手动触发。同步完成后通过 `peter-evans/create-pull-request@v6` 自动创建 PR。
+
+**理由：**
+
+- 定时触发确保 ≤24 小时同步延迟（NFR-EH-01 要求 < 5 分钟执行时间）
+- `workflow_dispatch` 支持手动触发，便于调试和紧急同步
+- 创建 PR 而非直接 push，保留人工审核环节（决策记录 #9）
+- `peter-evans/create-pull-request` 是 GitHub 官方推荐的 PR 创建 Action，成熟稳定
+
+**工作流文件（`.github/workflows/sync-external-skills.yml`）：**
+
+```yaml
+name: Sync External Skills
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每日 UTC 00:00
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run sync script
+        run: node scripts/sync-external-skills.mjs
+
+      - name: Create PR if changes exist
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: sync external skills"
+          body: |
+            Automated sync of external skills from registered repositories.
+
+            This PR was created by the `sync-external-skills` GitHub Action.
+            Please review the changes before merging.
+          branch: chore/sync-external-skills
+          commit-message: "chore: sync external skills"
+          labels: "automated,external-skills"
+          delete-branch: true
+```
+
+**关键约束：**
+
+- `permissions` 必须声明 `contents: write` 和 `pull-requests: write`
+- PR 分支名固定为 `chore/sync-external-skills`，`delete-branch: true` 确保合并后自动清理
+- 同步脚本失败不阻塞 PR 创建步骤（脚本内部已做容错处理）
+
+---
+
+### AD-34: 同步脚本核心逻辑与 Frontmatter 注入策略
+
+**决策：** 新增 `scripts/sync-external-skills.mjs`（ESM 格式 Node.js 脚本），负责完整的 clone → 筛选 → 复制 → Frontmatter 注入流程。支持 `--dry-run` 模式。
+
+**理由：**
+
+- 独立脚本而非后端 API，因为同步操作仅在 CI 环境运行，不需要 Express 服务器
+- ESM 格式（`.mjs`）与项目 `"type": "module"` 配置一致
+- `--dry-run` 模式满足 NFR-EH-11 可维护性要求
+- Frontmatter 注入使用 `gray-matter`（项目已有依赖），保持技术栈一致
+
+**脚本核心流程：**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  sync-external-skills.mjs                    │
+├─────────────────────────────────────────────────────────────┤
+│  1. 读取 config/repositories.yaml                            │
+│  2. 遍历 enabled: true 的仓库                                │
+│  3. 对每个仓库：                                              │
+│     ├─ git clone（首次）或 git pull（增量）到 skill-repos/{id}/ │
+│     ├─ 根据 include/exclude 筛选 Skill 目录                   │
+│     ├─ 复制 Skill 目录到 skills/{targetCategory}/{skillName}/  │
+│     ├─ 读取 Skill 主 .md 文件                                 │
+│     ├─ 注入 Frontmatter 来源字段                               │
+│     └─ 写回文件                                               │
+│  4. 输出变更摘要日志                                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Frontmatter 注入逻辑：**
+
+```javascript
+import matter from "gray-matter";
+import { readFileSync, writeFileSync } from "fs";
+
+function injectSourceMetadata(skillMdPath, repo, skillName) {
+  const raw = readFileSync(skillMdPath, "utf-8");
+  const parsed = matter(raw);
+
+  // 注入来源字段
+  parsed.data.source = repo.id;
+  parsed.data.sourceUrl = `${repo.url.replace(".git", "")}/tree/${repo.branch}/${repo.skillsPath}/${skillName}`;
+  parsed.data.sourceRepo = repo.url.replace(".git", "");
+  parsed.data.readonly = true;
+
+  // 写回
+  const output = matter.stringify(parsed.content, parsed.data);
+  writeFileSync(skillMdPath, output, "utf-8");
+}
+```
+
+**Skill 目录复制策略：**
+
+```javascript
+// 完整复制 Skill 目录（保留子文件结构）
+// 例如：skill-repos/anthropic-official/skills/pdf/ → skills/document-processing/pdf/
+import { cpSync, existsSync, mkdirSync } from "fs";
+
+function copySkillDirectory(sourceDir, targetDir) {
+  if (!existsSync(targetDir)) {
+    mkdirSync(targetDir, { recursive: true });
+  }
+  cpSync(sourceDir, targetDir, { recursive: true });
+}
+```
+
+**Skill 主文件发现逻辑：**
+
+```javascript
+// 优先查找 SKILL.md，其次查找目录下第一个 .md 文件
+function findMainSkillFile(skillDir) {
+  const skillMd = path.join(skillDir, "SKILL.md");
+  if (existsSync(skillMd)) return skillMd;
+
+  const files = readdirSync(skillDir).filter((f) => f.endsWith(".md"));
+  return files.length > 0 ? path.join(skillDir, files[0]) : null;
+}
+```
+
+**ID 冲突检测（本地优先）：**
+
+```javascript
+// 检查 skills/ 目录下是否已存在同名 Skill（非外部来源）
+function hasLocalConflict(skillName, targetCategory) {
+  const targetPath = path.join(SKILLS_ROOT, targetCategory, skillName);
+  if (!existsSync(targetPath)) return false;
+
+  // 检查是否是外部 Skill（有 source 字段）
+  const mainFile = findMainSkillFile(targetPath);
+  if (!mainFile) return true; // 无法判断，视为冲突
+
+  const parsed = matter(readFileSync(mainFile, "utf-8"));
+  return !parsed.data.source; // 无 source 字段 = 本地 Skill = 冲突
+}
+```
+
+**`--dry-run` 模式：**
+
+```javascript
+const isDryRun = process.argv.includes("--dry-run");
+
+if (isDryRun) {
+  console.log(`[DRY-RUN] 将复制: ${sourcePath} → ${targetPath}`);
+  console.log(`[DRY-RUN] 将注入 Frontmatter: source=${repo.id}, readonly=true`);
+} else {
+  copySkillDirectory(sourcePath, targetPath);
+  injectSourceMetadata(mainFile, repo, skillName);
+}
+```
+
+**日志输出格式（NFR-EH-10）：**
+
+```
+[sync] ========================================
+[sync] 开始同步外部 Skill 仓库
+[sync] ========================================
+[sync] 读取配置: config/repositories.yaml
+[sync] 发现 1 个启用的仓库
+[sync] ----------------------------------------
+[sync] [anthropic-official] 开始处理...
+[sync] [anthropic-official] git clone https://github.com/anthropics/skills.git
+[sync] [anthropic-official] 筛选: 9 个 include, 8 个 exclude
+[sync] [anthropic-official] 复制: pdf → document-processing/pdf ✓
+[sync] [anthropic-official] 复制: docx → document-processing/docx ✓
+[sync] [anthropic-official] 跳过: slack-gif-creator（黑名单）
+[sync] [anthropic-official] 完成: 9 个 Skill 同步成功
+[sync] ----------------------------------------
+[sync] 总计: 9 个 Skill 同步, 0 个跳过, 0 个失败
+[sync] ========================================
+```
+
+**关键约束：**
+
+- Git 操作超时设置 60 秒（`execSync` 的 `timeout` 参数）
+- 仓库 clone/pull 失败时跳过该仓库，不中断整体流程
+- Frontmatter 注入失败时仍复制文件（降级为无来源元数据），记录警告
+- `include` 中的 Skill 在仓库中不存在时记录警告，跳过
+
+---
+
+### AD-35: SkillMeta 类型扩展与 Frontmatter 解析
+
+**决策：** `shared/types.ts` 的 `SkillMeta` 接口新增 4 个可选字段：`source`、`sourceUrl`、`sourceRepo`、`readonly`。`shared/schemas.ts` 的 `SkillMetaSchema` 对应扩展。`frontmatterParser` 自动提取这些字段。
+
+**理由：**
+
+- 可选字段确保向后兼容——现有 Skill 无这些字段时正常工作（FR-EH-34）
+- 字段命名遵循现有 camelCase 规范
+- 复用现有 `frontmatterParser` 解析流程，零额外解析开销
+
+**`shared/types.ts` — `SkillMeta` 扩展：**
+
+```typescript
+export interface SkillMeta {
+  // ...现有字段（id, name, description, category, tags, type, author, version, filePath, fileSize, lastModified）...
+
+  /** 来源仓库 ID（外部 Skill 专用，对应 repositories.yaml 中的 id） */
+  source?: string;
+  /** Skill 在 GitHub 上的 URL（外部 Skill 专用） */
+  sourceUrl?: string;
+  /** 仓库 GitHub URL（外部 Skill 专用） */
+  sourceRepo?: string;
+  /** 是否只读（外部 Skill 为 true，本地 Skill 无此字段或为 false） */
+  readonly?: boolean;
+}
+```
+
+**`shared/schemas.ts` — `SkillMetaSchema` 扩展：**
+
+```typescript
+export const SkillMetaSchema = z.object({
+  // ...现有字段...
+  source: z.string().optional(),
+  sourceUrl: z.string().url().optional(),
+  sourceRepo: z.string().url().optional(),
+  readonly: z.boolean().optional(),
+});
+```
+
+**`server/utils/frontmatterParser.ts` — 解析扩展：**
+
+```typescript
+// parseFrontmatter 函数中，从 gray-matter 解析结果提取新字段
+const meta: SkillMeta = {
+  // ...现有字段映射...
+  source: data.source || undefined,
+  sourceUrl: data.sourceUrl || undefined,
+  sourceRepo: data.sourceRepo || undefined,
+  readonly: data.readonly === true ? true : undefined,
+};
+```
+
+**关键约束：**
+
+- `readonly` 字段严格检查 `=== true`，避免 truthy 值误判
+- `sourceUrl` 和 `sourceRepo` 使用 `z.string().url()` 校验，确保是合法 URL
+- 新字段均为 `optional`，不影响现有 Skill 的解析（向后兼容）
+
+---
+
+### AD-36: 只读 Skill 后端保护策略
+
+**决策：** 在 `skillService.ts` 的 `updateSkillMeta`、`deleteSkill`、`moveSkillToCategory` 三个写操作中新增 `readonly` 检查，为 `true` 时返回 403 + `SKILL_READONLY` 错误。
+
+**理由：**
+
+- 后端拦截是安全底线——即使前端 UI 被绕过（如直接调用 API），后端也能阻止非法操作
+- 复用现有 `AppError` 工厂方法模式，与 `bundleNotFound`、`skillNotFound` 等一致
+- 403 Forbidden 语义正确——资源存在但不允许操作
+
+**`shared/constants.ts` — 新增错误码：**
+
+```typescript
+export const ErrorCode = {
+  // ...现有错误码...
+
+  // 只读 Skill 相关
+  SKILL_READONLY: "SKILL_READONLY",
+} as const;
+```
+
+**`server/types/errors.ts` — 新增工厂方法：**
+
+```typescript
+/** Skill 只读（外部 Skill 不可编辑/删除/移动） */
+static skillReadonly(skillId: string): AppError {
+  return new AppError(
+    ErrorCode.SKILL_READONLY,
+    `Skill "${skillId}" 为只读（外部 Skill），不可编辑`,
+    HttpStatus.FORBIDDEN,
+  );
+}
+```
+
+**`server/services/skillService.ts` — 写操作拦截：**
+
+```typescript
+// updateSkillMeta 中新增（在 skillNotFound 检查之后）
+export async function updateSkillMeta(id: string, updates: {...}): Promise<SkillMeta> {
+  ensureInitialized();
+  const meta = skillCache.get(id);
+  if (!meta) throw AppError.skillNotFound(id);
+  if (meta.readonly) throw AppError.skillReadonly(id);  // ← 新增
+  // ...原有逻辑...
+}
+
+// deleteSkill 中新增
+export async function deleteSkill(id: string): Promise<void> {
+  ensureInitialized();
+  const meta = skillCache.get(id);
+  if (!meta) throw AppError.skillNotFound(id);
+  if (meta.readonly) throw AppError.skillReadonly(id);  // ← 新增
+  // ...原有逻辑...
+}
+
+// moveSkillToCategory 中新增
+export async function moveSkillToCategory(id: string, targetCategory: string): Promise<SkillMeta> {
+  ensureInitialized();
+  const meta = skillCache.get(id);
+  if (!meta) throw AppError.skillNotFound(id);
+  if (meta.readonly) throw AppError.skillReadonly(id);  // ← 新增
+  // ...原有逻辑...
+}
+```
+
+**关键约束：**
+
+- `readonly` 检查必须在 `skillNotFound` 检查之后（先确认资源存在，再检查权限）
+- 三个写操作**全部**拦截，不遗漏
+- 前端根据 `SKILL_READONLY` 错误码显示翻译后的提示消息
+
+---
+
+### AD-37: 前端来源标签与只读标识 UI 策略
+
+**决策：** SkillCard 组件根据 `skill.source` 渲染来源 Badge（GitHub 图标 + 仓库名），根据 `skill.readonly` 渲染锁图标。SkillPreview 组件底部新增来源信息区域，元数据编辑区域根据 `readonly` 禁用。
+
+**理由：**
+
+- 来源标签使用 `muted` 色调，不抢占卡片主要信息的视觉焦点（FR-EH-20）
+- 锁图标放在卡片左下角，与来源标签（右上角）形成对角线布局，视觉平衡
+- 前端禁用 + 后端拦截形成双重保护（FR-EH-21 ~ FR-EH-26）
+- 使用 `lucide-react` 的 `Github` 和 `Lock` 图标，与项目现有图标库一致
+
+**SkillCard 组件变更：**
+
+```tsx
+// src/components/skills/SkillCard.tsx
+import { Github, Lock } from "lucide-react";
+
+function SkillCard({ skill }: { skill: SkillMeta }) {
+  return (
+    <Card className="relative ...">
+      {/* 来源标签 — 右上角 */}
+      {skill.source && (
+        <button
+          type="button"
+          className="absolute top-2 right-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (skill.sourceUrl) {
+              window.open(skill.sourceUrl, "_blank", "noopener,noreferrer");
+            }
+          }}
+          title={t("skill.viewOnGithub")}
+        >
+          <Github className="h-3 w-3" />
+          <span className="max-w-[120px] truncate">{skill.source}</span>
+        </button>
+      )}
+
+      {/* 只读锁图标 — 左下角 */}
+      {skill.readonly && (
+        <div
+          className="absolute bottom-2 left-2 text-muted-foreground"
+          title={t("skill.readonlyTooltip")}
+        >
+          <Lock className="h-3.5 w-3.5" />
+        </div>
+      )}
+
+      {/* ...原有卡片内容... */}
+    </Card>
+  );
+}
+```
+
+**SkillPreview 组件变更：**
+
+```tsx
+// src/components/skills/SkillPreview.tsx
+
+// 底部来源信息区域（仅外部 Skill 显示）
+{skill.source && (
+  <div className="border-t pt-4 mt-4 space-y-2">
+    <h4 className="text-sm font-medium text-muted-foreground">
+      {t("skill.sourceInfo")}
+    </h4>
+    <div className="flex items-center gap-2 text-sm">
+      <Github className="h-4 w-4" />
+      <span>{skill.source}</span>
+    </div>
+    {skill.sourceRepo && (
+      <a
+        href={skill.sourceUrl || skill.sourceRepo}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+      >
+        {t("skill.viewOnGithub")}
+        <ExternalLink className="h-3 w-3" />
+      </a>
+    )}
+  </div>
+)}
+
+// 元数据编辑区域禁用
+<MetadataEditor
+  skill={skill}
+  disabled={skill.readonly}
+  disabledTooltip={t("skill.readonlyEditTooltip")}
+/>
+
+// 删除按钮禁用
+<Button
+  variant="destructive"
+  disabled={skill.readonly}
+  title={skill.readonly ? t("skill.readonlyDeleteTooltip") : undefined}
+>
+  {t("common.delete")}
+</Button>
+```
+
+**新增 i18n 翻译键（`src/i18n/locales/zh.ts`）：**
+
+```typescript
+skill: {
+  viewOnGithub: "在 GitHub 上查看",
+  sourceInfo: "来源信息",
+  readonlyTooltip: "外部 Skill（只读）",
+  readonlyEditTooltip: "外部 Skill 为只读，由上游仓库管理",
+  readonlyDeleteTooltip: "外部 Skill 不可删除",
+},
+```
+
+**关键约束：**
+
+- 来源标签点击事件必须 `e.stopPropagation()` 防止触发卡片点击
+- 外部链接必须使用 `target="_blank"` + `rel="noopener noreferrer"`（NFR-EH-09）
+- `disabled` 属性传递到 MetadataEditor 内部的所有表单控件
+
+---
+
+### AD-38: 预设分类体系扩展策略
+
+**决策：** `config/categories.yaml` 从 4 个分类扩展到 9 个分类。新增 5 个分类：`document-processing`、`dev-tools`、`testing`、`design`、`meta-skills`。现有 4 个分类不变，现有 Skill 分类归属不变。
+
+**理由：**
+
+- 新增分类覆盖外部 Skill 的多样性（FR-EH-27）
+- 分类名使用 kebab-case，与现有分类命名规范一致
+- 追加而非替换，确保零破坏性变更（NFR-EH-06）
+
+**扩展后的 `config/categories.yaml`：**
+
+```yaml
+# Skill Manager 默认分类
+# 原有分类（不变）
+- name: coding
+  displayName: 编程开发
+  description: 代码编写、调试、重构相关的 Skill
+- name: writing
+  displayName: 文档写作
+  description: 文档、注释、技术写作相关的 Skill
+- name: devops
+  displayName: DevOps
+  description: 部署、CI/CD、运维相关的 Skill
+- name: workflows
+  displayName: 工作流
+  description: 多 Skill 组合的自动化工作流
+
+# 新增分类（外部 Skill 驱动）
+- name: document-processing
+  displayName: 文档处理
+  description: PDF/DOCX/XLSX/PPTX 等文档格式的读写与转换
+- name: dev-tools
+  displayName: 开发工具
+  description: MCP 构建、API 集成等开发工具链
+- name: testing
+  displayName: 测试
+  description: 自动化测试、前端功能验证
+- name: design
+  displayName: 设计
+  description: 前端设计、UI/UX 相关
+- name: meta-skills
+  displayName: 元技能
+  description: Skill 创建、优化、评估等元级能力
+```
+
+**关键约束：**
+
+- 新增分类的 `name` 必须与 `repositories.yaml` 中 `targetCategory` 值一致
+- 同步脚本在目标分类不存在时自动创建分类目录（`fs.mkdirSync`），但**不**自动修改 `categories.yaml`——分类定义由人工维护
+- 现有 Skill 的 `category` 字段不受影响
+
+---
+
+### AD-39: 默认套件自动创建策略
+
+**决策：** 系统启动时（`bundleService` 初始化阶段）检测 `settings.yaml` 中是否存在 `name: "default"` 的套件。如不存在，自动创建包含所有 9 个出厂分类的默认套件。默认套件可编辑但不可删除。
+
+**理由：**
+
+- 默认套件为用户提供开箱即用的完整技能组合（FR-EH-30 ~ FR-EH-33）
+- 自动创建策略与现有 `settings.yaml` 的 `.default([])` 向后兼容模式一致
+- 不可删除保护通过 `removeBundle` 中的前置检查实现
+
+**自动创建逻辑（`server/services/bundleService.ts`）：**
+
+```typescript
+const DEFAULT_BUNDLE_NAME = "default";
+const DEFAULT_BUNDLE_CATEGORIES = [
+  "coding",
+  "writing",
+  "devops",
+  "workflows",
+  "document-processing",
+  "dev-tools",
+  "testing",
+  "design",
+  "meta-skills",
+];
+
+/**
+ * 确保默认套件存在 — 在应用启动时调用
+ */
+export async function ensureDefaultBundle(): Promise<void> {
+  const settings = await readSettings();
+  const bundles = settings.skillBundles ?? [];
+
+  const hasDefault = bundles.some((b) => b.name === DEFAULT_BUNDLE_NAME);
+  if (hasDefault) return;
+
+  const now = new Date().toISOString();
+  const defaultBundle: SkillBundle = {
+    id: `bundle-default`,
+    name: DEFAULT_BUNDLE_NAME,
+    displayName: "默认套件",
+    description: "包含所有出厂预设分类的完整技能组合",
+    categoryNames: DEFAULT_BUNDLE_CATEGORIES,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  settings.skillBundles = [...bundles, defaultBundle];
+  await writeSettings(settings);
+  console.log("[bundleService] 已自动创建默认套件");
+}
+```
+
+**删除保护（`server/services/bundleService.ts`）：**
+
+```typescript
+export async function removeBundle(id: string): Promise<void> {
+  const settings = await readSettings();
+  const bundle = settings.skillBundles?.find((b) => b.id === id);
+  if (!bundle) throw AppError.bundleNotFound(id);
+
+  // 默认套件不可删除
+  if (bundle.name === DEFAULT_BUNDLE_NAME) {
+    throw AppError.badRequest("默认套件不可删除");
+  }
+
+  // ...原有删除逻辑...
+}
+```
+
+**启动时调用（`server/index.ts`）：**
+
+```typescript
+// 应用启动序列
+await initializeSkillCache();
+await ensureDefaultBundle(); // ← 新增
+```
+
+**关键约束：**
+
+- 默认套件的 `id` 固定为 `bundle-default`（不使用随机 ID），便于识别
+- 默认套件的 `categoryNames` 包含所有 9 个出厂分类
+- 用户可编辑默认套件（修改包含的分类），但不可删除
+- `ensureDefaultBundle` 是幂等操作——已存在时不重复创建
+
+---
+
+### AD-40: 边界情况处理与容错策略总览
+
+**决策：** 所有边界情况采用"跳过 + 记录日志"策略，不中断整体流程。遵循"宁可少同步，不可破坏现有功能"原则。
+
+**边界情况处理矩阵：**
+
+| #   | 场景                                 | 处理策略                          | 日志级别 | 影响范围                  |
+| --- | ------------------------------------ | --------------------------------- | -------- | ------------------------- |
+| 1   | `repositories.yaml` 不存在           | 返回空数组，系统正常启动          | `info`   | 无影响                    |
+| 2   | `repositories.yaml` 格式错误         | 返回空数组，记录错误              | `error`  | 无影响                    |
+| 3   | 仓库 clone/pull 失败（网络错误）     | 跳过该仓库，继续处理其他仓库      | `error`  | 该仓库的 Skill 不更新     |
+| 4   | Git 操作超时（>60s）                 | 跳过该仓库                        | `error`  | 同上                      |
+| 5   | `include` 中的 Skill 在仓库中不存在  | 跳过该 Skill                      | `warn`   | 该 Skill 不同步           |
+| 6   | Skill 文件格式异常（无 Frontmatter） | 跳过 Frontmatter 注入，仍复制文件 | `warn`   | Skill 无来源元数据        |
+| 7   | Frontmatter 注入失败                 | 仍复制文件（降级）                | `warn`   | Skill 无来源元数据        |
+| 8   | Skill ID 冲突（本地同名）            | 跳过外部 Skill，本地优先          | `warn`   | 外部 Skill 不同步         |
+| 9   | 目标分类目录不存在                   | 自动创建目录（`mkdirSync`）       | `info`   | 无影响                    |
+| 10  | 仓库被删除/不可达                    | 保留上次同步的 Skill 不删除       | `error`  | 该仓库的 Skill 保持旧版本 |
+| 11  | `url` 不是合法 GitHub HTTPS URL      | Zod 校验失败，跳过该仓库          | `error`  | 该仓库不处理              |
+
+**容错原则：**
+
+```
+1. 单个仓库失败 → 不影响其他仓库
+2. 单个 Skill 失败 → 不影响同仓库其他 Skill
+3. Frontmatter 注入失败 → 降级为无来源元数据（文件仍复制）
+4. 配置文件缺失/错误 → 降级为空配置（系统正常运行）
+5. 网络超时 → 跳过，保留上次同步结果
+```
+
+**同步脚本退出码：**
+
+```javascript
+// 全部成功 → exit 0
+// 部分失败 → exit 0（不阻塞 PR 创建）
+// 配置文件错误 → exit 0（降级为空操作）
+// 脚本自身异常（未捕获错误） → exit 1
+```
+
+**关键约束：**
+
+- 同步脚本**永远不删除** `skills/` 目录下的现有文件——只新增或覆盖
+- 仓库不可达时保留上次同步的 Skill，不做"清理"操作
+- 所有日志使用 `[sync]` 前缀，便于在 GitHub Action 日志中过滤
+
+---
+
+### 更新后的项目目录结构（增量变更）
+
+```
+skill-manager/
+├── skill-repos/                          # 新增，.gitignore 忽略
+│   └── anthropic-official/               # clone 的外部仓库
+│
+├── skills/
+│   ├── coding/                           # 原有
+│   ├── writing/                          # 原有
+│   ├── devops/                           # 原有
+│   ├── workflows/                        # 原有
+│   ├── document-processing/              # 新增（外部 Skill）
+│   │   ├── pdf/
+│   │   ├── docx/
+│   │   ├── xlsx/
+│   │   └── pptx/
+│   ├── dev-tools/                        # 新增（外部 Skill）
+│   │   ├── mcp-builder/
+│   │   └── claude-api/
+│   ├── testing/                          # 新增（外部 Skill）
+│   │   └── webapp-testing/
+│   ├── design/                           # 新增（外部 Skill）
+│   │   └── frontend-design/
+│   └── meta-skills/                      # 新增（外部 Skill）
+│       └── skill-creator/
+│
+├── scripts/
+│   └── sync-external-skills.mjs          # 新增：同步脚本
+│
+├── config/
+│   ├── categories.yaml                   # 修改：4 → 9 个分类
+│   ├── settings.yaml                     # 修改：新增 default 套件（自动创建）
+│   └── repositories.yaml                 # 新增：仓库注册配置
+│
+└── .github/
+    └── workflows/
+        └── sync-external-skills.yml      # 新增：GitHub Action
+```
+
+### 文件变更清单
+
+| 文件                                         | 操作     | 说明                                                                                                                                  |
+| -------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/types.ts`                            | 修改     | `SkillMeta` 新增 `source`/`sourceUrl`/`sourceRepo`/`readonly`；新增 `ExternalRepository`/`RepoSkillMapping`/`RepositoriesConfig` 类型 |
+| `shared/schemas.ts`                          | 修改     | `SkillMetaSchema` 扩展 4 个可选字段；新增 `RepoSkillMappingSchema`/`ExternalRepositorySchema`/`RepositoriesConfigSchema`              |
+| `shared/constants.ts`                        | 修改     | 新增 `SKILL_READONLY` 错误码                                                                                                          |
+| `server/types/errors.ts`                     | 修改     | 新增 `AppError.skillReadonly()` 工厂方法                                                                                              |
+| `server/services/skillService.ts`            | 修改     | `updateSkillMeta`/`deleteSkill`/`moveSkillToCategory` 新增 readonly 检查                                                              |
+| `server/services/bundleService.ts`           | 修改     | 新增 `ensureDefaultBundle()` 函数 + `removeBundle` 默认套件删除保护                                                                   |
+| `server/utils/frontmatterParser.ts`          | 修改     | 解析 `source`/`sourceUrl`/`sourceRepo`/`readonly` 字段                                                                                |
+| `server/index.ts`                            | 修改     | 启动序列新增 `ensureDefaultBundle()` 调用                                                                                             |
+| `src/components/skills/SkillCard.tsx`        | 修改     | 新增来源标签（GitHub 图标 + 仓库名）+ 只读锁图标                                                                                      |
+| `src/components/skills/SkillPreview.tsx`     | 修改     | 新增来源信息区域 + readonly 禁用逻辑                                                                                                  |
+| `src/i18n/locales/zh.ts`                     | 修改     | 新增 `skill.viewOnGithub` 等翻译键                                                                                                    |
+| `src/i18n/locales/en.ts`                     | 修改     | 新增对应英文翻译                                                                                                                      |
+| `config/categories.yaml`                     | 修改     | 4 → 9 个出厂分类                                                                                                                      |
+| `config/repositories.yaml`                   | **新建** | 外部仓库注册配置                                                                                                                      |
+| `scripts/sync-external-skills.mjs`           | **新建** | 同步脚本                                                                                                                              |
+| `.github/workflows/sync-external-skills.yml` | **新建** | GitHub Action 工作流                                                                                                                  |
+| `.gitignore`                                 | 修改     | 新增 `skill-repos/` 忽略规则                                                                                                          |
+
+**零改动文件：** `categoryService.ts`、`categoryRoutes.ts`、`bundleRoutes.ts`、`syncService.ts`、`workflowService.ts`、`configService.ts`
+
+### 架构一致性验证
+
+| 验证项     | 结果 | 说明                                                                              |
+| ---------- | ---- | --------------------------------------------------------------------------------- |
+| 命名规范   | ✅   | 新增类型 PascalCase、字段 camelCase、错误码 UPPER_SNAKE_CASE、API 路径 kebab-case |
+| 错误处理   | ✅   | 复用 `AppError` 工厂方法 + `ErrorCode` 常量                                       |
+| Zod 校验   | ✅   | 新增 Schema 遵循现有模式（`z.object` + `.optional()` + `.default()`）             |
+| 文件写入   | ✅   | 同步脚本使用 `writeFileSync`（CI 环境单线程，无并发风险）                         |
+| 向后兼容   | ✅   | 所有新增字段 optional、配置文件缺失降级为空、现有功能零回归                       |
+| i18n 集成  | ✅   | 新增 UI 文本通过 `t()` 调用，遵循 AD-28/AD-29 模式                                |
+| 组件模式   | ✅   | 使用 `lucide-react` 图标、shadcn/ui 组件、Tailwind 样式                           |
+| 服务层模式 | ✅   | `bundleService` 新增函数遵循函数式导出模式（AD-19）                               |

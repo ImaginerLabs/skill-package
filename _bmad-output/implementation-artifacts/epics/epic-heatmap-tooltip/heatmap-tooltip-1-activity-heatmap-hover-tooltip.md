@@ -1,6 +1,6 @@
 # Story HT.1: 活跃度热力图 Hover 浮窗 — 展示当日修改文件列表
 
-Status: review
+Status: done
 
 ## Story
 

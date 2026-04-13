@@ -3,7 +3,13 @@ title: "Product Brief: Skill Manager"
 status: "approved"
 created: "2026-04-10"
 updated: "2026-04-10"
-inputs: ["用户对话记录", "现有 .codebuddy/skills/ 目录结构分析", "UI/UX 设计系统推荐", "Claude 官方 skill-creator 方法论"]
+inputs:
+  [
+    "用户对话记录",
+    "现有 .codebuddy/skills/ 目录结构分析",
+    "UI/UX 设计系统推荐",
+    "Claude 官方 skill-creator 方法论",
+  ]
 ---
 
 # 产品简报：Skill Manager — 本地 AI 技能管理器
@@ -30,18 +36,21 @@ AI Coding 时代，开发者积累了大量私人 Skill 技能文件（Markdown 
 Skill Manager 提供四大核心能力：
 
 ### 1. 可视化 Skill 浏览（只读）
+
 - 分类（Category）和场景（Scenario）两个维度浏览所有 Skill
 - 支持搜索、筛选、标签过滤
 - Markdown 渲染预览，YAML Frontmatter 元数据展示
 - **不提供新建和编辑能力**——Skill 的创作应该在 IDE 中通过 Agent 完成，Web 只做管理
 
 ### 2. 工作流编排
+
 - 通过可视化界面将多个已有 Skill 按顺序编排成工作流
 - 编排结果基于**工作流标准模板**自动生成一个全新的标准 Skill 文件（`.md` 格式）
 - 工作流 Skill 内部引用并组合其他 Skill 的能力，形成多步骤协作流程
 - 用户在 UI 上选择 Skill 并排序，为每个 Step 填写描述，系统自动生成工作流文件
 
 ### 3. 一键同步到 IDE
+
 - 预设各 IDE 的 Skill 存放路径（默认先支持 CodeBuddy）
 - 用户可按 IDE 维度选择需要同步的 Skill 包
 - 通过 Node.js 脚本执行实际的文件同步操作
@@ -49,6 +58,7 @@ Skill Manager 提供四大核心能力：
 - **V1 为单向同步（仓库 → IDE）**，仓库是 Single Source of Truth
 
 ### 4. 从 IDE 导入
+
 - 根据预设路径扫描 IDE 中已有的 Skill 文件
 - 展示发现的 Skill 列表，允许用户选择性导入
 - 导入时需选择分类归属
@@ -78,15 +88,15 @@ Skill 正文内容（纯 Markdown）...
 
 ### Frontmatter 字段说明
 
-| 字段 | 必填 | 说明 |
-|------|------|------|
-| `name` | ✅ | Skill 唯一标识符（Claude 官方标准字段） |
-| `description` | ✅ | Skill 描述，包括触发条件（Claude 官方标准字段） |
-| `category` | ✅ | 分类归属（系统扩展字段，用于 Web 端分类浏览） |
-| `tags` | ❌ | 标签数组（系统扩展字段，用于搜索和筛选） |
-| `author` | ❌ | 作者（系统扩展字段） |
-| `version` | ❌ | 版本号（系统扩展字段） |
-| `type` | ❌ | 类型标识，工作流 Skill 为 `workflow`（系统扩展字段） |
+| 字段          | 必填 | 说明                                                 |
+| ------------- | ---- | ---------------------------------------------------- |
+| `name`        | ✅   | Skill 唯一标识符（Claude 官方标准字段）              |
+| `description` | ✅   | Skill 描述，包括触发条件（Claude 官方标准字段）      |
+| `category`    | ✅   | 分类归属（系统扩展字段，用于 Web 端分类浏览）        |
+| `tags`        | ❌   | 标签数组（系统扩展字段，用于搜索和筛选）             |
+| `author`      | ❌   | 作者（系统扩展字段）                                 |
+| `version`     | ❌   | 版本号（系统扩展字段）                               |
+| `type`        | ❌   | 类型标识，工作流 Skill 为 `workflow`（系统扩展字段） |
 
 ### 工作流 Skill 格式
 
@@ -136,6 +146,7 @@ category: workflows
 ## 目标用户
 
 **主要用户：个人开发者**
+
 - 同时使用多个 AI IDE 进行开发
 - 积累了一定数量的私人 Skill/Prompt 资产
 - 希望统一管理、跨 IDE 复用这些资产
@@ -143,17 +154,18 @@ category: workflows
 
 ## 成功标准
 
-| 指标 | 目标 |
-|------|------|
-| Skill 浏览体验 | 用户能在 3 秒内找到目标 Skill |
-| 同步效率 | 一键完成 Skill 到目标 IDE 的同步，无需手动操作 |
-| 工作流创建 | 用户能在 5 分钟内完成一个多 Skill 工作流编排 |
-| 导入成功率 | 从 IDE 导入的 Skill 100% 保持格式完整性 |
-| Fork 上手时间 | 新用户 fork 后 10 分钟内完成首次配置和使用 |
+| 指标           | 目标                                           |
+| -------------- | ---------------------------------------------- |
+| Skill 浏览体验 | 用户能在 3 秒内找到目标 Skill                  |
+| 同步效率       | 一键完成 Skill 到目标 IDE 的同步，无需手动操作 |
+| 工作流创建     | 用户能在 5 分钟内完成一个多 Skill 工作流编排   |
+| 导入成功率     | 从 IDE 导入的 Skill 100% 保持格式完整性        |
+| Fork 上手时间  | 新用户 fork 后 10 分钟内完成首次配置和使用     |
 
 ## 范围
 
 ### V1 包含
+
 - React + TypeScript 前端 + Node.js + Express 后端（前后端分离）
 - Skill 分类浏览、搜索、Markdown 预览
 - 工作流编排器（顺序组合多个 Skill，基于标准模板自动生成工作流文件）
@@ -163,6 +175,7 @@ category: workflows
 - 暗色主题 UI（开发者工具风格）
 
 ### V1 不包含
+
 - Skill 在线编辑/创建（除工作流编排外）
 - 多用户协作/团队功能
 - 云端同步/远程服务器
@@ -224,18 +237,18 @@ skill-package/
 
 ## 技术方案概要
 
-| 维度 | 选型 |
-|------|------|
-| 前端 | React + TypeScript + Tailwind CSS + React Router |
-| 后端 | Node.js + Express |
-| 数据存储 | 文件系统（`.md` Skill 文件 + `.yaml` 配置文件） |
-| Frontmatter 解析 | `gray-matter` |
-| Markdown 渲染 | `react-markdown` + `remark-gfm` |
-| 文件监听 | `chokidar` |
-| 同步机制 | Node.js `fs-extra`（文件复制，单向推送） |
-| UI 风格 | 暗色主题，Code Dark (#0F172A) + Run Green (#22C55E) |
-| 字体 | Fira Code（代码/标题）+ Fira Sans（正文） |
-| 部署 | 本地运行（localhost） |
+| 维度             | 选型                                                |
+| ---------------- | --------------------------------------------------- |
+| 前端             | React + TypeScript + Tailwind CSS + React Router    |
+| 后端             | Node.js + Express                                   |
+| 数据存储         | 文件系统（`.md` Skill 文件 + `.yaml` 配置文件）     |
+| Frontmatter 解析 | `gray-matter`                                       |
+| Markdown 渲染    | `react-markdown` + `remark-gfm`                     |
+| 文件监听         | `chokidar`                                          |
+| 同步机制         | Node.js `fs-extra`（文件复制，单向推送）            |
+| UI 风格          | 暗色主题，Code Dark (#0F172A) + Run Green (#22C55E) |
+| 字体             | Fira Code（代码/标题）+ Fira Sans（正文）           |
+| 部署             | 本地运行（localhost）                               |
 
 ### 默认 IDE 路径配置
 
@@ -251,15 +264,15 @@ sync:
 
 ## 决策记录
 
-| # | 决策项 | 结论 | 状态 |
-|---|--------|------|------|
-| 1 | Skill 文件格式 | `.md` 文件（YAML Frontmatter + Markdown 正文），兼容 Claude 官方标准 | ✅ 已确认 |
-| 2 | 项目配置格式 | 统一 YAML（独立的 `.yaml` 文件，与 Skill 文件的 Frontmatter 格式一致） | ✅ 已确认 |
-| 3 | 工作流引用格式 | 正文中 `## Step N` + `**使用 Skill:** \`name\`` 引用，Frontmatter 中 `type: workflow` 标识 | ✅ 已确认 |
-| 4 | 工作流模板 | 编排器内部输出模板，用户在 UI 编排后系统自动生成标准 `.md` 文件 | ✅ 已确认 |
-| 5 | 同步方向 | V1 单向（仓库 → IDE），导入是独立反向操作 | ✅ 已确认 |
-| 6 | 代码/数据分离 | `src/` 公版代码 + `skills/` 用户数据 + `config/` 用户配置，三区分离 | ✅ 已确认 |
-| 7 | 冷启动 | 不预置示例，空状态引导用户从 IDE 导入 | ✅ 已确认 |
-| 8 | 技术栈 | React + TS + Tailwind（前端）、Node.js + Express（后端） | ✅ 已确认 |
-| 9 | UI 风格 | 暗色主题，Code Dark + Run Green，Fira Code/Sans 字体 | ✅ 已确认 |
-| 10 | Skill 模板脚手架 | 不提供独立的空白 Skill 模板创建能力，Web 端不做编辑 | ✅ 已确认 |
+| #   | 决策项           | 结论                                                                                     | 状态      |
+| --- | ---------------- | ---------------------------------------------------------------------------------------- | --------- |
+| 1   | Skill 文件格式   | `.md` 文件（YAML Frontmatter + Markdown 正文），兼容 Claude 官方标准                     | ✅ 已确认 |
+| 2   | 项目配置格式     | 统一 YAML（独立的 `.yaml` 文件，与 Skill 文件的 Frontmatter 格式一致）                   | ✅ 已确认 |
+| 3   | 工作流引用格式   | 正文中 `## Step N` + `**使用 Skill:** \`name\``引用，Frontmatter 中`type: workflow` 标识 | ✅ 已确认 |
+| 4   | 工作流模板       | 编排器内部输出模板，用户在 UI 编排后系统自动生成标准 `.md` 文件                          | ✅ 已确认 |
+| 5   | 同步方向         | V1 单向（仓库 → IDE），导入是独立反向操作                                                | ✅ 已确认 |
+| 6   | 代码/数据分离    | `src/` 公版代码 + `skills/` 用户数据 + `config/` 用户配置，三区分离                      | ✅ 已确认 |
+| 7   | 冷启动           | 不预置示例，空状态引导用户从 IDE 导入                                                    | ✅ 已确认 |
+| 8   | 技术栈           | React + TS + Tailwind（前端）、Node.js + Express（后端）                                 | ✅ 已确认 |
+| 9   | UI 风格          | 暗色主题，Code Dark + Run Green，Fira Code/Sans 字体                                     | ✅ 已确认 |
+| 10  | Skill 模板脚手架 | 不提供独立的空白 Skill 模板创建能力，Web 端不做编辑                                      | ✅ 已确认 |
