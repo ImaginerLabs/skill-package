@@ -10,6 +10,8 @@ inputDocuments:
   - "prd.md"
   - "architecture.md"
   - "ux-design-specification.md"
+  - "prd-category-settings-and-bundles.md"
+  - "prd-epic6-ux-polish.md"
 ---
 
 # Skill Manager - Epic Breakdown
@@ -303,6 +305,21 @@ UI 视觉质感全面提升：补全 shadcn/ui 组件基础设施（Input/Select
 **UX-DRs:** UX-DR7, UX-DR9, UX-DR15(同步部分)
 **NFRs:** NFR3, NFR7
 
+### Epic 5: 分类设置页重组织 & 套件管理
+
+用户可以在重组织后的分类页中管理分类和套件，通过套件将常用分类组合保存并一键激活，在不同工作场景下快速切换分类配置。
+**FRs:** FR-CS-01 ~ FR-CS-24（来源：prd-category-settings-and-bundles.md）
+**NFRs:** NFR-CS-01 ~ NFR-CS-06
+**Stories:** 5.1（后端基础层）、5.2（API 路由层）、5.3（页面 Tab 化）、5.4（套件 CRUD UI）、5.5（套件激活）、5.6（损坏引用处理）
+
+### Epic 6: UX 体验全面优化
+
+基于全页面实地体验审计，修复分类计数与 Skill 归属脱节、工作流缺少已有列表入口、同步页引导断裂、导入页路径预设割裂、Command Palette 缺少描述摘要等 6 类用户体验痛点，打通已有功能的"最后一公里"。
+**FRs:** FR-E6-01 ~ FR-E6-12（来源：prd-epic6-ux-polish.md）
+**NFRs:** NFR-E6-01 ~ NFR-E6-03
+**依赖:** Epic 3/4（工作流功能）→ Story 6-2；Epic 5（路径预设）→ Story 6-3
+**Stories:** 6.1（分类系统数据一致性修复）、6.2（工作流已有列表管理）、6.3（同步页引导 + 导入页预设集成）、6.4（Command Palette 搜索增强）
+
 ### 依赖关系
 
 ```
@@ -314,6 +331,10 @@ UI 视觉质感全面提升：补全 shadcn/ui 组件基础设施（Input/Select
        ╱    │    ╲
     Epic 2  Epic 3  Epic 4
    (导入)  (编排)  (同步)
+            │
+        Epic 5 (分类设置页 & 套件)
+            │
+        Epic 6 (UX 体验全面优化)
 ```
 
 - Epic 0 → Epic 1：线性依赖
@@ -1223,3 +1244,458 @@ So that 项目的 story 生命周期记录完整，便于后续追溯。
 
 - 来源：Epic 3 回顾 — Story 3-3 和 3-4 缺少独立 story 文件，违反生命周期规范
 - 这是文档补全任务，不涉及代码修改
+
+---
+
+## Epic 5: 分类设置页重组织 & 套件管理
+
+用户可以在重组织后的分类页中管理分类和套件，通过套件将常用分类组合保存并一键激活，在不同工作场景下快速切换分类配置。
+
+**FRs covered:** FR-CS-01 ~ FR-CS-24
+**NFRs covered:** NFR-CS-01 ~ NFR-CS-06
+**来源 PRD:** prd-category-settings-and-bundles.md
+
+### Story 5.1: 套件后端基础层（数据模型 + Schema + 服务层）
+
+As a 开发者,
+I want 套件功能的后端基础层（类型定义、Schema 校验、服务函数）就绪,
+So that 后续的 API 路由和前端功能可以基于稳定的数据层构建。
+
+**Acceptance Criteria:**
+
+**Given** `shared/types.ts` 中尚无 `SkillBundle` 类型
+**When** 完成本 Story
+**Then** `shared/types.ts` 新增 `SkillBundle` 接口（id、name、displayName、description?、categoryNames、createdAt、updatedAt）
+**And** `AppConfig` 接口追加 `skillBundles: SkillBundle[]` 和 `activeCategories: string[]` 字段
+
+**Given** `shared/schemas.ts` 中尚无套件相关 Schema
+**When** 完成本 Story
+**Then** 新增 `SkillBundleSchema`（含 `categoryNames.max(20)` 约束）
+**And** 新增 `SkillBundleCreateSchema`、`SkillBundleUpdateSchema`
+**And** `AppConfigSchema` 追加 `skillBundles: z.array(SkillBundleSchema).max(50).default([])`
+**And** `AppConfigSchema` 追加 `activeCategories: z.array(z.string()).default([])`
+**And** 旧版 `settings.yaml`（无 `skillBundles` 字段）读取时默认为空数组（向后兼容）
+
+**Given** `server/services/bundleService.ts` 不存在
+**When** 完成本 Story
+**Then** 新建 `bundleService.ts`，导出以下函数：`getBundles()`、`addBundle(data)`、`updateBundle(id, data)`、`removeBundle(id)`、`applyBundle(id)`
+**And** `addBundle` 校验 `name` 唯一性（大小写不敏感）
+**And** `addBundle` 校验 `categoryNames` 引用的分类必须存在（调用 `categoryService.getCategories()` 交叉验证）
+**And** `applyBundle` 以覆盖模式写入 `activeCategories`（不叠加），跳过已删除分类引用
+**And** `applyBundle` 返回 `{ applied: string[], skipped: string[] }`
+**And** 所有写操作通过 `safeWrite()` 保证原子性
+**And** `shared/constants.ts` 新增套件相关错误码常量
+
+**Given** 套件服务层完成
+**When** 运行单元测试
+**Then** `bundleService` 的所有函数有对应单元测试（CRUD + applyBundle + 唯一性校验 + 向后兼容）
+**And** 所有测试通过，TypeScript 零错误
+
+**Technical Notes:**
+
+- 复用 `pathPresetService` 的函数式导出模式（不使用 class）
+- ID 生成格式：`bundle-{ts36}-{rand4}`（复用 `generateId()` 函数）
+- 套件名称正则校验：`/^[a-z0-9-]+$/`（防路径注入，与 `importService` 的 `VALID_CATEGORY_RE` 一致）
+- `getBundles()` 需注入 `brokenCategoryNames` 字段（与 `categoryService.getCategories()` 做 diff）
+
+### Story 5.2: 套件 API 路由层
+
+As a 开发者,
+I want 套件功能的 REST API 端点就绪,
+So that 前端可以通过标准 API 进行套件的 CRUD 和激活操作。
+
+**Acceptance Criteria:**
+
+**Given** `server/routes/bundleRoutes.ts` 不存在
+**When** 完成本 Story
+**Then** 新建 `bundleRoutes.ts`，注册以下端点：
+
+- `GET /api/skill-bundles` — 返回所有套件（含 `brokenCategoryNames` 注入）
+- `POST /api/skill-bundles` — 创建套件（Zod 校验 `SkillBundleCreateSchema`）
+- `PUT /api/skill-bundles/:id` — 更新套件（Zod 校验 `SkillBundleUpdateSchema`）
+- `DELETE /api/skill-bundles/:id` — 删除套件
+- `PUT /api/skill-bundles/:id/apply` — 一键激活套件
+- `GET /api/skill-bundles/export` — 返回 501 Not Implemented（占位）
+- `POST /api/skill-bundles/import` — 返回 501 Not Implemented（占位）
+
+**Given** 路由注册顺序
+**When** 服务启动
+**Then** `GET /api/skill-bundles/export` 必须在 `GET /api/skill-bundles/:id` 之前注册（防止 "export" 被当作 `:id`）
+**And** `bundleRoutes` 在 `server/app.ts` 中正确注册
+
+**Given** 请求体校验
+**When** POST/PUT 请求体不符合 Schema
+**Then** 返回 400 + `VALIDATION_ERROR`
+
+**Given** 套件不存在
+**When** PUT/DELETE/apply 操作指定不存在的 id
+**Then** 返回 404 + 对应错误码
+
+**Given** 超出数据上限
+**When** 已有 50 个套件时尝试创建新套件
+**Then** 返回 400 + 错误提示
+
+**Given** API 层完成
+**When** 运行集成测试
+**Then** 所有 7 个端点有对应集成测试（含正常流程 + 错误场景）
+**And** 所有测试通过
+
+**Given** `src/lib/api.ts` 尚无套件相关函数
+**When** 完成本 Story
+**Then** 新增以下 API 客户端函数：`fetchSkillBundles()`、`createSkillBundle(data)`、`updateSkillBundle(id, data)`、`deleteSkillBundle(id)`、`applySkillBundle(id)`
+
+**Technical Notes:**
+
+- 路由层薄封装：只做请求解析、Zod 校验和响应格式化，业务逻辑全部委托给 `bundleService`
+- 所有路由处理器用 try/catch 包裹，catch 中调用 `next(err)`
+- 响应格式遵循 `ApiResponse<T>`：成功 `{ success: true, data: T }`，失败 `{ success: false, error: {...} }`
+
+### Story 5.3: 设置页 Tab 化重组织 + 导航重命名
+
+As a 用户,
+I want 侧边栏导航显示"分类"而非"设置"，且分类页内有"分类设置"和"套件管理"两个 Tab,
+So that 我能直观理解导航入口的功能，并在分类管理和套件管理之间快速切换。
+
+**Acceptance Criteria:**
+
+**Given** 侧边栏当前显示"设置"导航入口
+**When** 完成本 Story
+**Then** 侧边栏导航文字从"设置"改为"分类"
+**And** 路由 `/settings` 保持不变（无破坏性变更）
+**And** `AppLayout.tsx` 中对应导航项文字更新
+
+**Given** `SettingsPage.tsx` 当前只渲染 `CategoryManager`
+**When** 完成本 Story
+**Then** 页面顶部显示两个 Tab："分类设置"（默认激活）和"套件管理"
+**And** 使用现有 shadcn/ui `Tabs` 组件实现
+**And** "分类设置" Tab 渲染现有 `CategoryManager` 组件（零改动）
+**And** "套件管理" Tab 渲染占位内容（"套件管理功能即将上线"或空状态组件，Story 5.4 实现完整功能）
+**And** 页面 H1 标题显示"分类管理"
+
+**Given** Tab 切换
+**When** 用户在两个 Tab 之间切换
+**Then** 各 Tab 的滚动位置和内部状态不重置
+**And** Tab 切换动画流畅
+
+**Given** 现有 CategoryManager 功能
+**When** 切换到"分类设置" Tab
+**Then** 所有现有分类管理功能（创建、编辑、删除分类，展开查看 Skill，批量移出分类）100% 正常工作
+**And** 分类设置 Tab 内的标题从"分类管理"改为"分类设置"
+
+**Given** 本 Story 完成
+**When** 运行现有 CategoryManager 相关测试
+**Then** 所有测试通过（零回归）
+**And** 新增 SettingsPage Tab 切换的单元测试
+
+**Technical Notes:**
+
+- `CategoryManager.tsx` 零改动，只修改 `SettingsPage.tsx` 和 `AppLayout.tsx`
+- Tab 组件使用 `src/components/ui/` 中已有的 shadcn/ui Tabs（如不存在则新建）
+- "套件管理" Tab 本 Story 只需占位，完整实现在 Story 5.4
+
+### Story 5.4: 套件管理 UI — CRUD 交互
+
+As a 用户,
+I want 在"套件管理" Tab 中创建、查看、编辑和删除套件,
+So that 我可以将常用的分类组合保存为套件，方便后续复用。
+
+**Acceptance Criteria:**
+
+**Given** `src/stores/bundle-store.ts` 不存在
+**When** 完成本 Story
+**Then** 新建 `bundle-store.ts`，包含：`bundles`、`bundlesLoading`、`bundlesError` 状态，以及 `fetchBundles`、`createBundle`、`updateBundle`、`deleteBundle` action
+
+**Given** `src/components/settings/BundleManager.tsx` 不存在
+**When** 完成本 Story
+**Then** 新建 `BundleManager.tsx` 组件，在"套件管理" Tab 中渲染
+
+**Given** 套件列表为空
+**When** 用户进入"套件管理" Tab
+**Then** 显示空状态引导，文案说明套件用途："套件是分类的组合，一键激活整套分类配置"
+**And** 提供"新建套件"按钮
+
+**Given** 套件列表有数据
+**When** 用户进入"套件管理" Tab
+**Then** 每个套件以卡片形式展示：套件显示名称、描述（可选）、包含的分类数量、分类 Tag Chip 列表
+**And** 套件卡片支持展开/折叠，折叠时显示摘要，展开时显示完整分类列表
+
+**Given** 用户点击"新建套件"
+**When** 填写名称（英文标识）、显示名称，并从分类列表中多选至少 1 个分类
+**Then** 套件创建成功，卡片出现在列表中
+**And** 分类选择器支持搜索过滤
+**And** 名称重复时显示错误提示
+**And** 名称不符合 `/^[a-z0-9-]+$/` 时显示错误提示
+**And** 未选择分类时"确认创建"按钮禁用
+
+**Given** 用户点击套件卡片的编辑按钮
+**When** 修改显示名称、描述或分类列表后确认
+**Then** 套件更新成功，卡片内容刷新
+
+**Given** 用户点击套件卡片的删除按钮
+**When** 确认删除
+**Then** 套件从列表中移除（仅删除套件本身，不影响其中引用的分类）
+**And** 显示删除成功 Toast
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** `bundle-store.ts` 有完整单元测试（CRUD actions + loading/error 状态）
+**And** `BundleManager.tsx` 有组件测试（空状态、列表渲染、创建表单、编辑、删除）
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 参考 `CategoryManager.tsx` 的实现模式（展开/折叠、编辑模式、AlertDialog 确认删除）
+- 分类选择器可复用 `Input` + `Checkbox` 组合，支持搜索过滤（fuse.js 或简单 filter）
+- 暗色主题样式与现有组件保持一致
+
+### Story 5.5: 套件一键激活功能
+
+As a 用户,
+I want 点击套件卡片上的"激活"按钮，将套件中的分类设为当前激活分类,
+So that 我可以在不同工作场景下快速切换整套分类配置，无需逐条手动调整。
+
+**Acceptance Criteria:**
+
+**Given** 用户点击套件卡片上的"激活"按钮
+**When** 激活操作执行
+**Then** 后端 `PUT /api/skill-bundles/:id/apply` 被调用
+**And** `config/settings.yaml` 中 `activeCategories` 字段更新为套件中的有效分类列表（覆盖模式，不叠加）
+**And** Toast 提示激活结果："已激活 N 个分类"
+
+**Given** 激活操作完成
+**When** 用户查看套件列表
+**Then** 当前激活的套件卡片有视觉标识（绿色边框或"已激活" Badge）
+**And** 同一时间只有一个套件显示"已激活"状态
+
+**Given** 套件激活后用户激活另一个套件
+**When** 新的激活操作完成
+**Then** 旧套件的"已激活"标识消失，新套件显示"已激活"
+**And** `activeCategories` 被新套件的分类列表覆盖
+
+**Given** 激活操作的性能
+**When** 执行激活操作
+**Then** 操作完成时间 < 500ms（NFR-CS-02）
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** `applyBundle` 服务函数有单元测试（正常激活 + 覆盖模式验证）
+**And** `PUT /api/skill-bundles/:id/apply` 端点有集成测试
+**And** 前端激活交互有组件测试（按钮点击 + 视觉标识更新）
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- `bundle-store.ts` 新增 `applyBundle(id)` action 和 `activeBundleId` 状态
+- 激活后需刷新 `bundles` 列表（或通过 `activeBundleId` 本地状态管理"已激活"标识）
+- 激活视觉标识：参考现有 Badge 组件，使用 `--primary` 色（绿色）
+
+### Story 5.6: 损坏引用处理与向后兼容验证
+
+As a 用户,
+I want 当套件中引用的分类被删除后，套件卡片显示明确的警告提示，而不是静默失效,
+So that 我能清楚知道套件状态，并决定是否需要修复套件。
+
+**Acceptance Criteria:**
+
+**Given** 套件引用了分类 A，用户删除了分类 A
+**When** 用户查看套件管理 Tab
+**Then** 该套件卡片显示黄色警告 Badge："包含 N 个已删除分类"
+**And** 展开套件时，已删除的分类 Tag 显示删除线样式和"已删除"标注
+**And** 有效分类 Tag 正常显示
+
+**Given** 用户激活一个包含损坏引用的套件
+**When** 激活操作执行
+**Then** 自动跳过已删除的分类引用，仅激活有效分类
+**And** Toast 提示："已激活 N 个分类，跳过 M 个已删除分类"
+
+**Given** 用户删除一个分类
+**When** 删除操作执行
+**Then** 删除操作不被套件阻断（职责分离，`categoryService` 不感知 `bundleService`）
+**And** 删除成功后，引用该分类的套件在下次加载时自动显示损坏警告
+
+**Given** 旧版 `settings.yaml`（无 `skillBundles` 和 `activeCategories` 字段）
+**When** 应用启动
+**Then** 正常启动，`skillBundles` 默认为空数组，`activeCategories` 默认为空数组（NFR-CS-03）
+**And** 现有分类管理功能无任何回归（NFR-CS-04）
+
+**Given** 本 Story 完成
+**When** 运行完整测试套件
+**Then** `getBundles()` 的 `brokenCategoryNames` 注入逻辑有单元测试
+**And** 损坏引用的 UI 展示有组件测试（警告 Badge + 删除线样式）
+**And** 激活损坏套件的跳过逻辑有单元测试
+**And** 向后兼容性有集成测试（旧版 settings.yaml 读取）
+**And** 所有测试通过，TypeScript 零错误
+
+**Technical Notes:**
+
+- `getBundles()` 后端注入 `brokenCategoryNames`：与 `categoryService.getCategories()` 做 diff，找出 `categoryNames` 中不存在的分类名
+- 前端套件卡片：`brokenCategoryNames.length > 0` 时显示黄色警告（使用 `--warning` 或 `--destructive` 色系的 Badge）
+- 删除线样式：CSS `line-through` + `text-muted-foreground`
+- 向后兼容由 `AppConfigSchema` 的 `.default([])` 保证，本 Story 需验证该行为
+
+---
+
+## Epic 6: UX 体验全面优化
+
+基于对 Skill Manager v0.1.0 的全页面实地体验审计（Chrome DevTools MCP），修复 6 类用户体验痛点，打通已有功能的"最后一公里"，让每一个已有功能都能被用户顺畅发现、正确理解、高效使用。
+
+**FRs covered:** FR-E6-01 ~ FR-E6-12
+**NFRs covered:** NFR-E6-01 ~ NFR-E6-03
+**来源 PRD:** prd-epic6-ux-polish.md
+**依赖:** Epic 3/4（工作流功能）→ Story 6.2；Epic 5（路径预设）→ Story 6.3
+
+### Story 6.1: 分类系统数据一致性修复
+
+As a 用户,
+I want 侧边栏分类计数与主区域 Skill 展示数量完全一致,
+So that 我能准确通过分类筛选找到目标 Skill，分类系统真正可用。
+
+**Acceptance Criteria:**
+
+**Given** Skill 的 Frontmatter `category` 字段值（如 `coding`）与分类配置 `id` 大小写不一致
+**When** 系统计算分类归属
+**Then** 进行大小写不敏感的规范化匹配，`coding`、`Coding`、`CODING` 均能正确归入对应分类
+**And** 侧边栏分类计数与主区域该分类下的 Skill 数量完全一致
+
+**Given** Skill 的 `category` 字段值无法匹配任何已知分类
+**When** 系统加载 Skill 列表
+**Then** 该 Skill 归入「未分类」虚拟分类
+**And** 侧边栏显示「未分类 N」条目
+**And** UI 在 Skill 卡片上提示「分类未匹配，点击修复」（或类似引导）
+
+**Given** 分类计数计算
+**When** 加载 500 个 Skill 规模的列表
+**Then** 分类计数计算不影响列表加载性能（< 200ms，NFR-E6-01）
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** `category` 字段规范化匹配逻辑有单元测试（大小写不敏感 + 别名映射 + 未匹配归入未分类）
+**And** 侧边栏计数与主区域一致性有集成测试
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 只做读取时规范化，不修改源 Skill 文件的 `category` 字段（避免破坏用户文件）
+- 规范化逻辑放在 `skillService` 的 `getSkills()` 或分类归属计算函数中
+- 「未分类」虚拟分类不持久化到 `settings.yaml`，仅在运行时动态生成
+- 来源：痛点 1（P0 — 阻断性问题）
+
+### Story 6.2: 工作流页面已有工作流管理
+
+As a 用户,
+I want 在工作流页面直接看到并管理已有工作流，而不是每次都进入空白新建状态,
+So that 我可以快速找到并编辑已有工作流，无需跨页面跳转。
+
+**Acceptance Criteria:**
+
+**Given** 用户进入 `/workflow` 页面
+**When** 已有工作流存在
+**Then** 页面顶部或侧边展示已有工作流列表（折叠式或标签页形式）
+**And** 每条工作流显示名称和步骤数量
+**And** 点击工作流条目，编排器加载该工作流的步骤进入编辑模式
+
+**Given** 用户处于编辑已有工作流状态
+**When** 点击「新建工作流」按钮
+**Then** 编排器清空，进入新建模式
+**And** 新建模式与编辑模式在 UI 上有明确区分（如标题显示「新建工作流」vs「编辑：{工作流名称}」）
+
+**Given** 工作流列表为空
+**When** 用户进入工作流页面
+**Then** 直接进入新建模式（当前行为保持不变）
+**And** 无需展示空的工作流列表区域
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** 工作流列表加载有单元测试
+**And** 新建/编辑模式切换有组件测试
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 复用现有 `workflowService`，不引入新数据源（工作流数据已存在）
+- 工作流列表 UI 参考 `CategoryManager` 的折叠列表模式
+- 来源：痛点 2（P0 — 阻断性问题）
+
+### Story 6.3: 同步页引导优化 + 导入页路径预设集成 + 顶部栏引导闭环
+
+As a 用户,
+I want 同步页有清晰的操作步骤引导，导入页能直接使用已保存的路径预设，顶部栏引导能直接打开配置对话框,
+So that 我在配置同步和导入时不会因为操作顺序不明确而困惑，已有的路径预设配置能被复用。
+
+**Acceptance Criteria:**
+
+**Given** 用户进入同步页 `/sync`，且同步目标列表为空
+**When** 查看右侧面板
+**Then** 右侧面板展示醒目的引导卡片，说明操作顺序：「第一步：添加同步目标」→「第二步：选择 Skill」→「第三步：开始同步」
+**And** 引导卡片在添加第一个同步目标后自动消失
+
+**Given** 同步目标为空时用户点击「开始同步」
+**When** 按钮 tooltip 显示
+**Then** 提示文案为「请先在右侧添加同步目标」（而非当前的「请先选择要同步的 Skill」）
+
+**Given** 用户在导入页 `/import` 的扫描路径输入框旁
+**When** 点击「从预设选择」下拉按钮
+**Then** 列出路径配置页面已保存的所有路径预设
+**And** 点击预设条目，路径自动填入输入框
+
+**Given** 路径预设列表为空
+**When** 用户点击「从预设选择」下拉按钮
+**Then** 下拉菜单展示「前往路径配置添加预设」快捷入口，点击跳转到路径配置页
+
+**Given** 用户点击顶部栏「未配置同步目标」按钮
+**When** 跳转到同步页
+**Then** 自动触发「添加同步目标」对话框弹出（或高亮右侧添加按钮）
+**And** 引导链完整闭环，用户无需自行寻找操作入口
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** 同步页引导卡片的显示/隐藏逻辑有组件测试
+**And** 导入页路径预设下拉有组件测试（有预设 + 无预设两种状态）
+**And** 顶部栏引导跳转有 E2E 测试
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 本 Story 依赖 Epic 5 完成（路径预设 `pathPresetService` 已就绪）
+- 导入页路径预设下拉复用 `pathPresetService.getPresets()`
+- 顶部栏跳转触发对话框：可通过 URL query param（如 `/sync?action=add-target`）或全局状态实现
+- 来源：痛点 3（P1）+ 痛点 4（P1）+ 痛点 6（P2）
+
+### Story 6.4: Command Palette 搜索增强
+
+As a 用户,
+I want Command Palette 搜索结果展示 Skill 描述摘要并按类型分组,
+So that 当多个 Skill 名称相似时，我能通过描述快速识别目标，无需逐一点击查看。
+
+**Acceptance Criteria:**
+
+**Given** 用户在 Command Palette 中搜索关键词
+**When** 搜索结果展示
+**Then** 每条 Skill 结果在名称下方显示描述摘要（截取 `description` 字段前 60 字符，超出显示省略号）
+**And** 描述摘要使用次要文字色（`text-muted-foreground`）展示
+
+**Given** 搜索结果包含多种类型（Skills、工作流、页面导航）
+**When** 结果列表渲染
+**Then** 结果按类型分组展示（「Skills」分组 / 「工作流」分组 / 「页面」分组）
+**And** 每个分组有清晰的分组标题
+
+**Given** Command Palette 搜索结果渲染
+**When** 含描述摘要的结果列表渲染完成
+**Then** 渲染时间 < 100ms（NFR-E6-02）
+
+**Given** Skill 的 `description` 字段为空
+**When** 搜索结果展示
+**Then** 不显示描述摘要行（不显示空白占位）
+
+**Given** 本 Story 完成
+**When** 运行测试
+**Then** 描述摘要截取逻辑有单元测试（正常截取 + 空描述 + 超长描述）
+**And** 分组展示有组件测试
+**And** 所有测试通过
+
+**Technical Notes:**
+
+- 修改 Command Palette 的搜索结果渲染组件（`CommandItem` 或类似组件）
+- 描述摘要截取：`description?.slice(0, 60) + (description?.length > 60 ? '...' : '')`
+- 分组使用 shadcn/ui `CommandGroup` 组件（已有基础设施）
+- 来源：痛点 5（P2）

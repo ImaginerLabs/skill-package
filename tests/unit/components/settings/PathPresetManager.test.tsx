@@ -7,6 +7,21 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PathPreset } from "../../../../shared/types";
 
+// Mock ide-icons — 阻止 @lobehub/icons → @lobehub/ui 的 ESM 模块解析失败
+vi.mock("../../../../src/components/settings/ide-icons/index", () => ({}));
+vi.mock("../../../../src/components/settings/ide-icons/ide-matcher", () => ({
+  matchIDEByPath: vi.fn().mockReturnValue(null),
+  IDE_CONFIGS: [],
+}));
+
+// Mock toast-store
+vi.mock("../../../../src/components/shared/toast-store", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock API
 vi.mock("../../../../src/lib/api", () => ({
   fetchPathPresets: vi.fn(),
@@ -65,9 +80,7 @@ describe("PathPresetManager", () => {
       render(<PathPresetManager />);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/暂无路径预设，点击「添加路径」开始配置/),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/还没有路径预设/)).toBeInTheDocument();
       });
     });
 
@@ -124,7 +137,7 @@ describe("PathPresetManager", () => {
       await user.click(screen.getByRole("button", { name: /添加路径/ }));
 
       expect(
-        screen.getByPlaceholderText("/Users/alex/projects"),
+        screen.getByPlaceholderText("/Users/alex/.cursor"),
       ).toBeInTheDocument();
     });
 
@@ -152,11 +165,11 @@ describe("PathPresetManager", () => {
       await user.click(screen.getByRole("button", { name: /添加路径/ }));
 
       await user.type(
-        screen.getByPlaceholderText("/Users/alex/projects"),
+        screen.getByPlaceholderText("/Users/alex/.cursor"),
         "/Users/alex/projects",
       );
       await user.type(
-        screen.getByPlaceholderText("例如：我的项目目录"),
+        screen.getByPlaceholderText("例如：我的主力开发目录"),
         "我的项目",
       );
 
@@ -179,7 +192,7 @@ describe("PathPresetManager", () => {
       await user.click(screen.getByRole("button", { name: /添加路径/ }));
 
       await user.type(
-        screen.getByPlaceholderText("/Users/alex/projects"),
+        screen.getByPlaceholderText("/Users/alex/.cursor"),
         "/Users/alex/projects",
       );
       await user.click(screen.getByRole("button", { name: /确认添加/ }));
@@ -187,7 +200,7 @@ describe("PathPresetManager", () => {
       await waitFor(() => {
         expect(screen.getByText("/Users/alex/projects")).toBeInTheDocument();
         expect(
-          screen.queryByPlaceholderText("/Users/alex/projects"),
+          screen.queryByPlaceholderText("/Users/alex/.cursor"),
         ).not.toBeInTheDocument();
       });
     });
@@ -202,13 +215,13 @@ describe("PathPresetManager", () => {
       await user.click(screen.getByRole("button", { name: /添加路径/ }));
 
       expect(
-        screen.getByPlaceholderText("/Users/alex/projects"),
+        screen.getByPlaceholderText("/Users/alex/.cursor"),
       ).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: /取消/ }));
 
       expect(
-        screen.queryByPlaceholderText("/Users/alex/projects"),
+        screen.queryByPlaceholderText("/Users/alex/.cursor"),
       ).not.toBeInTheDocument();
     });
 
@@ -223,7 +236,7 @@ describe("PathPresetManager", () => {
       await user.click(screen.getByRole("button", { name: /添加路径/ }));
 
       await user.type(
-        screen.getByPlaceholderText("/Users/alex/projects"),
+        screen.getByPlaceholderText("/Users/alex/.cursor"),
         "/Users/alex/projects",
       );
       await user.click(screen.getByRole("button", { name: /确认添加/ }));
@@ -231,7 +244,7 @@ describe("PathPresetManager", () => {
       // 表单仍然存在（未关闭）
       await waitFor(() => {
         expect(
-          screen.getByPlaceholderText("/Users/alex/projects"),
+          screen.getByPlaceholderText("/Users/alex/.cursor"),
         ).toBeInTheDocument();
       });
     });

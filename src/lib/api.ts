@@ -410,3 +410,56 @@ export async function deletePathPreset(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+// ---- Skill Bundle API ----
+
+import type {
+  ApplyBundleResult,
+  SkillBundleCreate,
+  SkillBundleUpdate,
+  SkillBundleWithStatus,
+} from "../../shared/types";
+
+/** 获取所有套件（含损坏引用信息） */
+export async function fetchSkillBundles(): Promise<SkillBundleWithStatus[]> {
+  return apiCall<SkillBundleWithStatus[]>("/api/skill-bundles");
+}
+
+/** 创建套件 */
+export async function createSkillBundle(
+  data: SkillBundleCreate,
+): Promise<SkillBundleWithStatus> {
+  return apiCall<SkillBundleWithStatus>("/api/skill-bundles", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/** 更新套件 */
+export async function updateSkillBundle(
+  id: string,
+  data: SkillBundleUpdate,
+): Promise<SkillBundleWithStatus> {
+  return apiCall<SkillBundleWithStatus>(
+    `/api/skill-bundles/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+/** 删除套件 */
+export async function deleteSkillBundle(id: string): Promise<void> {
+  return apiCall<void>(`/api/skill-bundles/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+/** 激活套件（将套件中的分类设为当前激活分类） */
+export async function applySkillBundle(id: string): Promise<ApplyBundleResult> {
+  return apiCall<ApplyBundleResult>(
+    `/api/skill-bundles/${encodeURIComponent(id)}/apply`,
+    { method: "PUT" },
+  );
+}

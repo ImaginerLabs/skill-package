@@ -123,4 +123,31 @@ export class AppError extends Error {
       HttpStatus.NOT_FOUND,
     );
   }
+
+  /** 套件未找到 */
+  static bundleNotFound(id: string): AppError {
+    return new AppError(
+      ErrorCode.BUNDLE_NOT_FOUND,
+      `套件 "${id}" 未找到`,
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
+  /** 套件数量超限 */
+  static bundleLimitExceeded(): AppError {
+    return new AppError(
+      ErrorCode.BUNDLE_LIMIT_EXCEEDED,
+      "套件数量已达上限（最多 50 个）",
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  /** 套件名称重复 */
+  static bundleNameDuplicate(name: string): AppError {
+    return new AppError(
+      ErrorCode.BUNDLE_NAME_DUPLICATE,
+      `套件名称 "${name}" 已存在`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
 }

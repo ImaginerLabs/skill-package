@@ -172,6 +172,55 @@ export interface PathPreset {
   label?: string;
 }
 
+// ---- 套件类型 ----
+
+/** 套件（分类组合） */
+export interface SkillBundle {
+  /** 格式：bundle-{ts36}-{rand4} */
+  id: string;
+  /** 英文标识，唯一，/^[a-z0-9-]+$/ */
+  name: string;
+  /** 显示名称 */
+  displayName: string;
+  /** 可选描述 */
+  description?: string;
+  /** 引用分类的 name（英文标识）列表，最多 20 个 */
+  categoryNames: string[];
+  /** ISO 8601 创建时间 */
+  createdAt: string;
+  /** ISO 8601 更新时间 */
+  updatedAt: string;
+}
+
+/** 套件（含损坏引用信息，用于 API 响应） */
+export interface SkillBundleWithStatus extends SkillBundle {
+  /** 已被删除的分类名列表（损坏引用） */
+  brokenCategoryNames: string[];
+}
+
+/** 套件激活结果 */
+export interface ApplyBundleResult {
+  /** 成功激活的分类名列表 */
+  applied: string[];
+  /** 因引用损坏被跳过的分类名列表 */
+  skipped: string[];
+}
+
+/** 创建套件请求体 */
+export interface SkillBundleCreate {
+  name: string;
+  displayName: string;
+  description?: string;
+  categoryNames: string[];
+}
+
+/** 更新套件请求体 */
+export interface SkillBundleUpdate {
+  displayName?: string;
+  description?: string;
+  categoryNames?: string[];
+}
+
 // ---- 分类与配置类型 ----
 
 /** 分类 */
@@ -189,6 +238,8 @@ export interface AppConfig {
     targets: SyncTarget[];
   };
   pathPresets: PathPreset[];
+  skillBundles: SkillBundle[];
+  activeCategories: string[];
   categories: Category[];
   ui: {
     defaultView: "grid" | "list";

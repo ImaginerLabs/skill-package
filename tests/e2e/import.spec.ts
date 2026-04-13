@@ -351,11 +351,15 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .click();
 
     // 选择分类（等待 option 元素存在）
-    await page.locator("select option[value='frontend']").waitFor({
-      state: "attached",
-      timeout: 5000,
-    });
-    await page.locator("select").selectOption("frontend");
+    await page
+      .locator("[data-testid='category-select'] option[value='frontend']")
+      .waitFor({
+        state: "attached",
+        timeout: 5000,
+      });
+    await page
+      .locator("[data-testid='category-select']")
+      .selectOption("frontend");
 
     // 导入按钮启用
     await expect(page.locator("button", { hasText: /导入选中/ })).toBeEnabled();
@@ -410,11 +414,15 @@ test.describe("Epic 2: 导入页面 — 勾选与分类", () => {
       .locator("label", { hasText: "Skill A" })
       .locator('input[type="checkbox"]')
       .click();
-    await page.locator("select option[value='frontend']").waitFor({
-      state: "attached",
-      timeout: 5000,
-    });
-    await page.locator("select").selectOption("frontend");
+    await page
+      .locator("[data-testid='category-select'] option[value='frontend']")
+      .waitFor({
+        state: "attached",
+        timeout: 5000,
+      });
+    await page
+      .locator("[data-testid='category-select']")
+      .selectOption("frontend");
 
     // 点击导入
     await page.locator("button", { hasText: /导入选中/ }).click();

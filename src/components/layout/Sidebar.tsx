@@ -17,7 +17,7 @@ const navItems = [
   { to: "/sync", icon: RefreshCw, label: "同步" },
   { to: "/import", icon: Download, label: "导入" },
   { to: "/paths", icon: FolderOpen, label: "路径配置" },
-  { to: "/settings", icon: Settings, label: "设置" },
+  { to: "/settings", icon: Settings, label: "分类" },
 ];
 
 /**

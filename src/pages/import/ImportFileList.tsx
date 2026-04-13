@@ -59,6 +59,7 @@ export const ImportFileList = memo(function ImportFileList({
         <div className="flex items-center gap-3">
           {/* 分类选择器 — 使用原生 select 以兼容 e2e 测试 */}
           <select
+            data-testid="category-select"
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
             className="h-9 w-[180px] rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 text-sm text-[hsl(var(--foreground))] cursor-pointer"

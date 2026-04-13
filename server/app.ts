@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import path from "node:path";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { bundleRoutes } from "./routes/bundleRoutes.js";
 import { categoryRoutes } from "./routes/categoryRoutes.js";
 import { configRoutes } from "./routes/configRoutes.js";
 import { healthRoutes } from "./routes/healthRoutes.js";
@@ -37,6 +38,7 @@ export function createApp(options: AppOptions) {
   app.use("/api", syncRoutes);
   app.use("/api", workflowRoutes);
   app.use("/api", pathPresetRoutes);
+  app.use("/api", bundleRoutes);
 
   // API 404 处理器：未匹配的 /api/* 路由返回 JSON 404
   app.all("/api/{*path}", (_req, res) => {

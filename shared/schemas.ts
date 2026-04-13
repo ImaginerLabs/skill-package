@@ -160,6 +160,43 @@ export const PathPresetUpdateSchema = z.object({
   label: z.string().optional(),
 });
 
+// ---- 套件 Schema ----
+
+/** SkillBundle Zod Schema */
+export const SkillBundleSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().regex(/^[a-z0-9-]+$/, "名称只能包含小写字母、数字和连字符"),
+  displayName: z.string().min(1, "显示名称不能为空"),
+  description: z.string().optional(),
+  categoryNames: z
+    .array(z.string().min(1))
+    .min(1, "至少选择 1 个分类")
+    .max(20, "最多选择 20 个分类"),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/** POST /api/skill-bundles 请求体 */
+export const SkillBundleCreateSchema = z.object({
+  name: z
+    .string()
+    .min(1, "name 为必填项")
+    .regex(/^[a-z0-9-]+$/, "名称只能包含小写字母、数字和连字符"),
+  displayName: z.string().min(1, "displayName 为必填项"),
+  description: z.string().optional(),
+  categoryNames: z
+    .array(z.string().min(1))
+    .min(1, "至少选择 1 个分类")
+    .max(20, "最多选择 20 个分类"),
+});
+
+/** PUT /api/skill-bundles/:id 请求体 */
+export const SkillBundleUpdateSchema = z.object({
+  displayName: z.string().min(1).optional(),
+  description: z.string().optional(),
+  categoryNames: z.array(z.string().min(1)).min(1).max(20).optional(),
+});
+
 // ---- 分类与配置 Schema ----
 
 /** Category Zod Schema */
@@ -177,6 +214,8 @@ export const AppConfigSchema = z.object({
     targets: z.array(SyncTargetSchema),
   }),
   pathPresets: z.array(PathPresetSchema).default([]),
+  skillBundles: z.array(SkillBundleSchema).max(50).default([]),
+  activeCategories: z.array(z.string()).default([]),
   categories: z.array(CategorySchema),
   ui: z.object({
     defaultView: z.enum(["grid", "list"]),
@@ -280,3 +319,6 @@ export type AppConfigInferred = z.infer<typeof AppConfigSchema>;
 export type ScanResultItemInferred = z.infer<typeof ScanResultItemSchema>;
 export type ScanResultInferred_Import = z.infer<typeof ScanResultSchema_Import>;
 export type PathPresetInferred = z.infer<typeof PathPresetSchema>;
+export type SkillBundleInferred = z.infer<typeof SkillBundleSchema>;
+export type SkillBundleCreateInferred = z.infer<typeof SkillBundleCreateSchema>;
+export type SkillBundleUpdateInferred = z.infer<typeof SkillBundleUpdateSchema>;
