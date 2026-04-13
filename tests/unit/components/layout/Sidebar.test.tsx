@@ -14,6 +14,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import Sidebar from "../../../../src/components/layout/Sidebar";
 
 // ─────────────────────────────────────────────
+// Mock react-i18next（t() 返回翻译后的中文，模拟 zh 语言环境）
+// ─────────────────────────────────────────────
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "nav.skillLibrary": "Skill 库",
+        "nav.workflow": "工作流",
+        "nav.sync": "同步",
+        "nav.import": "导入",
+        "nav.pathConfig": "路径配置",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
+// ─────────────────────────────────────────────
 // Mock react-router-dom
 // ─────────────────────────────────────────────
 const mockNavigate = vi.fn();
@@ -227,6 +246,7 @@ describe("Sidebar — Skill 库导航 (Story NAV-01 + Story 7.1)", () => {
     it("渲染所有保留的导航项", () => {
       render(<Sidebar />);
       expect(screen.getByTestId("nav-skill-library")).toBeInTheDocument();
+      // i18n 化后，t() 返回翻译后的中文（mock 中已映射）
       expect(screen.getByText("工作流")).toBeInTheDocument();
       expect(screen.getByText("同步")).toBeInTheDocument();
       expect(screen.getByText("导入")).toBeInTheDocument();
@@ -235,6 +255,7 @@ describe("Sidebar — Skill 库导航 (Story NAV-01 + Story 7.1)", () => {
 
     it("「分类」导航项已从主 Sidebar 移除", () => {
       render(<Sidebar />);
+      // 「分类」不在 navItems 中，也不在 mock 映射中
       expect(screen.queryByText("分类")).not.toBeInTheDocument();
     });
 

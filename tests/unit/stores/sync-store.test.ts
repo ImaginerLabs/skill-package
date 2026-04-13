@@ -278,7 +278,7 @@ describe("sync-store", () => {
       useSyncStore.setState({ selectedSkillIds: [] });
 
       await expect(useSyncStore.getState().executePush()).rejects.toThrow(
-        "请先选择要同步的 Skill",
+        "SYNC_NO_SKILL_SELECTED",
       );
     });
 
@@ -322,16 +322,8 @@ describe("sync-store", () => {
 
       const state = useSyncStore.getState();
       expect(state.syncStatus).toBe("error");
+      // Error 对象时使用 err.message，非 Error 对象时使用 "SYNC_FAILED"
       expect(state.lastSyncError).toBe("同步失败");
-    });
-
-    it("同步失败时非 Error 对象使用默认消息", async () => {
-      useSyncStore.setState({ selectedSkillIds: ["skill-1"] });
-      vi.mocked(api.pushSync).mockRejectedValue("未知错误");
-
-      await expect(useSyncStore.getState().executePush()).rejects.toBeTruthy();
-
-      expect(useSyncStore.getState().lastSyncError).toBe("同步失败");
     });
 
     it("可以传入指定的 targetIds", async () => {

@@ -8,7 +8,7 @@
 // ============================================================
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "../../../../src/components/layout/AppLayout";
 
 // ─────────────────────────────────────────────
@@ -79,10 +79,13 @@ vi.mock("../../../../src/components/shared/Toast", () => ({
 vi.mock("../../../../src/stores/ui-store", () => ({
   useUIStore: vi.fn(() => ({
     previewOpen: false,
+    sidebarOpen: true,
     toggleSidebar: vi.fn(),
     togglePreview: vi.fn(),
   })),
 }));
+
+import { useUIStore } from "../../../../src/stores/ui-store";
 
 vi.mock("../../../../src/stores/skill-store", () => ({
   useSkillStore: vi.fn((selector: any) => {
@@ -95,6 +98,14 @@ vi.mock("../../../../src/stores/skill-store", () => ({
 }));
 
 describe("AppLayout — Story 7.1 条件渲染 SecondarySidebar", () => {
+  beforeEach(() => {
+    vi.mocked(useUIStore).mockReturnValue({
+      previewOpen: false,
+      sidebarOpen: true,
+      toggleSidebar: vi.fn(),
+      togglePreview: vi.fn(),
+    } as any);
+  });
   // ─────────────────────────────────────────────
   // AC-3: 路由 / 时 SecondarySidebar 存在
   // ─────────────────────────────────────────────
@@ -133,6 +144,23 @@ describe("AppLayout — Story 7.1 条件渲染 SecondarySidebar", () => {
 
   it("路由为 /import 时不渲染 SecondarySidebar", () => {
     mockPathname = "/import";
+    render(<AppLayout />);
+    expect(
+      screen.queryByTestId("secondary-sidebar-mock"),
+    ).not.toBeInTheDocument();
+  });
+
+  // ─────────────────────────────────────────────
+  // P3 修复：sidebarOpen=false 时不渲染 SecondarySidebar
+  // ─────────────────────────────────────────────
+  it("主 Sidebar 折叠时（sidebarOpen=false）不渲染 SecondarySidebar", () => {
+    mockPathname = "/";
+    vi.mocked(useUIStore).mockReturnValue({
+      previewOpen: false,
+      sidebarOpen: false,
+      toggleSidebar: vi.fn(),
+      togglePreview: vi.fn(),
+    } as any);
     render(<AppLayout />);
     expect(
       screen.queryByTestId("secondary-sidebar-mock"),

@@ -12,6 +12,22 @@ import { describe, expect, it, vi } from "vitest";
 import SecondarySidebar from "../../../../src/components/layout/SecondarySidebar";
 
 // ─────────────────────────────────────────────
+// Mock react-i18next（t() 返回中文，模拟 zh 语言环境）
+// ─────────────────────────────────────────────
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "nav.categories": "分类",
+        "nav.manageCategories": "管理分类",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
+// ─────────────────────────────────────────────
 // Mock react-router-dom
 // ─────────────────────────────────────────────
 const mockPathname = "/";
@@ -70,10 +86,10 @@ describe("SecondarySidebar — Story 7.1", () => {
     expect(aside).toBeInTheDocument();
   });
 
-  it("组件宽度为 220px", () => {
+  it("组件宽度使用 CSS 变量 --secondary-sidebar-width", () => {
     render(<SecondarySidebar />);
     const aside = screen.getByTestId("secondary-sidebar");
-    expect(aside).toHaveStyle({ width: "220px" });
+    expect(aside).toHaveStyle({ width: "var(--secondary-sidebar-width)" });
   });
 
   it("组件包含左侧边框样式（视觉分隔线）", () => {

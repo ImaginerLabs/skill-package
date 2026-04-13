@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../../src/components/ui/dialog";
+
+// Mock react-i18next（t() 返回中文，模拟 zh 语言环境）
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "common.close": "关闭",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
 
 describe("Dialog", () => {
   const renderDialog = () =>

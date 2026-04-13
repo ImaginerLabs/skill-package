@@ -5,6 +5,30 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Mock scrollIntoView（jsdom 不支持）
 Element.prototype.scrollIntoView = vi.fn();
 
+// ─────────────────────────────────────────────
+// Mock react-i18next（t() 返回中文，模拟 zh 语言环境）
+// ─────────────────────────────────────────────
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "nav.skillLibrary": "Skill 库",
+        "nav.workflow": "工作流",
+        "nav.sync": "同步",
+        "nav.import": "导入",
+        "nav.settings": "设置",
+        "commandPalette.placeholder": "搜索 Skill、页面...",
+        "commandPalette.noResults": "未找到匹配结果",
+        "commandPalette.groupSkills": "Skills",
+        "commandPalette.groupWorkflows": "工作流",
+        "commandPalette.groupPages": "页面",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
 // Mock stores
 const mockUIState = {
   commandPaletteOpen: true,

@@ -120,7 +120,7 @@ describe("skill-store", () => {
       await fetchSkills();
 
       const state = useSkillStore.getState();
-      expect(state.error).toBe("加载 Skill 列表失败");
+      expect(state.error).toBe("LOAD_FAILED");
     });
   });
 
