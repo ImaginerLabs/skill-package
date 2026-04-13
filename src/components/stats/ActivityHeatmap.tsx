@@ -78,11 +78,11 @@ export default function ActivityHeatmap() {
       <p className="text-[10px] text-[hsl(var(--muted-foreground))] mb-2">
         活跃度
       </p>
-      {/* CSS Grid 12 列固定 8px 宽，豆点紧凑排列 */}
+      {/* CSS Grid 12 列自适应宽度，豆点撑满容器 */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(12, 8px)",
+          gridTemplateColumns: "repeat(12, 1fr)",
           gap: "2px",
         }}
       >
@@ -93,15 +93,14 @@ export default function ActivityHeatmap() {
               title={`${day.date} · ${day.count} 次修改`}
               data-testid={`heatmap-dot-${day.date}`}
               style={{
-                width: 8,
-                height: 8,
+                aspectRatio: "1",
                 borderRadius: 2,
                 backgroundColor: getHeatColor(day.count),
                 transition: "none",
               }}
             />
           ) : (
-            <div key={`empty-${idx}`} style={{ width: 8, height: 8 }} />
+            <div key={`empty-${idx}`} style={{ aspectRatio: "1" }} />
           ),
         )}
       </div>
