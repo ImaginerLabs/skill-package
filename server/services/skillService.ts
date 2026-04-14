@@ -50,6 +50,13 @@ async function scanMarkdownFiles(dirPath: string): Promise<string[]> {
 
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
+  // 若当前目录下存在 SKILL.md，视为 Skill 包根目录：只收录 SKILL.md，不处理其他文件/子目录
+  const hasSkillMd = entries.some((e) => e.isFile() && e.name === "SKILL.md");
+  if (hasSkillMd) {
+    results.push(path.join(dirPath, "SKILL.md"));
+    return results;
+  }
+
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
 
@@ -232,6 +239,9 @@ export async function deleteSkill(id: string): Promise<void> {
   if (!meta) {
     throw AppError.skillNotFound(id);
   }
+  if (meta.readonly) {
+    throw AppError.skillReadonly(id);
+  }
 
   const absolutePath = path.join(SKILLS_ROOT, meta.filePath);
 
@@ -257,6 +267,9 @@ export async function moveSkillToCategory(
   const meta = skillCache.get(id);
   if (!meta) {
     throw AppError.skillNotFound(id);
+  }
+  if (meta.readonly) {
+    throw AppError.skillReadonly(id);
   }
 
   const oldAbsolutePath = path.join(SKILLS_ROOT, meta.filePath);
@@ -315,6 +328,9 @@ export async function updateSkillMeta(
   const meta = skillCache.get(id);
   if (!meta) {
     throw AppError.skillNotFound(id);
+  }
+  if (meta.readonly) {
+    throw AppError.skillReadonly(id);
   }
 
   const absolutePath = path.join(SKILLS_ROOT, meta.filePath);

@@ -11,3 +11,22 @@ pathPresets:
     path: /Users/alex/projects/claude-code
   - id: preset-mnwkx5sh-0ek5
     path: /Users/alex/trae/workspace
+  - id: preset-mnydi8vj-vosk
+    path: /Users/alex/.codebuddy/skills
+skillBundles:
+  - id: bundle-default
+    name: default
+    displayName: 默认套件
+    description: 包含所有出厂预设分类的完整技能组合
+    categoryNames:
+      - coding
+      - writing
+      - devops
+      - workflows
+      - document-processing
+      - dev-tools
+      - testing
+      - design
+      - meta-skills
+    createdAt: '2026-04-14T04:01:28.856Z'
+    updatedAt: '2026-04-14T04:01:28.856Z'

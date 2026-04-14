@@ -28,6 +28,22 @@ const BUNDLE_LIMIT = 50;
 /** 套件名称校验正则 */
 const VALID_BUNDLE_NAME_RE = /^[a-z0-9-]+$/;
 
+/** 默认套件固定 ID */
+const DEFAULT_BUNDLE_ID = "bundle-default";
+
+/** 默认套件包含的所有出厂分类（9 个） */
+const DEFAULT_BUNDLE_CATEGORIES = [
+  "coding",
+  "writing",
+  "devops",
+  "workflows",
+  "document-processing",
+  "dev-tools",
+  "testing",
+  "design",
+  "meta-skills",
+];
+
 // ---- 内部工具函数 ----
 
 interface SettingsData {
@@ -216,6 +232,11 @@ export async function updateBundle(
  * 删除套件
  */
 export async function removeBundle(id: string): Promise<void> {
+  // 默认套件不可删除
+  if (id === DEFAULT_BUNDLE_ID) {
+    throw AppError.badRequest("默认套件不可删除");
+  }
+
   const settings = await readSettings();
   const bundles = settings.skillBundles ?? [];
 
@@ -258,4 +279,35 @@ export async function applyBundle(id: string): Promise<ApplyBundleResult> {
   await writeSettings(settings);
 
   return { applied, skipped };
+}
+
+/**
+ * 确保默认套件存在（幂等操作）
+ * 系统启动时调用，若默认套件不存在则自动创建
+ */
+export async function ensureDefaultBundle(): Promise<void> {
+  const settings = await readSettings();
+  const bundles = settings.skillBundles ?? [];
+
+  // 幂等检查：已存在 name: "default" 的套件则跳过
+  const exists = bundles.some((b) => b.name === "default");
+  if (exists) {
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const defaultBundle: SkillBundle = {
+    id: DEFAULT_BUNDLE_ID,
+    name: "default",
+    displayName: "默认套件",
+    description: "包含所有出厂预设分类的完整技能组合",
+    categoryNames: DEFAULT_BUNDLE_CATEGORIES,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  bundles.push(defaultBundle);
+  settings.skillBundles = bundles;
+  await writeSettings(settings);
+  console.log("[bundleService] 默认套件已创建");
 }

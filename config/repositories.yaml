@@ -1,0 +1,67 @@
+# External Skills Hub — 外部仓库注册配置
+# 格式参考：https://github.com/anthropics/skills
+repositories:
+  - id: anthropic-official
+    name: Anthropic Official Skills
+    url: https://github.com/anthropics/skills
+    branch: main
+    skillsPath: skills
+    enabled: true
+    include:
+      - name: pdf
+        targetCategory: document-processing
+      - name: docx
+        targetCategory: document-processing
+      - name: xlsx
+        targetCategory: document-processing
+      - name: pptx
+        targetCategory: document-processing
+      - name: mcp-builder
+        targetCategory: dev-tools
+      - name: webapp-testing
+        targetCategory: testing
+      - name: skill-creator
+        targetCategory: meta-skills
+      - name: frontend-design
+        targetCategory: design
+      - name: doc-coauthoring
+        targetCategory: writing
+      - name: web-artifacts-builder
+        targetCategory: design
+    exclude:
+      - slack-gif-creator
+      - algorithmic-art
+      - brand-guidelines
+      - canvas-design
+      - theme-factory
+      - internal-comms
+
+  - id: awesome-copilot
+    name: GitHub Awesome Copilot Skills
+    url: https://github.com/github/awesome-copilot
+    branch: main
+    skillsPath: skills
+    enabled: true
+    include:
+      # coding/
+      - name: security-review
+        targetCategory: coding
+      - name: refactor
+        targetCategory: coding
+      - name: doublecheck
+        targetCategory: coding
+      - name: git-commit
+        targetCategory: coding
+      # writing/
+      - name: documentation-writer
+        targetCategory: writing
+      - name: meeting-minutes
+        targetCategory: writing
+      # design/
+      - name: excalidraw-diagram-generator
+        targetCategory: design
+      - name: web-design-reviewer
+        targetCategory: design
+      # devops/
+      - name: create-implementation-plan
+        targetCategory: devops

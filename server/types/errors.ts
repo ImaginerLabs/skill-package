@@ -150,4 +150,13 @@ export class AppError extends Error {
       HttpStatus.BAD_REQUEST,
     );
   }
+
+  /** Skill 只读（外部 Skill 不可编辑/删除/移动） */
+  static skillReadonly(skillId: string): AppError {
+    return new AppError(
+      ErrorCode.SKILL_READONLY,
+      `Skill "${skillId}" 为只读（外部 Skill），不可编辑`,
+      HttpStatus.FORBIDDEN,
+    );
+  }
 }

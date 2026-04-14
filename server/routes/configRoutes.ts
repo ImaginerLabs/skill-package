@@ -3,7 +3,7 @@
 // ============================================================
 
 import { Router } from "express";
-import { loadCategories, loadConfig } from "../services/configService.js";
+import { loadConfig } from "../services/configService.js";
 
 export const configRoutes = Router();
 
@@ -14,18 +14,6 @@ configRoutes.get("/config", async (_req, res, next) => {
   try {
     const config = await loadConfig();
     res.json({ success: true, data: config });
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * GET /api/categories — 获取分类列表
- */
-configRoutes.get("/categories", async (_req, res, next) => {
-  try {
-    const categories = await loadCategories();
-    res.json({ success: true, data: categories });
   } catch (err) {
     next(err);
   }

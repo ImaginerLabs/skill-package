@@ -21,6 +21,11 @@ export const SkillMetaSchema = z.object({
   lastModified: z
     .string()
     .datetime({ message: "lastModified 必须是有效的 ISO 8601 时间戳" }),
+  // 外部 Skill 来源元数据（可选，向后兼容）
+  source: z.string().optional(),
+  sourceUrl: z.string().url().optional(),
+  sourceRepo: z.string().url().optional(),
+  readonly: z.boolean().optional(),
 });
 
 /** SkillFull Zod Schema */
@@ -158,6 +163,37 @@ export const PathPresetCreateSchema = z.object({
 export const PathPresetUpdateSchema = z.object({
   path: z.string().min(1).optional(),
   label: z.string().optional(),
+});
+
+// ---- 外部仓库配置 Schema ----
+
+/** RepoSkillMapping Zod Schema */
+export const RepoSkillMappingSchema = z.object({
+  name: z.string().min(1, "name 不能为空"),
+  targetCategory: z.string().min(1, "targetCategory 不能为空"),
+});
+
+/** ExternalRepository Zod Schema */
+export const ExternalRepositorySchema = z.object({
+  id: z.string().min(1, "id 不能为空"),
+  name: z.string().min(1, "name 不能为空"),
+  /** 必须是 https://github.com/ 开头的合法 URL */
+  url: z
+    .string()
+    .regex(
+      /^https:\/\/github\.com\//,
+      "url 必须是 https://github.com/ 开头的合法 GitHub URL",
+    ),
+  branch: z.string().min(1, "branch 不能为空"),
+  skillsPath: z.string().min(1, "skillsPath 不能为空"),
+  enabled: z.boolean(),
+  include: z.array(RepoSkillMappingSchema).default([]),
+  exclude: z.array(z.string()).default([]),
+});
+
+/** RepositoriesConfig Zod Schema */
+export const RepositoriesConfigSchema = z.object({
+  repositories: z.array(ExternalRepositorySchema).default([]),
 });
 
 // ---- 套件 Schema ----
@@ -322,3 +358,10 @@ export type PathPresetInferred = z.infer<typeof PathPresetSchema>;
 export type SkillBundleInferred = z.infer<typeof SkillBundleSchema>;
 export type SkillBundleCreateInferred = z.infer<typeof SkillBundleCreateSchema>;
 export type SkillBundleUpdateInferred = z.infer<typeof SkillBundleUpdateSchema>;
+export type RepoSkillMappingInferred = z.infer<typeof RepoSkillMappingSchema>;
+export type ExternalRepositoryInferred = z.infer<
+  typeof ExternalRepositorySchema
+>;
+export type RepositoriesConfigInferred = z.infer<
+  typeof RepositoriesConfigSchema
+>;

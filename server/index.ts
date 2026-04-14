@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "./app.js";
+import { ensureDefaultBundle } from "./services/bundleService.js";
 import { initializeSkillCache } from "./services/skillService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +24,7 @@ app.listen(PORT, "127.0.0.1", async () => {
   // 启动后初始化 Skill 缓存（异步，不阻塞服务启动）
   try {
     await initializeSkillCache();
+    await ensureDefaultBundle();
   } catch (err) {
     console.error("[启动] Skill 缓存初始化失败:", err);
   }

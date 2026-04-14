@@ -15,6 +15,7 @@ export const ErrorCode = {
   // Skill 相关
   SKILL_NOT_FOUND: "SKILL_NOT_FOUND",
   PARSE_ERROR: "PARSE_ERROR",
+  SKILL_READONLY: "SKILL_READONLY",
 
   // 配置相关
   CONFIG_ERROR: "CONFIG_ERROR",

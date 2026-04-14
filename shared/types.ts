@@ -28,6 +28,17 @@ export interface SkillMeta {
   fileSize: number;
   /** ISO 8601 时间戳 */
   lastModified: string;
+
+  // ---- 外部 Skill 来源元数据（可选，仅外部 Skill 有值）----
+
+  /** 来源仓库 ID（对应 repositories.yaml 中的 id，外部 Skill 专用） */
+  source?: string;
+  /** Skill 在 GitHub 上的 URL（外部 Skill 专用） */
+  sourceUrl?: string;
+  /** 仓库 GitHub URL（外部 Skill 专用） */
+  sourceRepo?: string;
+  /** 是否只读（外部 Skill 为 true，本地 Skill 无此字段或为 false） */
+  readonly?: boolean;
 }
 
 /** 完整 Skill（含 Markdown 正文） */
@@ -219,6 +230,41 @@ export interface SkillBundleUpdate {
   displayName?: string;
   description?: string;
   categoryNames?: string[];
+}
+
+// ---- 外部仓库配置类型 ----
+
+/** 仓库 Skill 映射（白名单项） */
+export interface RepoSkillMapping {
+  /** Skill 名称（对应仓库中的目录名） */
+  name: string;
+  /** 目标分类（对应 categories.yaml 中的 name） */
+  targetCategory: string;
+}
+
+/** 外部仓库配置 */
+export interface ExternalRepository {
+  /** 仓库唯一标识 */
+  id: string;
+  /** 仓库显示名称 */
+  name: string;
+  /** 仓库 GitHub HTTPS URL */
+  url: string;
+  /** 同步分支名 */
+  branch: string;
+  /** 仓库内 Skill 目录相对路径 */
+  skillsPath: string;
+  /** 是否启用 */
+  enabled: boolean;
+  /** 白名单（仅同步列表中的 Skill） */
+  include: RepoSkillMapping[];
+  /** 黑名单（排除列表中的 Skill，优先级高于白名单） */
+  exclude: string[];
+}
+
+/** 仓库注册配置（对应 config/repositories.yaml） */
+export interface RepositoriesConfig {
+  repositories: ExternalRepository[];
 }
 
 // ---- 分类与配置类型 ----

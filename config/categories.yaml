@@ -11,3 +11,18 @@
 - name: workflows
   displayName: 工作流
   description: 多 Skill 组合的自动化工作流
+- name: document-processing
+  displayName: 文档处理
+  description: PDF、Word、Excel、PPT 等文档格式处理相关的 Skill
+- name: dev-tools
+  displayName: 开发工具
+  description: 开发效率工具、MCP 构建、API 集成相关的 Skill
+- name: testing
+  displayName: 测试
+  description: 自动化测试、Web 应用测试、质量保障相关的 Skill
+- name: design
+  displayName: 设计
+  description: UI/UX 设计、前端视觉、交互设计相关的 Skill
+- name: meta-skills
+  displayName: 元技能
+  description: Skill 创建、AI 能力构建、提示词工程相关的 Skill

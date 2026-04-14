@@ -141,6 +141,11 @@ function parseRawFrontmatterInternal(
     filePath,
     fileSize,
     lastModified,
+    // 外部 Skill 来源元数据（可选字段，缺失时返回 undefined，向后兼容）
+    source: data.source || undefined,
+    sourceUrl: data.sourceUrl || undefined,
+    sourceRepo: data.sourceRepo || undefined,
+    readonly: data.readonly === true ? true : undefined,
   };
 
   // 3. Zod 校验
