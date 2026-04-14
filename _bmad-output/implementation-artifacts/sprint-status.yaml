@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-13T21:49:00
+last_updated: 2026-04-14T10:51:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -263,3 +263,22 @@ development_status:
   epic-heatmap-tooltip: done
   heatmap-tooltip-1-activity-heatmap-hover-tooltip: done
   epic-heatmap-tooltip-retrospective: optional
+
+  # ============================================================
+  # Epic 8: External Skills Hub（外部技能仓库聚合与管理）
+  # 系统从「个人 Skill 资产管理」扩展为「技能生态聚合平台」：通过配置文件驱动的多仓库注册机制，
+  # 自动从 GitHub 仓库（首批：anthropics/skills）拉取高质量 Skill，经过白名单/黑名单筛选后
+  # 同步到项目 skills/ 目录。外部 Skill 带有来源标签（可点击跳转 GitHub 仓库），以只读模式管理。
+  # 预设分类从 4 个扩展到 9 个，所有出厂分类聚合为默认套件。GitHub Action 定时自动同步并创建 PR。
+  # Dependencies: Epic 1（SkillCard/SkillPreview 组件已就绪）、Epic 5（bundleService 已就绪）
+  # FRs: FR-EH-01 ~ FR-EH-36 | NFRs: NFR-EH-01 ~ NFR-EH-11 | ARs: AD-31 ~ AD-40
+  # ============================================================
+  epic-8: backlog
+  8-1-skillmeta-type-extension-and-schema-update: backlog
+  8-2-repository-config-file-and-parsing: backlog
+  8-3-preset-category-expansion-and-default-bundle: backlog
+  8-4-backend-readonly-protection: backlog
+  8-5-frontend-source-label-and-readonly-indicator: backlog
+  8-6-sync-script-core-logic: backlog
+  8-7-github-action-workflow: backlog
+  epic-8-retrospective: optional
