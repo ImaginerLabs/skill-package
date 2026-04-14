@@ -8,6 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock react-i18next（使用 zh 翻译资源）
+// 注意：t 函数必须在模块级别定义，保持引用稳定，避免 useCallback 依赖变化导致无限循环
 vi.mock("react-i18next", async () => {
   const { zh } = await import("../../../../src/i18n/locales/zh");
   function resolve(key: string, obj: Record<string, unknown>): string {
@@ -20,18 +21,21 @@ vi.mock("react-i18next", async () => {
     }
     return typeof cur === "string" ? cur : key;
   }
+  // 稳定的 t 函数引用（模块级别，不在每次 useTranslation 调用时重新创建）
+  const stableT = (key: string, params?: Record<string, unknown>) => {
+    let text = resolve(key, zh as unknown as Record<string, unknown>);
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
+      }
+    }
+    return text;
+  };
+  const stableI18n = { language: "zh", changeLanguage: vi.fn() };
   return {
     useTranslation: () => ({
-      t: (key: string, params?: Record<string, unknown>) => {
-        let text = resolve(key, zh as unknown as Record<string, unknown>);
-        if (params) {
-          for (const [k, v] of Object.entries(params)) {
-            text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, "g"), String(v));
-          }
-        }
-        return text;
-      },
-      i18n: { language: "zh", changeLanguage: vi.fn() },
+      t: stableT,
+      i18n: stableI18n,
     }),
   };
 });
