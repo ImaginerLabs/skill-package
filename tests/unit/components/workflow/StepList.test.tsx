@@ -38,6 +38,7 @@ vi.mock("@dnd-kit/utilities", () => ({
 const mockRemoveStep = vi.fn();
 const mockReorderSteps = vi.fn();
 const mockUpdateStepDescription = vi.fn();
+const mockAddCustomStep = vi.fn();
 
 vi.mock("../../../../src/stores/workflow-store", () => ({
   useWorkflowStore: vi.fn(() => ({
@@ -45,6 +46,7 @@ vi.mock("../../../../src/stores/workflow-store", () => ({
     removeStep: mockRemoveStep,
     reorderSteps: mockReorderSteps,
     updateStepDescription: mockUpdateStepDescription,
+    addCustomStep: mockAddCustomStep,
   })),
 }));
 
@@ -63,7 +65,7 @@ describe("StepList", () => {
       expect(screen.getByText("开始编排工作流")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "从左侧选择 Skill 添加到工作流中，组合多个 Skill 为一个自动化工作流",
+          "从左侧选择 Skill 添加到工作流中，或添加自定义步骤，组合为一个自动化工作流",
         ),
       ).toBeInTheDocument();
     });
@@ -78,17 +80,20 @@ describe("StepList", () => {
             skillId: "skill-1",
             skillName: "代码审查",
             description: "执行全面审查",
+            type: "skill",
           },
           {
             order: 2,
             skillId: "skill-2",
             skillName: "测试覆盖",
             description: "",
+            type: "skill",
           },
         ],
         removeStep: mockRemoveStep,
         reorderSteps: mockReorderSteps,
         updateStepDescription: mockUpdateStepDescription,
+        addCustomStep: mockAddCustomStep,
       } as unknown as ReturnType<typeof useWorkflowStore>);
 
       render(<StepList />);

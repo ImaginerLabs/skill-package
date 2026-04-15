@@ -41,12 +41,10 @@ import { createApp } from "../../../server/app";
 import {
   createCategory,
   deleteCategory,
+  getCategories,
   updateCategory,
 } from "../../../server/services/categoryService";
-import {
-  loadConfig,
-  loadCategories as loadConfigCategories,
-} from "../../../server/services/configService";
+import { loadConfig } from "../../../server/services/configService";
 import {
   deleteSkill,
   getAllSkills,
@@ -325,8 +323,7 @@ describe("Skill API", () => {
 describe("Category API", () => {
   describe("GET /api/categories", () => {
     it("返回分类列表", async () => {
-      // 注意：GET /api/categories 由 configRoutes 先匹配，调用 configService.loadCategories
-      vi.mocked(loadConfigCategories).mockResolvedValue(mockCategories);
+      vi.mocked(getCategories).mockResolvedValue(mockCategories);
 
       const res = await request(app).get("/api/categories");
 

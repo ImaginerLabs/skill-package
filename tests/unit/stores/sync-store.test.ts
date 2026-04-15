@@ -9,6 +9,7 @@ vi.mock("../../../src/lib/api", () => ({
   updateSyncTarget: vi.fn(),
   deleteSyncTarget: vi.fn(),
   pushSync: vi.fn(),
+  diffSync: vi.fn(),
 }));
 
 const mockTarget = {
@@ -332,7 +333,7 @@ describe("sync-store", () => {
 
       await useSyncStore.getState().executePush(["t1"]);
 
-      expect(api.pushSync).toHaveBeenCalledWith(["skill-1"], ["t1"]);
+      expect(api.pushSync).toHaveBeenCalledWith(["skill-1"], ["t1"], undefined);
     });
 
     it("不传 targetIds 时传 undefined", async () => {
@@ -341,7 +342,11 @@ describe("sync-store", () => {
 
       await useSyncStore.getState().executePush();
 
-      expect(api.pushSync).toHaveBeenCalledWith(["skill-1"], undefined);
+      expect(api.pushSync).toHaveBeenCalledWith(
+        ["skill-1"],
+        undefined,
+        undefined,
+      );
     });
 
     it("成功同步后记录 lastSyncTime 为 ISO 格式", async () => {

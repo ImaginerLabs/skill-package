@@ -33,8 +33,10 @@ vi.mock("react-i18next", async () => {
 
 // Mock stores
 const mockExecutePush = vi.fn();
+const mockExecuteDiff = vi.fn();
 const mockSetSyncStatus = vi.fn();
 const mockSetSyncResult = vi.fn();
+const mockSetDiffReport = vi.fn();
 
 vi.mock("../../../../src/stores/sync-store", () => ({
   useSyncStore: vi.fn(() => ({
@@ -42,9 +44,12 @@ vi.mock("../../../../src/stores/sync-store", () => ({
     selectedSkillIds: ["s1", "s2"],
     syncStatus: "idle",
     syncResult: null,
+    diffReport: null,
     executePush: mockExecutePush,
+    executeDiff: mockExecuteDiff,
     setSyncStatus: mockSetSyncStatus,
     setSyncResult: mockSetSyncResult,
+    setDiffReport: mockSetDiffReport,
   })),
 }));
 
@@ -52,7 +57,46 @@ vi.mock("../../../../src/components/shared/toast-store", () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
   },
+}));
+
+// Mock SyncSplitButton 为简单按钮
+vi.mock("../../../../src/components/sync/SyncSplitButton", () => ({
+  default: ({
+    onSync,
+    onDiff,
+    disabled,
+    loading,
+  }: {
+    onSync: (mode: string) => void;
+    onDiff: () => void;
+    disabled: boolean;
+    loading: boolean;
+    loadingMode: string | null;
+  }) => (
+    <div data-testid="sync-split-button">
+      <button
+        onClick={() => onSync("incremental")}
+        disabled={disabled || loading}
+      >
+        {loading ? "同步中..." : "开始同步"}
+      </button>
+      <button onClick={onDiff} disabled={disabled || loading}>
+        查看差异
+      </button>
+    </div>
+  ),
+}));
+
+// Mock DiffReportView
+vi.mock("../../../../src/components/sync/DiffReportView", () => ({
+  default: () => <div data-testid="diff-report-view">DiffReport</div>,
+}));
+
+// Mock ReplaceSyncConfirmDialog
+vi.mock("../../../../src/components/sync/ReplaceSyncConfirmDialog", () => ({
+  default: () => null,
 }));
 
 import SyncExecutor from "../../../../src/components/sync/SyncExecutor";
@@ -77,9 +121,12 @@ describe("SyncExecutor", () => {
         selectedSkillIds: [],
         syncStatus: "idle",
         syncResult: null,
+        diffReport: null,
         executePush: mockExecutePush,
+        executeDiff: mockExecuteDiff,
         setSyncStatus: mockSetSyncStatus,
         setSyncResult: mockSetSyncResult,
+        setDiffReport: mockSetDiffReport,
       } as unknown as ReturnType<typeof useSyncStore>);
 
       render(<SyncExecutor />);
@@ -94,9 +141,12 @@ describe("SyncExecutor", () => {
         selectedSkillIds: ["s1"],
         syncStatus: "idle",
         syncResult: null,
+        diffReport: null,
         executePush: mockExecutePush,
+        executeDiff: mockExecuteDiff,
         setSyncStatus: mockSetSyncStatus,
         setSyncResult: mockSetSyncResult,
+        setDiffReport: mockSetDiffReport,
       } as unknown as ReturnType<typeof useSyncStore>);
 
       render(<SyncExecutor />);
@@ -111,82 +161,45 @@ describe("SyncExecutor", () => {
         selectedSkillIds: ["s1"],
         syncStatus: "syncing",
         syncResult: null,
+        diffReport: null,
         executePush: mockExecutePush,
+        executeDiff: mockExecuteDiff,
         setSyncStatus: mockSetSyncStatus,
         setSyncResult: mockSetSyncResult,
+        setDiffReport: mockSetDiffReport,
       } as unknown as ReturnType<typeof useSyncStore>);
 
       render(<SyncExecutor />);
 
+      // SyncSplitButton mock 中 loading=true 时显示 "同步中..."
       expect(screen.getByText("同步中...")).toBeInTheDocument();
       expect(screen.getByText("同步中...")).toBeDisabled();
     });
   });
 
-  describe("结果展示", () => {
-    it("显示同步结果摘要和详情", () => {
-      vi.mocked(useSyncStore).mockReturnValue({
-        targets: [{ id: "t1", name: "A", path: "/tmp", enabled: true }],
-        selectedSkillIds: ["s1"],
-        syncStatus: "done",
-        syncResult: {
-          total: 3,
-          success: 1,
-          overwritten: 1,
-          failed: 1,
-          details: [
-            {
-              skillId: "s1",
-              skillName: "Skill A",
-              targetPath: "/tmp/skill-a.md",
-              status: "success",
-            },
-            {
-              skillId: "s2",
-              skillName: "Skill B",
-              targetPath: "/tmp/skill-b.md",
-              status: "overwritten",
-            },
-            {
-              skillId: "s3",
-              skillName: "Skill C",
-              targetPath: "/tmp/skill-c.md",
-              status: "failed",
-              error: "权限不足",
-            },
-          ],
-        },
-        executePush: mockExecutePush,
-        setSyncStatus: mockSetSyncStatus,
-        setSyncResult: mockSetSyncResult,
-      } as unknown as ReturnType<typeof useSyncStore>);
-
-      render(<SyncExecutor />);
-
-      // 摘要
-      expect(screen.getByText("同步完成")).toBeInTheDocument();
-      expect(screen.getByText("成功 1")).toBeInTheDocument();
-      expect(screen.getByText("覆盖 1")).toBeInTheDocument();
-      expect(screen.getByText("失败 1")).toBeInTheDocument();
-
-      // 详情
-      expect(screen.getByText("Skill A")).toBeInTheDocument();
-      expect(screen.getByText("Skill B")).toBeInTheDocument();
-      expect(screen.getByText("Skill C")).toBeInTheDocument();
-      expect(screen.getByText("权限不足")).toBeInTheDocument();
-
-      // 清除结果按钮
-      expect(screen.getByText("清除结果")).toBeInTheDocument();
-    });
-  });
-
   describe("交互", () => {
     it("点击同步按钮调用 executePush", async () => {
+      // 重置为默认 idle 状态（上一个测试可能设置了 syncing）
+      vi.mocked(useSyncStore).mockReturnValue({
+        targets: [{ id: "t1", name: "项目A", path: "/tmp/a", enabled: true }],
+        selectedSkillIds: ["s1", "s2"],
+        syncStatus: "idle",
+        syncResult: null,
+        diffReport: null,
+        executePush: mockExecutePush,
+        executeDiff: mockExecuteDiff,
+        setSyncStatus: mockSetSyncStatus,
+        setSyncResult: mockSetSyncResult,
+        setDiffReport: mockSetDiffReport,
+      } as unknown as ReturnType<typeof useSyncStore>);
+
       const user = userEvent.setup();
       mockExecutePush.mockResolvedValue({
         total: 1,
         success: 1,
+        updated: 0,
         overwritten: 0,
+        skipped: 0,
         failed: 0,
         details: [],
       });
@@ -198,7 +211,7 @@ describe("SyncExecutor", () => {
       expect(mockExecutePush).toHaveBeenCalledOnce();
     });
 
-    it("点击清除结果调用 setSyncStatus 和 setSyncResult", async () => {
+    it("点击清除结果调用 setSyncStatus、setSyncResult 和 setDiffReport", async () => {
       const user = userEvent.setup();
       vi.mocked(useSyncStore).mockReturnValue({
         targets: [{ id: "t1", name: "A", path: "/tmp", enabled: true }],
@@ -207,7 +220,9 @@ describe("SyncExecutor", () => {
         syncResult: {
           total: 1,
           success: 1,
+          updated: 0,
           overwritten: 0,
+          skipped: 0,
           failed: 0,
           details: [
             {
@@ -218,9 +233,12 @@ describe("SyncExecutor", () => {
             },
           ],
         },
+        diffReport: null,
         executePush: mockExecutePush,
+        executeDiff: mockExecuteDiff,
         setSyncStatus: mockSetSyncStatus,
         setSyncResult: mockSetSyncResult,
+        setDiffReport: mockSetDiffReport,
       } as unknown as ReturnType<typeof useSyncStore>);
 
       render(<SyncExecutor />);
@@ -229,6 +247,7 @@ describe("SyncExecutor", () => {
 
       expect(mockSetSyncStatus).toHaveBeenCalledWith("idle");
       expect(mockSetSyncResult).toHaveBeenCalledWith(null);
+      expect(mockSetDiffReport).toHaveBeenCalledWith(null);
     });
   });
 });

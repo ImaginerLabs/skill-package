@@ -37,6 +37,35 @@ vi.mock("react-i18next", async () => {
   };
 });
 
+// Mock PathPresetSelect 组件（避免 shadcn Select 在 jsdom 中的兼容性问题）
+let _capturedOnSelect: ((path: string) => void) | null = null;
+vi.mock("../../../../src/components/shared/PathPresetSelect", () => ({
+  PathPresetSelect: ({
+    presets,
+    onSelect,
+  }: {
+    presets: { id: string; path: string; label?: string }[];
+    onSelect: (path: string) => void;
+  }) => {
+    _capturedOnSelect = onSelect;
+    if (presets.length === 0) return null;
+    return (
+      <select
+        data-testid="preset-select"
+        title="从预设选择"
+        onChange={(e) => onSelect(e.target.value)}
+      >
+        <option value="">从预设选择</option>
+        {presets.map((p) => (
+          <option key={p.id} value={p.path}>
+            {p.label ? `${p.label} (${p.path})` : p.path}
+          </option>
+        ))}
+      </select>
+    );
+  },
+}));
+
 const mockPresets: PathPreset[] = [
   { id: "p1", path: "/Users/alex/projects", label: "我的项目" },
   { id: "p2", path: "/Users/alex/backup" },
@@ -62,16 +91,16 @@ describe("ScanPathInput", () => {
       expect(screen.getByRole("button", { name: /搜索/ })).toBeInTheDocument();
     });
 
-    it("无预设时不渲染「从预设选择」下拉", () => {
+    it("无预设时不渲染预设下拉", () => {
       render(<ScanPathInput {...defaultProps} pathPresets={[]} />);
 
-      expect(screen.queryByTitle("搜索")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("preset-select")).not.toBeInTheDocument();
     });
 
-    it("有预设时渲染「从预设选择」下拉", () => {
+    it("有预设时渲染预设下拉", () => {
       render(<ScanPathInput {...defaultProps} pathPresets={mockPresets} />);
 
-      expect(screen.getByTitle("搜索")).toBeInTheDocument();
+      expect(screen.getByTestId("preset-select")).toBeInTheDocument();
     });
 
     it("预设下拉包含所有预设选项", () => {
@@ -148,7 +177,7 @@ describe("ScanPathInput", () => {
         />,
       );
 
-      const select = screen.getByTitle("搜索");
+      const select = screen.getByTestId("preset-select");
       await user.selectOptions(select, "/Users/alex/projects");
 
       expect(onScanPathChange).toHaveBeenCalledWith("/Users/alex/projects");
@@ -166,7 +195,7 @@ describe("ScanPathInput", () => {
         />,
       );
 
-      const select = screen.getByTitle("搜索");
+      const select = screen.getByTestId("preset-select");
       await user.selectOptions(select, "/Users/alex/backup");
 
       expect(onScanPathChange).toHaveBeenCalledWith("/Users/alex/backup");

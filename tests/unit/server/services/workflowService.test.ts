@@ -171,12 +171,14 @@ describe("workflowService", () => {
         skillId: "代码审查",
         skillName: "代码审查",
         description: "执行全面审查",
+        type: "skill",
       });
       expect(result.steps[1]).toEqual({
         order: 2,
         skillId: "测试覆盖",
         skillName: "测试覆盖",
         description: "",
+        type: "skill",
       });
     });
 

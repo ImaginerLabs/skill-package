@@ -45,6 +45,7 @@ describe("skill-store", () => {
       skills: [],
       categories: [],
       selectedCategory: null,
+      selectedSource: null,
       searchQuery: "",
       selectedSkillId: null,
       viewMode: "grid",
@@ -60,6 +61,7 @@ describe("skill-store", () => {
       expect(state.skills).toEqual([]);
       expect(state.categories).toEqual([]);
       expect(state.selectedCategory).toBeNull();
+      expect(state.selectedSource).toBeNull();
       expect(state.searchQuery).toBe("");
       expect(state.selectedSkillId).toBeNull();
       expect(state.viewMode).toBe("grid");
@@ -157,6 +159,48 @@ describe("skill-store", () => {
       setCategory(null);
 
       expect(useSkillStore.getState().selectedCategory).toBeNull();
+    });
+
+    it("设置分类时自动清除来源筛选（互斥，AD-41）", () => {
+      useSkillStore.setState({ selectedSource: "anthropic-official" });
+
+      const { setCategory } = useSkillStore.getState();
+      setCategory("frontend");
+
+      const state = useSkillStore.getState();
+      expect(state.selectedCategory).toBe("frontend");
+      expect(state.selectedSource).toBeNull();
+    });
+  });
+
+  describe("setSource", () => {
+    it("设置选中的来源", () => {
+      const { setSource } = useSkillStore.getState();
+      setSource("anthropic-official");
+
+      expect(useSkillStore.getState().selectedSource).toBe(
+        "anthropic-official",
+      );
+    });
+
+    it("清除选中的来源", () => {
+      useSkillStore.setState({ selectedSource: "anthropic-official" });
+
+      const { setSource } = useSkillStore.getState();
+      setSource(null);
+
+      expect(useSkillStore.getState().selectedSource).toBeNull();
+    });
+
+    it("设置来源时自动清除分类筛选（互斥，AD-41）", () => {
+      useSkillStore.setState({ selectedCategory: "frontend" });
+
+      const { setSource } = useSkillStore.getState();
+      setSource("anthropic-official");
+
+      const state = useSkillStore.getState();
+      expect(state.selectedSource).toBe("anthropic-official");
+      expect(state.selectedCategory).toBeNull();
     });
   });
 

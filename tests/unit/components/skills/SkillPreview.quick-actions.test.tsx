@@ -11,6 +11,22 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock react-i18next
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "skill.readonlyTooltip": "外部 Skill 只读",
+        "skill.readonlyEditTooltip": "外部 Skill 不可编辑",
+        "skill.sourceRepo": "来源仓库",
+        "skill.viewOnGithub": "在 GitHub 查看",
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: "zh", changeLanguage: vi.fn() },
+  }),
+}));
+
 // Mock API
 const mockFetchSkillById = vi.fn();
 vi.mock("../../../../src/lib/api", () => ({
@@ -202,26 +218,8 @@ describe("SkillPreview — 快捷操作（复制路径）(Story 3.1)", () => {
   });
 
   // ─────────────────────────────────────────────
-  // 关闭按钮
+  // 关闭预览按钮（已从 SkillPreview 移除，由外部布局控制）
   // ─────────────────────────────────────────────
-  describe("关闭预览按钮", () => {
-    it("点击关闭按钮调用 selectSkill(null) 和 setPreviewOpen(false)", async () => {
-      const user = userEvent.setup();
-      render(<SkillPreview />);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "关闭预览" }),
-        ).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByRole("button", { name: "关闭预览" }));
-
-      expect(mockSelectSkill).toHaveBeenCalledWith(null);
-      expect(mockSetPreviewOpen).toHaveBeenCalledWith(false);
-    });
-  });
-
   // ─────────────────────────────────────────────
   // 未选中状态
   // ─────────────────────────────────────────────

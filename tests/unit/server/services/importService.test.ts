@@ -10,6 +10,10 @@ vi.mock("fs-extra", () => ({
     writeFile: vi.fn(),
     rename: vi.fn(),
     remove: vi.fn(),
+    stat: vi.fn(),
+    pathExists: vi.fn().mockResolvedValue(false),
+    readdir: vi.fn(),
+    copy: vi.fn(),
   },
 }));
 
@@ -18,12 +22,14 @@ vi.mock("../../../../server/services/skillService", () => ({
   refreshSkillCache: vi
     .fn()
     .mockResolvedValue({ total: 0, success: 0, errors: 0 }),
+  getSkillsRoot: vi.fn().mockReturnValue("/skills-root"),
 }));
 
 // Mock pathUtils — isSubPath 始终返回 true（单元测试关注导入逻辑，不测路径安全）
 vi.mock("../../../../server/utils/pathUtils", () => ({
   isSubPath: vi.fn().mockReturnValue(true),
   normalizePath: vi.fn((p: string) => p),
+  slugify: vi.fn((name: string) => name.toLowerCase().replace(/\s+/g, "-")),
 }));
 
 // Mock scanService — 提供默认扫描路径
@@ -31,19 +37,38 @@ vi.mock("../../../../server/services/scanService", () => ({
   getDefaultScanPath: vi.fn().mockReturnValue("/source"),
 }));
 
+// Mock fileUtils — safeWrite（importService 使用 safeWrite 而非 fs.writeFile）
+const mockSafeWrite = vi.fn().mockResolvedValue(undefined);
+vi.mock("../../../../server/utils/fileUtils", () => ({
+  safeWrite: (...args: unknown[]) => mockSafeWrite(...args),
+}));
+
 describe("importService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // 重置 fs mock 实现（clearAllMocks 不清除 mockResolvedValue 设置的实现）
+    vi.mocked(fs.readFile).mockReset();
+    vi.mocked(fs.stat).mockReset();
+    vi.mocked(fs.pathExists).mockReset();
+    vi.mocked(fs.ensureDir).mockReset();
+    mockSafeWrite.mockReset();
+    // 重新设置通用默认值
+    vi.mocked(fs.pathExists).mockResolvedValue(false as never);
+    vi.mocked(fs.stat).mockResolvedValue({ isDirectory: () => false } as never);
+    vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
+    mockSafeWrite.mockResolvedValue(undefined);
   });
-
   describe("importFiles", () => {
     it("成功导入单个文件", async () => {
       vi.mocked(fs.readFile).mockResolvedValue(
         "---\nname: Test Skill\ndescription: A test\n---\n# Content" as never,
       );
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      // fs.stat 返回非目录（单个 .md 文件）
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
 
       const result = await importFiles({
         items: [{ absolutePath: "/source/test.md", name: "Test Skill" }],
@@ -61,18 +86,23 @@ describe("importService", () => {
         "---\nname: Test\n---\n# Content" as never,
       );
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockImplementation(async (_path, content) => {
-        // 验证写入的内容包含 category
-        expect(String(content)).toContain("category: coding");
-      });
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
+      mockSafeWrite.mockImplementation(
+        async (_path: string, content: string) => {
+          // 验证写入的内容包含 category
+          expect(String(content)).toContain("category: coding");
+        },
+      );
 
       await importFiles({
         items: [{ absolutePath: "/source/test.md", name: "Test" }],
         category: "coding",
       });
 
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(mockSafeWrite).toHaveBeenCalled();
     });
 
     it("补充缺失的 name 字段（使用文件名）", async () => {
@@ -80,10 +110,15 @@ describe("importService", () => {
         "---\ndescription: desc\n---\n# Content" as never,
       );
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockImplementation(async (_path, content) => {
-        expect(String(content)).toContain("name: my-skill");
-      });
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
+      mockSafeWrite.mockImplementation(
+        async (_path: string, content: string) => {
+          expect(String(content)).toContain("name: my-skill");
+        },
+      );
 
       await importFiles({
         items: [{ absolutePath: "/source/my-skill.md", name: "my-skill" }],
@@ -96,8 +131,10 @@ describe("importService", () => {
         .mockResolvedValueOnce("---\nname: Good\n---\n# OK" as never)
         .mockRejectedValueOnce(new Error("ENOENT: 文件不存在"));
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
 
       const result = await importFiles({
         items: [
@@ -119,8 +156,10 @@ describe("importService", () => {
         "这不是有效的 Frontmatter\n# 但仍然是内容" as never,
       );
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
 
       const result = await importFiles({
         items: [{ absolutePath: "/source/bad-fm.md", name: "Bad FM" }],
@@ -135,8 +174,10 @@ describe("importService", () => {
         await import("../../../../server/services/skillService");
       vi.mocked(fs.readFile).mockResolvedValue("---\nname: T\n---\n" as never);
       vi.mocked(fs.ensureDir).mockResolvedValue(undefined as never);
-      vi.mocked(fs.writeFile).mockResolvedValue(undefined as never);
-      vi.mocked(fs.rename).mockResolvedValue(undefined as never);
+      vi.mocked(fs.stat).mockResolvedValue({
+        isDirectory: () => false,
+      } as never);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as never);
 
       await importFiles({
         items: [{ absolutePath: "/source/t.md", name: "T" }],

@@ -123,15 +123,15 @@ describe("Tabs 滑块动画 — Story 7.3", () => {
   describe("AC-3: Tab 内容切换", () => {
     it("默认显示第一个 Tab 内容", () => {
       renderTwoTabs("tab1");
-      expect(screen.getByText("内容 1")).not.toHaveAttribute("hidden");
-      expect(screen.getByText("内容 2")).toHaveAttribute("hidden");
+      expect(screen.getByText("内容 1")).toBeInTheDocument();
+      expect(screen.queryByText("内容 2")).not.toBeInTheDocument();
     });
 
     it("点击第二个 Tab 后显示第二个内容", () => {
       renderTwoTabs("tab1");
       fireEvent.click(screen.getByText("Tab 2"));
-      expect(screen.getByText("内容 2")).not.toHaveAttribute("hidden");
-      expect(screen.getByText("内容 1")).toHaveAttribute("hidden");
+      expect(screen.getByText("内容 2")).toBeInTheDocument();
+      expect(screen.queryByText("内容 1")).not.toBeInTheDocument();
     });
   });
 

@@ -14,6 +14,12 @@ vi.mock("../../../../server/services/categoryService", () => ({
   getCategories: vi.fn(),
 }));
 
+// Mock skillService（ensureDefaultBundle 依赖 waitForInitialization + getAllSkills）
+vi.mock("../../../../server/services/skillService", () => ({
+  waitForInitialization: vi.fn().mockResolvedValue(undefined),
+  getAllSkills: vi.fn().mockReturnValue([]),
+}));
+
 import {
   addBundle,
   applyBundle,
@@ -370,30 +376,33 @@ describe("bundleService", () => {
       expect(writtenData.skillBundles).toHaveLength(1);
       expect(writtenData.skillBundles[0].id).toBe("bundle-default");
       expect(writtenData.skillBundles[0].name).toBe("default");
-      expect(writtenData.skillBundles[0].categoryNames).toHaveLength(9);
+      // mock 中 getCategories 返回 3 个分类，getAllSkills 返回空，所以收集到 3 个分类
+      expect(writtenData.skillBundles[0].categoryNames).toHaveLength(3);
+      expect(writtenData.skillBundles[0].categoryNames).toContain("coding");
+      expect(writtenData.skillBundles[0].categoryNames).toContain("testing");
+      expect(writtenData.skillBundles[0].categoryNames).toContain("writing");
     });
 
-    it("默认套件已存在时幂等跳过（不重复创建）", async () => {
+    it("默认套件已存在且分类已全部包含时幂等跳过（不重复创建）", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [
           {
             id: "bundle-default",
             name: "default",
             displayName: "默认套件",
-            categoryNames: ["coding"],
+            categoryNames: ["coding", "testing", "writing"],
             createdAt: "2026-04-14T00:00:00.000Z",
             updatedAt: "2026-04-14T00:00:00.000Z",
           },
         ],
       });
-
       await ensureDefaultBundle();
 
-      // 幂等：不应调用 writeYaml
+      // 幂等：分类已全部包含，不应调用 writeYaml
       expect(writeYaml).not.toHaveBeenCalled();
     });
 
-    it("创建的默认套件包含所有 9 个出厂分类", async () => {
+    it("创建的默认套件包含所有已定义分类", async () => {
       vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
@@ -404,15 +413,10 @@ describe("bundleService", () => {
         skillBundles: { categoryNames: string[] }[];
       };
       const categories = writtenData.skillBundles[0].categoryNames;
+      // mock 中 getCategories 返回 3 个分类
       expect(categories).toContain("coding");
-      expect(categories).toContain("writing");
-      expect(categories).toContain("devops");
-      expect(categories).toContain("workflows");
-      expect(categories).toContain("document-processing");
-      expect(categories).toContain("dev-tools");
       expect(categories).toContain("testing");
-      expect(categories).toContain("design");
-      expect(categories).toContain("meta-skills");
+      expect(categories).toContain("writing");
     });
 
     it("settings 为 null 时也能正常创建默认套件", async () => {

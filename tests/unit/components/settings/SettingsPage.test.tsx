@@ -99,19 +99,17 @@ describe("SettingsPage — Tab 化重组织", () => {
     expect(screen.getByTestId("bundle-manager")).toBeInTheDocument();
   });
 
-  it("切换到'套件管理'后，CategoryManager 不可见（hidden）", async () => {
+  it("切换到'套件管理'后，CategoryManager 不再挂载", async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
 
     await user.click(screen.getByRole("tab", { name: "套件管理" }));
 
-    // CategoryManager 所在的 TabsContent 应该被 hidden
-    const categoryManagerEl = screen.getByTestId("category-manager");
-    const tabPanel = categoryManagerEl.closest("[role='tabpanel']");
-    expect(tabPanel).toHaveAttribute("hidden");
+    // TabsContent 使用条件渲染，非激活 Tab 不挂载
+    expect(screen.queryByTestId("category-manager")).not.toBeInTheDocument();
   });
 
-  it("切换回'分类设置' Tab 后 CategoryManager 重新可见", async () => {
+  it("切换回'分类设置' Tab 后 CategoryManager 重新挂载", async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
 
@@ -120,8 +118,6 @@ describe("SettingsPage — Tab 化重组织", () => {
     // 再切换回分类设置
     await user.click(screen.getByRole("tab", { name: "分类设置" }));
 
-    const categoryManagerEl = screen.getByTestId("category-manager");
-    const tabPanel = categoryManagerEl.closest("[role='tabpanel']");
-    expect(tabPanel).not.toHaveAttribute("hidden");
+    expect(screen.getByTestId("category-manager")).toBeInTheDocument();
   });
 });

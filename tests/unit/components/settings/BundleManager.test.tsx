@@ -45,19 +45,16 @@ const mockFetchBundles = vi.fn();
 const mockCreateBundle = vi.fn();
 const mockUpdateBundle = vi.fn();
 const mockDeleteBundle = vi.fn();
-const mockApplyBundle = vi.fn();
 
 vi.mock("../../../../src/stores/bundle-store", () => ({
   useBundleStore: vi.fn(() => ({
     bundles: [],
     bundlesLoading: false,
     bundlesError: null,
-    activeBundleId: null,
     fetchBundles: mockFetchBundles,
     createBundle: mockCreateBundle,
     updateBundle: mockUpdateBundle,
     deleteBundle: mockDeleteBundle,
-    applyBundle: mockApplyBundle,
   })),
 }));
 
@@ -136,12 +133,10 @@ describe("BundleManager", () => {
         bundles: [mockBundle],
         bundlesLoading: false,
         bundlesError: null,
-        activeBundleId: null,
         fetchBundles: mockFetchBundles,
         createBundle: mockCreateBundle,
         updateBundle: mockUpdateBundle,
         deleteBundle: mockDeleteBundle,
-        applyBundle: mockApplyBundle,
       });
     });
 
@@ -267,12 +262,10 @@ describe("BundleManager", () => {
         bundles: [mockBundle],
         bundlesLoading: false,
         bundlesError: null,
-        activeBundleId: null,
         fetchBundles: mockFetchBundles,
         createBundle: mockCreateBundle,
         updateBundle: mockUpdateBundle,
         deleteBundle: mockDeleteBundle,
-        applyBundle: mockApplyBundle,
       });
     });
 
@@ -299,99 +292,6 @@ describe("BundleManager", () => {
   });
 
   // ----------------------------------------------------------------
-  // 激活套件
-  // ----------------------------------------------------------------
-  describe("激活套件", () => {
-    beforeEach(() => {
-      vi.mocked(useBundleStore).mockReturnValue({
-        bundles: [mockBundle],
-        bundlesLoading: false,
-        bundlesError: null,
-        activeBundleId: null,
-        fetchBundles: mockFetchBundles,
-        createBundle: mockCreateBundle,
-        updateBundle: mockUpdateBundle,
-        deleteBundle: mockDeleteBundle,
-        applyBundle: mockApplyBundle,
-      });
-    });
-
-    it("显示'激活'按钮", async () => {
-      render(<BundleManager />);
-
-      await waitFor(() => {
-        expect(screen.getByText("前端日常开发")).toBeInTheDocument();
-      });
-
-      expect(screen.getByTitle("激活")).toBeInTheDocument();
-    });
-
-    it("点击激活按钮后调用 applyBundle 并显示成功 toast", async () => {
-      const user = userEvent.setup();
-      mockApplyBundle.mockResolvedValue({
-        applied: ["coding", "testing"],
-        skipped: [],
-      });
-      render(<BundleManager />);
-
-      await waitFor(() => {
-        expect(screen.getByTitle("激活")).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByTitle("激活"));
-
-      await waitFor(() => {
-        expect(mockApplyBundle).toHaveBeenCalledWith(mockBundle.id);
-        expect(mockToastSuccess).toHaveBeenCalledWith("已激活 2 个分类");
-      });
-    });
-
-    it("激活有跳过分类时 toast 显示跳过数量", async () => {
-      const user = userEvent.setup();
-      mockApplyBundle.mockResolvedValue({
-        applied: ["coding"],
-        skipped: ["deleted-category"],
-      });
-      render(<BundleManager />);
-
-      await waitFor(() => {
-        expect(screen.getByTitle("激活")).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByTitle("激活"));
-
-      await waitFor(() => {
-        expect(mockToastSuccess).toHaveBeenCalledWith(
-          "已激活 1 个分类，跳过 1 个已删除分类",
-        );
-      });
-    });
-
-    it("当前激活套件显示'已激活' Badge", async () => {
-      vi.mocked(useBundleStore).mockReturnValue({
-        bundles: [mockBundle],
-        bundlesLoading: false,
-        bundlesError: null,
-        activeBundleId: mockBundle.id,
-        fetchBundles: mockFetchBundles,
-        createBundle: mockCreateBundle,
-        updateBundle: mockUpdateBundle,
-        deleteBundle: mockDeleteBundle,
-        applyBundle: mockApplyBundle,
-      });
-
-      render(<BundleManager />);
-
-      await waitFor(() => {
-        expect(screen.getByText("前端日常开发")).toBeInTheDocument();
-      });
-
-      // 激活按钮文字变为"已激活"
-      expect(screen.getByTitle("激活")).toHaveTextContent("已激活");
-    });
-  });
-
-  // ----------------------------------------------------------------
   // 损坏引用处理
   // ----------------------------------------------------------------
   describe("损坏引用处理", () => {
@@ -406,12 +306,10 @@ describe("BundleManager", () => {
         bundles: [brokenBundle],
         bundlesLoading: false,
         bundlesError: null,
-        activeBundleId: null,
         fetchBundles: mockFetchBundles,
         createBundle: mockCreateBundle,
         updateBundle: mockUpdateBundle,
         deleteBundle: mockDeleteBundle,
-        applyBundle: mockApplyBundle,
       });
     });
 

@@ -12,7 +12,6 @@ vi.mock("../../../src/lib/api", () => ({
   createSkillBundle: vi.fn(),
   updateSkillBundle: vi.fn(),
   deleteSkillBundle: vi.fn(),
-  applySkillBundle: vi.fn(),
 }));
 
 const mockBundle = {
@@ -33,7 +32,6 @@ describe("bundle-store", () => {
       bundles: [],
       bundlesLoading: false,
       bundlesError: null,
-      activeBundleId: null,
     });
   });
 
@@ -171,46 +169,6 @@ describe("bundle-store", () => {
       const { bundles } = useBundleStore.getState();
       expect(bundles).toHaveLength(1);
       expect(bundles[0].id).toBe("bundle-other");
-    });
-  });
-
-  // ----------------------------------------------------------------
-  // applyBundle
-  // ----------------------------------------------------------------
-  describe("applyBundle", () => {
-    it("成功激活套件并返回结果", async () => {
-      vi.mocked(api.applySkillBundle).mockResolvedValue({
-        applied: ["coding", "testing"],
-        skipped: [],
-      });
-
-      const result = await useBundleStore.getState().applyBundle(mockBundle.id);
-
-      expect(result.applied).toEqual(["coding", "testing"]);
-      expect(result.skipped).toEqual([]);
-    });
-
-    it("激活成功后更新 activeBundleId", async () => {
-      vi.mocked(api.applySkillBundle).mockResolvedValue({
-        applied: ["coding"],
-        skipped: [],
-      });
-
-      await useBundleStore.getState().applyBundle(mockBundle.id);
-
-      expect(useBundleStore.getState().activeBundleId).toBe(mockBundle.id);
-    });
-
-    it("激活另一个套件后 activeBundleId 更新为新套件", async () => {
-      useBundleStore.setState({ activeBundleId: mockBundle.id });
-      vi.mocked(api.applySkillBundle).mockResolvedValue({
-        applied: ["writing"],
-        skipped: [],
-      });
-
-      await useBundleStore.getState().applyBundle("bundle-other");
-
-      expect(useBundleStore.getState().activeBundleId).toBe("bundle-other");
     });
   });
 });

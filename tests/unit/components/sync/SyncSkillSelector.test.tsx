@@ -32,6 +32,7 @@ vi.mock("react-i18next", async () => {
 });
 
 // Mock fetchSkillBundles API
+import { fetchSkillBundles } from "../../../../src/lib/api";
 vi.mock("../../../../src/lib/api", () => ({
   fetchSkillBundles: vi.fn().mockResolvedValue([]),
 }));
@@ -342,6 +343,181 @@ describe("SyncSkillSelector", () => {
       expect(screen.getByText("Skill A").closest(".hidden")).toBeNull();
       // 工作流分类下 Skill 仍折叠
       expect(screen.getByText("Workflow 1").closest(".hidden")).not.toBeNull();
+    });
+  });
+
+  describe("套件选择 — 默认套件全选修复 (V2-1.1)", () => {
+    const defaultBundle = {
+      id: "bundle-default",
+      name: "default",
+      displayName: "默认套件",
+      description: "包含所有出厂预设分类的完整技能组合",
+      categoryNames: ["coding", "workflows"],
+      createdAt: "2026-04-14T04:01:28.856Z",
+      updatedAt: "2026-04-14T04:01:28.856Z",
+      brokenCategoryNames: [],
+    };
+
+    beforeEach(() => {
+      // 设置包含外部 Skill 的 mock 数据
+      mockSkills = [
+        {
+          id: "code-review",
+          name: "Code Review",
+          description: "代码审查",
+          category: "coding",
+          tags: [],
+          filePath: "coding/code-review.md",
+          fileSize: 100,
+          lastModified: "2026-01-01T00:00:00Z",
+        },
+        {
+          id: "pdf-reader",
+          name: "PDF Reader",
+          description: "PDF 阅读",
+          category: "coding",
+          tags: [],
+          filePath: "coding/pdf-reader.md",
+          fileSize: 100,
+          lastModified: "2026-01-01T00:00:00Z",
+        },
+        {
+          id: "wf-commit",
+          name: "Pre-Commit",
+          description: "提交前检查",
+          category: "workflows",
+          tags: [],
+          type: "workflow",
+          filePath: "workflows/wf-commit.md",
+          fileSize: 200,
+          lastModified: "2026-01-01T00:00:00Z",
+        },
+      ];
+      mockCategories = [
+        { name: "coding", displayName: "编程开发", skillCount: 2 },
+        { name: "workflows", displayName: "工作流", skillCount: 1 },
+      ];
+      // Mock fetchSkillBundles 返回默认套件
+      vi.mocked(fetchSkillBundles).mockResolvedValue([defaultBundle]);
+    });
+
+    it("点击默认套件后所有分类下的 Skill 被选中（包括外部 Skill）", async () => {
+      const user = userEvent.setup();
+      render(<SyncSkillSelector />);
+
+      // 等待套件加载完成
+      const bundleButton = await screen.findByText("默认套件");
+      await user.click(bundleButton);
+
+      expect(mockSelectByCategory).toHaveBeenCalledTimes(1);
+      const calledWith = mockSelectByCategory.mock.calls[0][0] as string[];
+      // 应包含所有 3 个 Skill ID
+      expect(calledWith).toContain("code-review");
+      expect(calledWith).toContain("pdf-reader");
+      expect(calledWith).toContain("wf-commit");
+      expect(calledWith).toHaveLength(3);
+    });
+
+    it("分类名大小写不一致时仍能正确匹配（toLowerCase 归一化）", async () => {
+      // 模拟外部 Skill 的 category 为大写开头
+      mockSkills = [
+        {
+          id: "ext-skill-1",
+          name: "External Skill",
+          description: "外部 Skill",
+          category: "Coding", // 大写开头
+          tags: [],
+          filePath: "Coding/ext-skill-1.md",
+          fileSize: 100,
+          lastModified: "2026-01-01T00:00:00Z",
+        },
+        {
+          id: "local-skill-1",
+          name: "Local Skill",
+          description: "本地 Skill",
+          category: "coding", // 小写
+          tags: [],
+          filePath: "coding/local-skill-1.md",
+          fileSize: 100,
+          lastModified: "2026-01-01T00:00:00Z",
+        },
+      ];
+      mockCategories = [
+        { name: "coding", displayName: "编程开发", skillCount: 1 },
+        { name: "Coding", displayName: "Coding", skillCount: 1 },
+      ];
+
+      // 套件 categoryNames 使用小写
+      const bundleWithLowerCase = {
+        ...defaultBundle,
+        categoryNames: ["coding"],
+      };
+      vi.mocked(fetchSkillBundles).mockResolvedValue([bundleWithLowerCase]);
+
+      const user = userEvent.setup();
+      render(<SyncSkillSelector />);
+
+      const bundleButton = await screen.findByText("默认套件");
+      await user.click(bundleButton);
+
+      expect(mockSelectByCategory).toHaveBeenCalledTimes(1);
+      const calledWith = mockSelectByCategory.mock.calls[0][0] as string[];
+      // 两个 Skill 都应被选中（大小写归一化后匹配）
+      expect(calledWith).toContain("ext-skill-1");
+      expect(calledWith).toContain("local-skill-1");
+      expect(calledWith).toHaveLength(2);
+    });
+
+    it("再次点击已全选的套件取消全选（切换逻辑）", async () => {
+      // 模拟所有 Skill 已被选中
+      mockSelectedSkillIds = ["code-review", "pdf-reader", "wf-commit"];
+
+      const user = userEvent.setup();
+      render(<SyncSkillSelector />);
+
+      const bundleButton = await screen.findByText("默认套件");
+      await user.click(bundleButton);
+
+      expect(mockSelectByCategory).toHaveBeenCalledTimes(1);
+      const calledWith = mockSelectByCategory.mock.calls[0][0] as string[];
+      // 取消全选后应为空数组
+      expect(calledWith).toHaveLength(0);
+    });
+
+    it("套件包含损坏引用时正确跳过，不影响有效分类", async () => {
+      const bundleWithBroken = {
+        ...defaultBundle,
+        categoryNames: ["coding", "deleted-category"],
+        brokenCategoryNames: ["deleted-category"],
+      };
+      vi.mocked(fetchSkillBundles).mockResolvedValue([bundleWithBroken]);
+
+      const user = userEvent.setup();
+      render(<SyncSkillSelector />);
+
+      const bundleButton = await screen.findByText("默认套件");
+      await user.click(bundleButton);
+
+      expect(mockSelectByCategory).toHaveBeenCalledTimes(1);
+      const calledWith = mockSelectByCategory.mock.calls[0][0] as string[];
+      // 只包含 coding 分类下的 Skill，deleted-category 被跳过
+      expect(calledWith).toContain("code-review");
+      expect(calledWith).toContain("pdf-reader");
+      expect(calledWith).toHaveLength(2);
+    });
+
+    it("套件选中状态正确反映（全选时显示 all 状态）", async () => {
+      // 模拟所有 Skill 已被选中
+      mockSelectedSkillIds = ["code-review", "pdf-reader", "wf-commit"];
+
+      render(<SyncSkillSelector />);
+
+      // 等待套件按钮渲染
+      const bundleButton = await screen.findByText("默认套件");
+      // 全选状态下按钮应有 primary 背景色 class
+      expect(bundleButton.closest("button")).toHaveClass(
+        "bg-[hsl(var(--primary))]",
+      );
     });
   });
 });
