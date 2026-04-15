@@ -7,7 +7,7 @@ description: >
   This skill should be used when the user mentions React performance optimization,
   stale closures, useMemo, useCallback, avoiding re-renders, useEffect issues,
   or requests a React code quality review.
-category: refactor
+category: coding
 ---
 
 # React 性能优化与常见错误规范

@@ -4,7 +4,7 @@ description: >
   Analyzes codebases, explores project structure, identifies issues, and provides contextual insights.
   This skill should be used when the user mentions code exploration, project analysis, bug investigation,
   context research, or needs help understanding unfamiliar codebases.
-category: understand
+category: coding
 ---
 
 # Code Exploration & Analysis Skill

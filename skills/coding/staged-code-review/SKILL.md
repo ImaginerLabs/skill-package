@@ -7,7 +7,7 @@ description: |
   - staged-fast-commit：跳过审查直接提交
   - frontend-code-review：针对已打开文件的深度代码审查
   - frontend-staged-bundle-review：专注包体积优化审查
-category: git, review
+category: coding
 ---
 
 # Git 暂存区代码审查

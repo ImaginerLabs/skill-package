@@ -1,7 +1,7 @@
 ---
 name: cross-branch-fix-porter
 description: 跨分支修复移植专家。当用户提供一个 commit ID、或在历史对话中已分析过某个修复/改动，且当前所在分支与修复分支项目结构存在较大差异、无法直接 cherry-pick 时触发。自动分析修复意图，读取当前分支的对应文件，以当前代码逻辑为准重新应用修复。当用户说「移植这个修复」「把这个 commit 的改动应用到当前分支」「跨分支应用修复」「这个 fix 怎么在我这边实现」时触发。
-category: reuse
+category: dev-tools
 ---
 
 # 跨分支修复移植

@@ -1,7 +1,7 @@
 ---
 name: react-component-refactor
 description: Analyzes React component structure, identifies reusable units, and refactors large or messy components into well-organized, high-quality code following React best practices. Splits components by responsibility, extracts custom Hooks, and guarantees 1:1 logic equivalence with the original code. This skill should be used when the user says「重构组件」「帮我重构这个文件」「组件重构」「refactor component」「拆分重构」, or requests to refactor, split, or reorganize a React component file.
-category: refactor
+category: coding
 ---
 
 # React 组件重构规范

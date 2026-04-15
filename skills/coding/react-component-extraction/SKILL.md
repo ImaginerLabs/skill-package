@@ -1,7 +1,7 @@
 ---
 name: react-component-extraction
 description: This skill analyzes context dependencies, evaluates extraction boundaries, designs component/Hook interfaces, and ensures safe, backward-compatible extraction with zero breaking changes to existing callers. This skill should be used when the user says「抽取组件」「提取为 Hook」「拆分组件」「组件抽离」or「extract component」, or requests to extract reusable logic into a standalone component or custom Hook.
-category: refactor
+category: coding
 ---
 
 # React 组件逻辑抽取规范

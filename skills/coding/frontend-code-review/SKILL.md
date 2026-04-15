@@ -1,7 +1,7 @@
 ---
 name: frontend-code-review
 description: 当用户说「帮我做代码审查」「检查这段代码」「code review」「提交前检查」「审查代码」「review」「代码体检」「质量检查」「帮我看看这段代码」「代码有没有问题」「检查一下代码」时触发。自动检测并修复 ESLint 错误，分析代码健壮性、边界条件、副作用及性能隐患，适用于 React/Vue/Taro 等前端项目。
-category: review
+category: coding
 ---
 
 # 前端代码质量检查

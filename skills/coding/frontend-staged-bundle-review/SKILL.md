@@ -1,7 +1,7 @@
 ---
 name: frontend-staged-bundle-review
 description: 当用户说「检查暂存区体积」「分析包体积」「bundle 优化」「体积审查」「检查体积」「包大小分析」「体积回归」「打包优化」「减少体积」「瘦身」时触发。读取 git diff --staged，结合上下文分析需求改造意图，从代码体积（Bundle Size）角度给出高/中/低三级优化建议，适用于 React/Vue/Taro/Next.js 等前端项目。
-category: review
+category: coding
 ---
 
 # 前端暂存区代码体积优化审查

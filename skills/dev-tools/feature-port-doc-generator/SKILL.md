@@ -1,7 +1,7 @@
 ---
 name: feature-port-doc-generator
 description: 需求移植文档生成专家。当用户提供一个文件路径或 commit ID，需要将该需求改造的意图、涉及范围、移植流程和依赖关系整理成一份供其他项目参考的移植文档时触发。自动分析 commit 变更或文件内容，提取需求改造意图，输出标准化的 Markdown 移植文档。当用户说「生成移植文档」「帮我写移植说明」「整理这个需求的移植指南」「输出移植 MD」「这个改动怎么移植到其他项目」时触发。
-category: reuse
+category: dev-tools
 ---
 
 # 需求移植文档生成器

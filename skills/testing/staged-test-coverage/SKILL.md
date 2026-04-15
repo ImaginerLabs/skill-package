@@ -1,7 +1,7 @@
 ---
 name: staged-test-coverage
 description: Analyze staged code changes and design comprehensive test cases. This skill should be used when the user mentions「测试用例覆盖」「帮我设计测试」「暂存区测试」「生成测试报告」「分析测试覆盖」. Automatically reads `git diff --staged`, summarizes the purpose and capability changes of this modification, designs test cases covering main flows and edge cases, and outputs a complete test analysis report.
-category: test
+category: testing
 ---
 
 # 暂存区代码测试用例覆盖分析
