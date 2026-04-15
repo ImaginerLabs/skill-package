@@ -1,6 +1,10 @@
 version: 0.1.0
 sync:
-  targets: []
+  targets:
+    - id: sync-mnyessr6-1i07
+      name: codebuddy
+      path: /Users/alex/.codebuddy/skills
+      enabled: true
 ui:
   defaultView: grid
   sidebarWidth: 240
@@ -29,4 +33,7 @@ skillBundles:
       - design
       - meta-skills
     createdAt: '2026-04-14T04:01:28.856Z'
-    updatedAt: '2026-04-14T04:01:28.856Z'
+    updatedAt: '2026-04-15T03:07:27.874Z'
+activeCategories:
+  - coding
+  - writing

@@ -16,6 +16,9 @@ export default tseslint.config(
       "_bmad/",
       "_bmad-output/",
       "knowledge/",
+      "skill-repos/",
+      "scripts/",
+      "skills/",
     ],
   },
 

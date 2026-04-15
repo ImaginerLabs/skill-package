@@ -143,8 +143,6 @@ graph TD
 - [ ] Tasks 之间无循环依赖
 - [ ] 无遗漏的 FR/NFR 覆盖
 
-> ⚠️ **遗漏发现：** 当前项目的 Epic 0 和 Epic 1 的所有 Story 都跳过了此验证步骤。
-
 ---
 
 #### 步骤 3：DS — 实现 + 单元测试
@@ -207,8 +205,6 @@ graph TD
 **回退规则：**
 - 测试失败 → 回退到 `in-progress`，修复后重新进入 `qa`
 
-> ⚠️ **遗漏发现：** 当前项目的 Epic 0 和 Epic 1 的所有 Story 都跳过了此 QA 步骤。现有 75 个测试用例全部是单元测试，缺少集成测试和 E2E 测试覆盖。
-
 ---
 
 #### 步骤 5：CR — 对抗式代码审查
@@ -237,8 +233,6 @@ graph TD
 
 **回退规则：**
 - 发现 Blocker/Major → 回退到 `in-progress`，修复后重新走 `qa` → `review`
-
-> ⚠️ **遗漏发现：** 当前项目的 Epic 0 和 Epic 1 的所有 Story 都跳过了此 CR 步骤。
 
 ---
 
@@ -275,8 +269,6 @@ graph TD
 - 评估架构决策的实际效果
 - 识别技术债务
 - 为下一个 Epic 提供改进建议
-
-> ⚠️ **遗漏发现：** Epic 0 和 Epic 1 的回顾均标记为 `optional` 且未执行。
 
 ---
 
@@ -328,57 +320,11 @@ stateDiagram-v2
     done --> [*]
 ```
 
----
 
-## 四、遗漏分析与修正记录
-
-### 已发现的流程遗漏
-
-| # | 遗漏 | 影响范围 | 严重度 | 修正状态 |
-|---|------|----------|--------|--------|
-| G1 | **Story 验证步骤缺失** — CS:validate 从未执行，Story 文件未经验证直接进入开发 | Epic 0 全部 5 个 Story + Epic 1 全部 8 个 Story | 🟠 高 | ⚠️ 已识别，从 Epic 2 起强制执行 |
-| G2 | **QA 阶段缺失** — 无集成测试/E2E 测试覆盖验证 | Epic 0 + Epic 1 | 🔴 严重 | ✅ 已修正 sprint-status.yaml + architecture.md + epics.md |
-| G3 | **CR 阶段缺失** — 无对抗式代码审查 | Epic 0 + Epic 1 | 🔴 严重 | ✅ 已修正 sprint-status.yaml + architecture.md + epics.md |
-| G4 | **Epic 回顾缺失** — ER 标记为 optional 且未执行 | Epic 0 + Epic 1 | 🟡 中 | ⚠️ 建议在 Epic 2 开始前补做 Epic 1 回顾 |
-| G5 | **Story 文件缺失** — Epic 1 的 8 个 Story 没有 story 文件 | Epic 1 | 🟠 高 | ⚠️ 已识别，无法追溯实现记录 |
-| G6 | **后端服务层缺少单元测试** — skillService/categoryService/configService 无测试 | Epic 1 | 🟠 高 | ✅ 已修正 — 新增 6 个后端测试文件（96 个测试用例） |
-| G7 | **前端组件测试覆盖不完整** — 仅 SkillCard 有测试，其余组件无测试 | Epic 1 | 🟡 中 | ✅ 已修正 — 新增 CategoryTree + Toast 组件测试 |
-| G8 | **sprint-status.yaml 缺少 qa 状态** — 原始定义中没有 qa 阶段 | 全局 | 🔴 严重 | ✅ 已修正 |
-| G9 | **集成测试为空壳** — 所有 API 集成测试均为 expect(true).toBe(true) | Epic 0 + Epic 1 | 🟠 高 | ✅ 已修正 — 重写为 28 个真实集成测试（supertest + mock 服务层） |
-### 已执行的修正
-
-#### 修正 1：sprint-status.yaml（2026-04-10）
-
-**变更内容：**
-- Story 状态从 5 个扩展为 6 个，新增 `qa` 阶段
-- 新增完整的 STORY LIFECYCLE 定义
-- 新增 GATE REQUIREMENTS（3 个质量门禁）
-- 更新 WORKFLOW NOTES
-
-**新状态流转：**
-```
-backlog → ready-for-dev → in-progress → qa → review → done
-```
-
-#### 修正 2：architecture.md（2026-04-10）
-
-**变更内容：**
-- Process Patterns 中新增 Story 生命周期流程规范
-- 新增 mermaid 流程图
-- 新增每个阶段的执行者、工具和质量门禁表
-- 新增 4 条阶段详细规则
-- Enforcement Guidelines 新增第 8/9/10 条强制规则
-
-#### 修正 3：epics.md（2026-04-10）
-
-**变更内容：**
-- 依赖关系部分后新增 Story 生命周期强制质量门禁
-- 明确 QA 和 CR 为不可跳过的强制环节
-- 定义回退规则和 Dev Agent Record 必须记录的内容
 
 ---
 
-## 五、完整技能调用链路参考
+## 四、完整技能调用链路参考
 
 ### 从零到交付的完整链路
 
@@ -455,64 +401,11 @@ backlog → ready-for-dev → in-progress → qa → review → done
 
 > **注意：** BMad Method 官方定义中 QA 和 CR 不是 `required: true`，但本项目通过 architecture.md 的 Enforcement Guidelines 将其提升为强制要求。
 
----
 
-## 六、当前项目执行状态对照
-
-### Epic 0：技术脚手架与设计系统 — ✅ done
-
-| Story | CS:create | CS:validate | DS | QA | CR | done |
-|-------|-----------|-------------|----|----|----|----|
-| 0-1 项目初始化 | ✅ | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 0-2 共享类型/Schema | ✅ | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 0-3 文件解析/路径工具 | ✅ | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 0-4 暗色主题/布局 | ✅ | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 0-5 配置文件读取 | ✅ | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-
-**Epic 0 回顾：** ❌ 未执行
-
-### Epic 1：Skill 浏览与分类管理 — ✅ done
-
-| Story | CS:create | CS:validate | DS | QA | CR | done |
-|-------|-----------|-------------|----|----|----|----|
-| 1-1 后端 Skill 扫描 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-2 分类树/卡片网格 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-3 Markdown 预览 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-4 搜索/Command Palette | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-5 视图切换/列表视图 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-6 分类管理 CRUD | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-7 Skill 管理 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-| 1-8 Toast/无障碍 | ❌ 无文件 | ❌ 跳过 | ✅ | ❌ 跳过 | ❌ 跳过 | ✅ |
-
-**Epic 1 回顾：** ❌ 未执行
-
-### Epic 2-4：待开发 — 🔲 backlog
-
-从 Epic 2 开始，所有 Story 必须严格遵循完整的 7 步流程。
 
 ---
 
-## 七、补救建议
-
-### 短期（Epic 2 开始前）
-
-1. **补做 Epic 1 回顾（ER）** — 提取经验教训，为 Epic 2 提供改进方向
-2. **补充后端服务层单元测试** — `skillService.ts`、`categoryService.ts`、`configService.ts`
-3. **补充集成测试** — 为 Epic 1 的核心 API 端点补充集成测试
-4. **运行一次全面的 Code Review（CR）** — 对 Epic 0+1 的全部代码做一次对抗式审查
-
-> ✅ 第 2、3 项已完成（新增 8 个测试文件，测试用例从 75 增长到 188）
-
-### 长期（Epic 2 起强制执行）
-
-1. 每个 Story 必须走完 CS:create → CS:validate → DS → QA → CR → done 全流程
-2. sprint-status.yaml 中的状态必须真实反映当前阶段
-3. Story 文件的 Dev Agent Record 必须完整记录 QA 和 CR 结果
-4. Epic 完成后必须执行回顾（ER）
-
----
-
-## 八、快速参考卡片
+## 五、快速参考卡片
 
 ### Story 执行 Checklist
 
