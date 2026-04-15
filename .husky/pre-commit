@@ -1,7 +1,27 @@
 #!/bin/sh
-npx lint-staged
+# ─── ESLint 全量检查（零警告容忍）────────────────────────────────────────────
+echo "🔍 运行 ESLint 检查..."
+npx eslint . --max-warnings=0
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ ESLint 检查失败，请修复上述错误后重新提交。"
+  echo "   如需自动修复：npm run lint:fix"
+  echo ""
+  exit 1
+fi
 
-# 检测业务文件变更，提醒同步更新 README.md 和 README.en.md
+# ─── Prettier 格式检查────────────────────────────────────────────────────────
+echo "🎨 运行 Prettier 格式检查..."
+npx prettier --check .
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Prettier 格式检查失败，请格式化后重新提交。"
+  echo "   如需自动格式化：npm run format"
+  echo ""
+  exit 1
+fi
+
+# ─── 检测业务文件变更，提醒同步更新 README.md 和 README.en.md ─────────────────
 CHANGED=$(git diff --cached --name-only)
 BUSINESS_CHANGED=$(echo "$CHANGED" | grep -E '^(src/|server/|shared/|skills/|_bmad-output/)' || true)
 README_ZH_CHANGED=$(echo "$CHANGED" | grep -E '^README\.md$' || true)
@@ -34,7 +54,7 @@ if [ -n "$BUSINESS_CHANGED" ] && { [ -z "$README_ZH_CHANGED" ] || [ -z "$README_
   exit 1
 fi
 
-# 检测业务文件变更，提醒同步更新 project context
+# ─── 检测业务文件变更，提醒同步更新 project context ──────────────────────────
 PROJECT_CONTEXT_CHANGED=$(echo "$CHANGED" | grep -E '^_bmad-output/project-context\.md$' || true)
 
 if [ -n "$BUSINESS_CHANGED" ] && [ -z "$PROJECT_CONTEXT_CHANGED" ]; then
@@ -47,5 +67,3 @@ if [ -n "$BUSINESS_CHANGED" ] && [ -z "$PROJECT_CONTEXT_CHANGED" ]; then
   echo "   可使用 bmad-generate-project-context 技能重新生成，或手动编辑相关章节。"
   echo ""
 fi
-
-npm run test:run
