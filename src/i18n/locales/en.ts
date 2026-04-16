@@ -93,11 +93,13 @@ export const en = {
     failedCount: "Failed {{count}}",
     updatedCount: "Updated {{count}}",
     skippedCount: "Skipped {{count}}",
+    deletedCount: "Deleted {{count}}",
     statusNew: "New",
     statusOverwritten: "Overwritten",
     statusFailed: "Failed",
     statusUpdated: "Updated",
     statusSkipped: "Skipped",
+    statusDeleted: "Deleted",
     bundleSelect: "Select by Bundle",
     bundleNoMatch: 'No matching skills found in bundle "{{name}}"',
     // Sync multi-mode
@@ -107,7 +109,8 @@ export const en = {
     moreSyncOptions: "More sync options",
     incrementalSyncSuccess:
       "Incremental sync complete! Added {{added}}, updated {{updated}}, skipped {{skipped}}",
-    replaceSyncSuccess: "Replace sync complete! {{count}} files synced",
+    replaceSyncSuccess:
+      "Replace sync complete! Synced {{count}}, deleted {{deleted}}",
     replaceSyncConfirmTitle: "Confirm Replace Sync",
     replaceSyncConfirmDesc:
       "This will delete {{count}} Skill folders in the target directory, then re-sync.",
@@ -137,6 +140,12 @@ export const en = {
     retryLimitReached: "Max retries reached",
     retrySuccess: '"{{name}}" retry succeeded',
     retryFailed: '"{{name}}" retry failed',
+    // Target selector
+    selectDiffTarget: "Select Preview Target",
+    selectSyncTargets: "Select Sync Targets",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    noEnabledTargets: "No enabled sync targets",
   },
 
   // ── Sync Target Manager ───────────────────────────────────
@@ -163,6 +172,8 @@ export const en = {
     updateFailed: "Failed to update sync target",
     deleteSuccess: "Sync target deleted",
     deleteFailed: "Failed to delete sync target",
+    enableAll: "Enable All",
+    disableAll: "Disable All",
   },
 
   // ── Settings Page ─────────────────────────────────────────

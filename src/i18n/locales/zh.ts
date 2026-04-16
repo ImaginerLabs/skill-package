@@ -92,11 +92,13 @@ export const zh = {
     failedCount: "失败 {{count}}",
     updatedCount: "更新 {{count}}",
     skippedCount: "跳过 {{count}}",
+    deletedCount: "删除 {{count}}",
     statusNew: "新建",
     statusOverwritten: "覆盖",
     statusFailed: "失败",
     statusUpdated: "已更新",
     statusSkipped: "已跳过",
+    statusDeleted: "已删除",
     bundleSelect: "按套件选择",
     bundleNoMatch: "套件「{{name}}」下没有匹配的 Skill",
     // 同步多模式
@@ -106,7 +108,7 @@ export const zh = {
     moreSyncOptions: "更多同步选项",
     incrementalSyncSuccess:
       "增量同步完成！新增 {{added}}、更新 {{updated}}、跳过 {{skipped}}",
-    replaceSyncSuccess: "替换同步完成！{{count}} 个文件已同步",
+    replaceSyncSuccess: "替换同步完成！同步 {{count}} 个、删除 {{deleted}} 个",
     replaceSyncConfirmTitle: "替换同步确认",
     replaceSyncConfirmDesc:
       "此操作将删除目标目录中 {{count}} 个 Skill 文件夹，然后重新同步。",
@@ -136,6 +138,12 @@ export const zh = {
     retryLimitReached: "已达最大重试次数",
     retrySuccess: "「{{name}}」重试成功",
     retryFailed: "「{{name}}」重试失败",
+    // 目标选择器
+    selectDiffTarget: "请选择预览目标",
+    selectSyncTargets: "请选择同步目标",
+    selectAll: "全选",
+    deselectAll: "取消全选",
+    noEnabledTargets: "暂无已启用的同步目标",
   },
 
   // ── 同步目标管理 ──────────────────────────────────────────
@@ -161,6 +169,8 @@ export const zh = {
     updateFailed: "更新同步目标失败",
     deleteSuccess: "同步目标已删除",
     deleteFailed: "删除同步目标失败",
+    enableAll: "全部启用",
+    disableAll: "全部禁用",
   },
 
   // ── 设置页 ────────────────────────────────────────────────
