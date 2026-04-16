@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-15T21:44:00
+last_updated: 2026-04-16T15:40:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -350,3 +350,20 @@ development_status:
   9-4-sync-flow-progressive-guidance: done
   9-5-breadcrumb-and-transition-animation: done
   epic-9-retrospective: done
+
+  # ============================================================
+  # Epic REFACTOR: 组件抽象与复用统一 — 消除重复模式，提升 UI 一致性
+  # 提取共享组件（ConfirmDialog/SkillTypeIcon/SearchInput/SidebarItem/EmptyState增强）
+  # 和自定义 Hook（useConfirmDialog/useSkillFiltering/useSkillActions/useKeyboardNav/useSortableStep）
+  # 分两阶段渐进替换现有文件中的重复实现
+  # Spec: spec-component-abstraction-and-reuse.md
+  # Dependencies: None（基于现有组件重构，不改变外部 API）
+  # ============================================================
+  epic-refactor-component-abstraction: done
+  refactor-1-confirm-dialog: done
+  refactor-2-skill-type-icon: done
+  refactor-3-search-input-sidebar-item: done
+  refactor-4-composable-hooks: done
+  refactor-5-empty-state-sortable-step: done
+  refactor-6-migration-verification: done
+  epic-refactor-component-abstraction-retrospective: optional
