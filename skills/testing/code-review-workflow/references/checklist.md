@@ -2,43 +2,64 @@
 
 > 本文件供模型在审查过程中参考，按需查阅相关章节，无需全部加载。
 
+## 问题严重性分类
+
+| 分类 | 说明 | 处理方式 |
+| ---- | ---- | -------- |
+| **阻断项** | 必须修复，否则可能导致安全问题、运行时错误或数据泄露 | 必须在报告中标注为"必须处理" |
+| **建议项** | 优化建议，不影响功能但提升代码质量 | 在报告中标注为"建议优化" |
+
+### 阻断项清单
+
+- **敏感信息**：硬编码密钥/Token、密码、API Key 等
+- **错误处理**：异步操作未 try-catch、接口错误被吞掉
+- **边界条件**：空值未保护、除零/越界未防护
+
+### 建议项清单
+
+- **调试代码**：`console.log`、`debugger`、`TODO` 遗留
+- **注释质量**：复杂逻辑缺少说明、无意义注释
+- **代码规范**：命名不规范、格式不一致
+
 ---
 
 ## 1. 基础检查项
 
-### 调试代码
+### 调试代码（建议项）
 
 - `console.log`/`console.warn`/`console.error`（非错误处理用途的遗留）
 - `debugger` 语句
 - `print`、未处理的 `TODO`/`FIXME`
 - 测试专用 mock data 未清理
 
-### 敏感信息
+> **说明**：调试代码遗留为建议优化项，不作为阻断性问题处理。除非在关键路径上（如生产环境日志泄露、性能敏感区），否则仅标记为"建议移除"。
+
+### 敏感信息（阻断项）
 
 - 硬编码的密码、Token、密钥
 - 内网地址、IP 地址
 - 手机号、身份证号、银行卡号
 - 云服务 Access Key / Secret Key
 
-### 注释质量
+### 注释质量（建议项）
 
 - 复杂逻辑缺少说明性注释
 - 无意义注释未清理
 - 注释与代码逻辑不一致
 
-### 错误处理
+### 错误处理（阻断项）
 
 - 异步/IO 操作缺少 try-catch / .catch()
 - 接口调用未处理失败场景
 - 错误提示对用户不友好
 
-### 边界条件
+### 边界条件（阻断项）
 
 - 空值、空数组缺少保护
 - 极端输入未校验
 - 除零、越界等未防护
 
-### 代码规范
+### 代码规范（建议项）
 
 - 命名不规范（变量、函数、类）
 - 缩进格式、换行风格不一致
@@ -73,6 +94,38 @@
 - **Go**: 错误处理、goroutine 泄漏
 - **Python**: 异常处理、类型注解
 - **Java/Kotlin**: 空指针、资源释放
+
+### React Native / Taro
+
+| 检查项 | 要点 |
+| ------ | ---- |
+| 生命周期 | Bridge 模块是否正确释放 |
+| 图片资源 | 大图是否压缩、是否使用合适格式 |
+| 内存管理 | 大列表是否使用虚拟列表 |
+| 页面栈 | 是否超过小程序页面栈限制（10层） |
+| 平台差异 | 是否有条件判断处理不同平台 |
+
+---
+
+## 2.5 安全检查专项（阻断项）
+
+### 注入风险
+
+- **XSS**：用户输入未转义直接渲染（React 默认安全，但 dangerouslySetInnerHTML 需警惕）
+- **SQL 注入**：字符串拼接 SQL，应使用参数化查询
+- **命令注入**：用户输入传入 `exec`/`eval`/`spawn`，应避免或严格校验
+
+### 认证授权
+
+- **越权访问**：接口请求是否校验用户权限
+- **Token 泄露**：Token 是否在 URL 参数中传递
+- **敏感接口**：关键操作是否需要二次验证
+
+### 数据安全
+
+- **敏感数据存储**：密码/密钥不应存在 localStorage/cookie
+- **日志泄露**：日志是否打印敏感信息（密码、Token、手机号）
+- **加密传输**：接口是否使用 HTTPS
 
 ---
 
@@ -209,6 +262,13 @@ import dayjs from "dayjs"; // 替代 moment
 ### 竞态处理优化
 
 ```typescript
+// ❌ 无竞态处理
+const fetchData = async () => {
+  const res = await api.fetch();
+  setData(res);
+};
+
+// ✅ 使用 AbortController
 useEffect(() => {
   const controller = new AbortController();
   const fetchData = async () => {
@@ -222,4 +282,38 @@ useEffect(() => {
   fetchData();
   return () => controller.abort();
 }, []);
+```
+
+### 防重复提交优化
+
+```typescript
+// ❌ 无防重复
+const handleSubmit = async () => {
+  await api.submit(data);
+};
+
+// ✅ 防重复提交
+const [submitting, setSubmitting] = useState(false);
+const handleSubmit = async () => {
+  if (submitting) return;
+  setSubmitting(true);
+  try {
+    await api.submit(data);
+  } finally {
+    setSubmitting(false);
+  }
+};
+```
+
+### 空值保护优化
+
+```typescript
+// ❌ 无空值保护
+const name = user.profile.name;
+
+// ✅ 可选链保护
+const name = user?.profile?.name ?? '匿名';
+
+// ✅ 空数组合并
+const items = list ?? [];
 ```
