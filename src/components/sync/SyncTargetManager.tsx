@@ -174,6 +174,21 @@ export default function SyncTargetManager() {
     [updateTarget, t],
   );
 
+  // 全部启用 / 全部禁用
+  const allEnabled = targets.length > 0 && targets.every((t) => t.enabled);
+  const handleToggleAll = useCallback(async () => {
+    const newEnabled = !allEnabled;
+    try {
+      await Promise.all(
+        targets.map((tgt) => updateTarget(tgt.id, { enabled: newEnabled })),
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : t("syncTarget.updateFailed"),
+      );
+    }
+  }, [allEnabled, targets, updateTarget, t]);
+
   if (targetsLoading && targets.length === 0) {
     return (
       <div className="p-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
@@ -191,6 +206,18 @@ export default function SyncTargetManager() {
           <h3 className="text-sm font-medium text-[hsl(var(--foreground))]">
             {t("syncTarget.title")} ({targets.length})
           </h3>
+          {targets.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={handleToggleAll}
+            >
+              {allEnabled
+                ? t("syncTarget.disableAll")
+                : t("syncTarget.enableAll")}
+            </Button>
+          )}
         </div>
         {!showAddForm && (
           <Button
@@ -408,19 +435,21 @@ export default function SyncTargetManager() {
                     </div>
                   </div>
                 ) : (
-                  /* 显示模式 */
+                  /* 显示模式 - 点击整行切换启用/关闭 */
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                    <div
+                      className="min-w-0 flex-1 cursor-pointer"
+                      onClick={() =>
+                        handleToggleEnabled(target.id, target.enabled)
+                      }
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-sm font-medium text-[hsl(var(--foreground))] truncate">
                           {target.name}
                         </p>
                         <Badge
                           variant={target.enabled ? "default" : "secondary"}
-                          className="text-[10px] px-1.5 py-0 cursor-pointer"
-                          onClick={() =>
-                            handleToggleEnabled(target.id, target.enabled)
-                          }
+                          className="text-[10px] px-1.5 py-0"
                         >
                           {target.enabled
                             ? t("syncTarget.enabledLabel")

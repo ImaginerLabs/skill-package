@@ -2,7 +2,7 @@
 // components/skills/MetadataEditor.tsx — Skill Frontmatter 元数据编辑表单
 // ============================================================
 
-import { FolderInput, Save, Trash2, X } from "lucide-react";
+import { Save, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SkillMeta } from "../../../shared/types";
@@ -13,6 +13,7 @@ import { useSkillStore } from "../../stores/skill-store";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import CategoryCombobox from "./CategoryCombobox";
 
 interface MetadataEditorProps {
   skill: SkillMeta;
@@ -34,7 +35,6 @@ export default function MetadataEditor({
   const [name, setName] = useState(skill.name);
   const [description, setDescription] = useState(skill.description);
   const [tags, setTags] = useState(skill.tags.join(", "));
-  const [moveCategory, setMoveCategory] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,11 +77,9 @@ export default function MetadataEditor({
   };
 
   // 移动分类
-  const handleMove = async () => {
-    if (!moveCategory.trim()) return;
+  const handleCategoryChange = async (newCategory: string) => {
     try {
-      await moveSkillCategory(skill.id, moveCategory.trim());
-      setMoveCategory("");
+      await moveSkillCategory(skill.id, newCategory);
       onUpdated();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("metadata.moveFailed"));
@@ -176,24 +174,10 @@ export default function MetadataEditor({
             {t("metadata.fieldMoveCategory")}
           </label>
           <div className="flex gap-2">
-            <Input
-              id="meta-move-category"
-              name="meta-move-category"
-              value={moveCategory}
-              onChange={(e) => setMoveCategory(e.target.value)}
-              placeholder={t("metadata.movePlaceholder")}
-              className="h-8 text-sm flex-1"
+            <CategoryCombobox
+              value={skill.category}
+              onChange={handleCategoryChange}
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMove}
-              disabled={!moveCategory.trim()}
-              className="gap-1"
-            >
-              <FolderInput size={12} />
-              {t("metadata.moveButton")}
-            </Button>
           </div>
         </div>
 

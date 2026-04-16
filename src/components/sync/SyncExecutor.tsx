@@ -10,6 +10,7 @@ import {
   RefreshCw,
   RotateCcw,
   SkipForward,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -27,6 +28,7 @@ import ReplaceSyncConfirmDialog from "./ReplaceSyncConfirmDialog";
 import SyncProgressBar from "./SyncProgressBar";
 import SyncSplitButton from "./SyncSplitButton";
 import SyncSummaryPanel from "./SyncSummaryPanel";
+import SyncTargetSelector from "./SyncTargetSelector";
 
 /**
  * SyncExecutor — 同步执行按钮 + 摘要确认 + 进度展示 + 结果日志
@@ -59,6 +61,12 @@ export default function SyncExecutor() {
   const [retryingSkillId, setRetryingSkillId] = useState<string | null>(null);
   // 当前待确认的同步模式（用于摘要面板确认后执行）
   const [pendingMode, setPendingMode] = useState<SyncMode>("incremental");
+  // 目标选择器显示状态
+  const [showTargetSelector, setShowTargetSelector] = useState(false);
+  // 目标选择器模式
+  const [targetSelectorMode, setTargetSelectorMode] = useState<"sync" | "diff">(
+    "sync",
+  );
 
   const enabledTargets = targets.filter((t) => t.enabled);
   const canSync = selectedSkillIds.length > 0 && enabledTargets.length > 0;
@@ -67,26 +75,50 @@ export default function SyncExecutor() {
     syncStatus === "diffing" ||
     syncFlow.state.phase === "syncing";
 
-  // 点击同步按钮 → 展示摘要面板（而非直接执行）
-  const handleSync = useCallback(
-    (mode: SyncMode) => {
-      if (mode === "replace") {
+  // 目标选择器确认（同步模式）
+  const handleTargetSelectorConfirm = useCallback(
+    (selectedIds: string[]) => {
+      setShowTargetSelector(false);
+
+      if (pendingMode === "replace") {
         // 替换同步：先展示摘要，确认后再弹出替换确认对话框
-        setPendingMode("replace");
         syncFlow.startSummary(
           selectedSkillIds.length,
-          enabledTargets,
+          enabledTargets.filter((t) => selectedIds.includes(t.id)),
           "replace",
         );
         return;
       }
 
       // 增量/全量同步：展示摘要面板
-      setPendingMode(mode);
-      syncFlow.startSummary(selectedSkillIds.length, enabledTargets, mode);
+      syncFlow.startSummary(
+        selectedSkillIds.length,
+        enabledTargets.filter((t) => selectedIds.includes(t.id)),
+        pendingMode,
+      );
     },
-    [selectedSkillIds.length, enabledTargets, syncFlow],
+    [pendingMode, syncFlow, selectedSkillIds.length, enabledTargets],
   );
+
+  // 点击同步按钮 → 只有一个启用目标时跳过选择器，否则显示目标选择器
+  const handleSync = useCallback(
+    (mode: SyncMode) => {
+      setPendingMode(mode);
+      // 只有一个启用目标时，跳过选择器直接进入摘要
+      if (enabledTargets.length === 1) {
+        handleTargetSelectorConfirm([enabledTargets[0].id]);
+        return;
+      }
+      setTargetSelectorMode("sync");
+      setShowTargetSelector(true);
+    },
+    [enabledTargets, handleTargetSelectorConfirm],
+  );
+
+  // 目标选择器取消
+  const handleTargetSelectorCancel = useCallback(() => {
+    setShowTargetSelector(false);
+  }, []);
 
   // 摘要面板确认 → 执行同步
   const handleSummaryConfirm = useCallback(async () => {
@@ -157,9 +189,15 @@ export default function SyncExecutor() {
       if (result.failed > 0) {
         toast.error(t("sync.syncPartialFail", { failed: result.failed }));
       } else {
-        toast.success(t("sync.replaceSyncSuccess", { count: result.success }), {
-          duration: 5000,
-        });
+        toast.success(
+          t("sync.replaceSyncSuccess", {
+            count: result.success,
+            deleted: result.deleted,
+          }),
+          {
+            duration: 5000,
+          },
+        );
       }
     } catch (err) {
       syncFlow.setError(
@@ -171,24 +209,35 @@ export default function SyncExecutor() {
     }
   }, [syncFlow, loadingMode, executePush, t]);
 
-  // 执行 Diff（预览变更）
-  const handleDiff = useCallback(async () => {
+  // Diff 目标选择器确认
+  const handleDiffTargetSelectorConfirm = useCallback(
+    async (selectedIds: string[]) => {
+      setShowTargetSelector(false);
+      if (selectedIds.length === 0) return;
+
+      setLoadingMode("diff");
+      try {
+        await executeDiff(selectedIds[0]);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t("sync.diffFailed"));
+      } finally {
+        setLoadingMode(null);
+      }
+    },
+    [executeDiff, t],
+  );
+
+  // 执行 Diff（预览变更）- 只有一个启用目标时直接执行，否则显示目标选择器
+  const handleDiff = useCallback(() => {
     if (enabledTargets.length === 0) return;
-    const target = enabledTargets[0];
-    if (enabledTargets.length > 1) {
-      toast.info(
-        t("sync.diffTargetHint", { name: target.name || target.path }),
-      );
+    // 只有一个启用目标时，跳过选择器直接执行 Diff
+    if (enabledTargets.length === 1) {
+      handleDiffTargetSelectorConfirm([enabledTargets[0].id]);
+      return;
     }
-    setLoadingMode("diff");
-    try {
-      await executeDiff(target.id);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("sync.diffFailed"));
-    } finally {
-      setLoadingMode(null);
-    }
-  }, [enabledTargets, executeDiff, t]);
+    setTargetSelectorMode("diff");
+    setShowTargetSelector(true);
+  }, [enabledTargets, handleDiffTargetSelectorConfirm]);
 
   // 从 Diff 报告执行同步
   const handleDiffSyncIncremental = useCallback(async () => {
@@ -264,6 +313,8 @@ export default function SyncExecutor() {
             className="text-[hsl(var(--destructive))] shrink-0"
           />
         );
+      case "deleted":
+        return <Trash2 size={14} className="text-red-400 shrink-0" />;
     }
   };
 
@@ -279,6 +330,8 @@ export default function SyncExecutor() {
         return t("sync.statusSkipped");
       case "failed":
         return t("sync.statusFailed");
+      case "deleted":
+        return t("sync.statusDeleted");
     }
   };
 
@@ -415,6 +468,14 @@ export default function SyncExecutor() {
                   {t("sync.skippedCount", { count: displayResult.skipped })}
                 </Badge>
               )}
+              {displayResult.deleted > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0 bg-red-500/15 text-red-400"
+                >
+                  {t("sync.deletedCount", { count: displayResult.deleted })}
+                </Badge>
+              )}
               {displayResult.failed > 0 && (
                 <Badge
                   variant="destructive"
@@ -488,14 +549,18 @@ export default function SyncExecutor() {
                               ? "secondary"
                               : detail.status === "skipped"
                                 ? "outline"
-                                : "destructive"
+                                : detail.status === "deleted"
+                                  ? "secondary"
+                                  : "destructive"
                         }
                         className={`text-[10px] px-1.5 py-0 ${
                           detail.status === "overwritten"
                             ? "bg-yellow-500/15 text-yellow-500"
                             : detail.status === "updated"
                               ? "bg-blue-500/15 text-blue-400"
-                              : ""
+                              : detail.status === "deleted"
+                                ? "bg-red-500/15 text-red-400"
+                                : ""
                         }`}
                       >
                         {getStatusLabel(detail.status)}
@@ -516,6 +581,20 @@ export default function SyncExecutor() {
         skillCount={selectedSkillIds.length}
         onConfirm={handleConfirmReplace}
       />
+
+      {/* 目标选择器弹窗 */}
+      {showTargetSelector && (
+        <SyncTargetSelector
+          mode={targetSelectorMode === "sync" ? "multi" : "single"}
+          targets={enabledTargets}
+          onConfirm={
+            targetSelectorMode === "sync"
+              ? handleTargetSelectorConfirm
+              : handleDiffTargetSelectorConfirm
+          }
+          onCancel={handleTargetSelectorCancel}
+        />
+      )}
     </div>
   );
 }

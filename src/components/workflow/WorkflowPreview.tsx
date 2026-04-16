@@ -5,6 +5,9 @@
 import { Eye, RotateCcw, Save } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import {
   createWorkflow as apiCreateWorkflow,
   previewWorkflow as apiPreviewWorkflow,
@@ -211,10 +214,15 @@ export default function WorkflowPreview({
                 关闭
               </button>
             </div>
-            <ScrollArea className="max-h-[300px]">
-              <pre className="p-3 text-xs font-[var(--font-code)] text-[hsl(var(--foreground))] whitespace-pre-wrap">
-                {preview}
-              </pre>
+            <ScrollArea className="h-[400px]">
+              <div className="p-3 prose prose-invert prose-sm max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {preview}
+                </ReactMarkdown>
+              </div>
             </ScrollArea>
           </div>
         )}
