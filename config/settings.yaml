@@ -8,7 +8,7 @@ sync:
     - id: sync-mo1arcsq-51da
       name: cb
       path: /Users/alex/.codebuddy/skills
-      enabled: false
+      enabled: true
 ui:
   defaultView: grid
   sidebarWidth: 240
@@ -40,8 +40,9 @@ skillBundles:
       - design
       - meta-skills
       - workflow
+      - tools
     createdAt: '2026-04-14T04:01:28.856Z'
-    updatedAt: '2026-04-16T08:08:57.068Z'
+    updatedAt: '2026-04-16T12:04:41.888Z'
 activeCategories:
   - coding
   - writing
