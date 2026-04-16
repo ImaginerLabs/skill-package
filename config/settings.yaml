@@ -5,6 +5,10 @@ sync:
       name: trae-cn
       path: /Users/alex/.trae-cn/skills
       enabled: true
+    - id: sync-mo1arcsq-51da
+      name: cb
+      path: /Users/alex/.codebuddy/skills
+      enabled: false
 ui:
   defaultView: grid
   sidebarWidth: 240

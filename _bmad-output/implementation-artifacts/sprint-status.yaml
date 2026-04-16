@@ -74,7 +74,7 @@
 # - NEVER skip qa or review — these are mandatory quality gates
 
 generated: 2026-04-10T15:38:50
-last_updated: 2026-04-16T15:40:00
+last_updated: 2026-04-16T19:12:00
 project: skill-package
 project_key: NOKEY
 tracking_system: file-system
@@ -367,3 +367,19 @@ development_status:
   refactor-5-empty-state-sortable-step: done
   refactor-6-migration-verification: done
   epic-refactor-component-abstraction-retrospective: optional
+
+  # ============================================================
+  # Epic SWU: 同步链路优化 + 分类编辑增强 + 工作流预览修复
+  # 同步目标选择器：用户可在同步/Diff 前选择目标，不再默认推送到所有目标
+  # 分类编辑增强：分类移动使用下拉选择器，支持搜索过滤和创建新分类
+  # 工作流预览修复：工作流预览支持 Markdown 渲染，代码块有语法高亮，内容可滚动
+  # Priority: P0 | FRs: FR-1.1~FR-5.1 | Architecture: AD-SWU-1~6
+  # Dependencies: None（基于现有技术栈）
+  # ============================================================
+  epic-sync-workflow-ux-enhancement: done
+  swu-1-1-sync-target-multi-selector: done
+  swu-1-2-diff-target-selector: done
+  swu-2-1-category-combobox: done
+  swu-2-2-create-category: done
+  swu-3-1-workflow-preview-markdown: done
+  epic-sync-workflow-ux-enhancement-retrospective: done

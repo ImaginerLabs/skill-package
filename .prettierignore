@@ -17,6 +17,10 @@ docs/
 
 # CodeBuddy skill 资源文件
 .codebuddy/
+skills/
+
+# 配置文件（YAML 等非源码）
+config/
 
 # 锁文件
 package-lock.json
