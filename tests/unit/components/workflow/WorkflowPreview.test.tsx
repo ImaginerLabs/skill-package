@@ -158,7 +158,7 @@ describe("WorkflowPreview", () => {
         steps: sampleSteps,
       };
       mockPreviewWorkflow.mockResolvedValue({
-        content: "---\nname: 测试工作流\n---\n## Step 1",
+        content: "## 测试工作流\n\n描述内容\n\n### Step 1\n\n执行审查\n",
       });
 
       render(<WorkflowPreview />);
@@ -174,9 +174,7 @@ describe("WorkflowPreview", () => {
 
       await vi.waitFor(() => {
         // 验证预览区域中包含预览内容
-        expect(document.querySelector("pre")?.textContent).toContain(
-          "测试工作流",
-        );
+        expect(screen.getByText("测试工作流")).toBeInTheDocument();
       });
 
       // 预览标题栏显示文件名

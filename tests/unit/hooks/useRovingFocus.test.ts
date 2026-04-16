@@ -8,11 +8,11 @@ import { useRovingFocus } from "../../../src/hooks/useRovingFocus";
 
 describe("useRovingFocus", () => {
   describe("初始状态", () => {
-    it("focusedIndex 初始为 0", () => {
+    it("focusedIndex 初始为 -1（未激活）", () => {
       const { result } = renderHook(() =>
         useRovingFocus({ itemCount: 5, isActive: true }),
       );
-      expect(result.current.focusedIndex).toBe(0);
+      expect(result.current.focusedIndex).toBe(-1);
     });
 
     it("getItemProps 返回正确的 tabIndex", () => {
@@ -28,7 +28,8 @@ describe("useRovingFocus", () => {
       const { result } = renderHook(() =>
         useRovingFocus({ itemCount: 5, isActive: true }),
       );
-      expect(result.current.getItemProps(0)["data-focused"]).toBe(true);
+      // focusedIndex 为 -1 时没有任何项是 focused
+      expect(result.current.getItemProps(0)["data-focused"]).toBe(false);
       expect(result.current.getItemProps(1)["data-focused"]).toBe(false);
     });
 
@@ -36,7 +37,8 @@ describe("useRovingFocus", () => {
       const { result } = renderHook(() =>
         useRovingFocus({ itemCount: 5, isActive: true }),
       );
-      expect(result.current.getItemProps(0)["aria-current"]).toBe("true");
+      // focusedIndex 为 -1 时没有任何项有 aria-current
+      expect(result.current.getItemProps(0)["aria-current"]).toBeUndefined();
       expect(result.current.getItemProps(1)["aria-current"]).toBeUndefined();
     });
   });
@@ -56,7 +58,7 @@ describe("useRovingFocus", () => {
   });
 
   describe("itemCount 变化时重置", () => {
-    it("itemCount 变化时 focusedIndex 重置为 0", () => {
+    it("itemCount 变化时 focusedIndex 重置为 -1", () => {
       const { result, rerender } = renderHook(
         ({ itemCount }) => useRovingFocus({ itemCount, isActive: true }),
         { initialProps: { itemCount: 5 } },
@@ -68,7 +70,7 @@ describe("useRovingFocus", () => {
       expect(result.current.focusedIndex).toBe(3);
 
       rerender({ itemCount: 3 });
-      expect(result.current.focusedIndex).toBe(0);
+      expect(result.current.focusedIndex).toBe(-1);
     });
   });
 
@@ -84,11 +86,11 @@ describe("useRovingFocus", () => {
   });
 
   describe("边界处理", () => {
-    it("itemCount 为 0 时 focusedIndex 为 0", () => {
+    it("itemCount 为 0 时 focusedIndex 为 -1（无项可聚焦）", () => {
       const { result } = renderHook(() =>
         useRovingFocus({ itemCount: 0, isActive: true }),
       );
-      expect(result.current.focusedIndex).toBe(0);
+      expect(result.current.focusedIndex).toBe(-1);
     });
 
     it("itemCount 为 1 时只有一个项可聚焦", () => {

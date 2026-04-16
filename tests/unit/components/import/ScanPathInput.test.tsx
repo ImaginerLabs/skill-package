@@ -38,7 +38,6 @@ vi.mock("react-i18next", async () => {
 });
 
 // Mock PathPresetSelect 组件（避免 shadcn Select 在 jsdom 中的兼容性问题）
-let _capturedOnSelect: ((path: string) => void) | null = null;
 vi.mock("../../../../src/components/shared/PathPresetSelect", () => ({
   PathPresetSelect: ({
     presets,
@@ -47,13 +46,14 @@ vi.mock("../../../../src/components/shared/PathPresetSelect", () => ({
     presets: { id: string; path: string; label?: string }[];
     onSelect: (path: string) => void;
   }) => {
-    _capturedOnSelect = onSelect;
     if (presets.length === 0) return null;
     return (
       <select
         data-testid="preset-select"
         title="从预设选择"
-        onChange={(e) => onSelect(e.target.value)}
+        onChange={(e) => {
+          if (e.target.value) onSelect(e.target.value);
+        }}
       >
         <option value="">从预设选择</option>
         {presets.map((p) => (
