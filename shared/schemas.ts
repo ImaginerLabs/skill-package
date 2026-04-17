@@ -230,16 +230,39 @@ export const RepositoriesConfigSchema = z.object({
 
 // ---- 套件 Schema ----
 
-/** SkillBundle Zod Schema */
+/** SkillBundleCriteria Zod Schema（V3 统一条件） */
+export const SkillBundleCriteriaSchema = z
+  .object({
+    categories: z.array(z.string().min(1)).max(50).optional(),
+    sources: z.array(z.string()).max(50).optional(),
+    skills: z.array(z.string().min(1)).max(50).optional(),
+  })
+  .refine(
+    (data) =>
+      (data.categories?.length ?? 0) > 0 ||
+      (data.sources?.length ?? 0) > 0 ||
+      (data.skills?.length ?? 0) > 0,
+    { message: "至少需要选择一个条件（分类、来源或 Skill）" },
+  );
+
+/** SkillBundle Zod Schema（V3） */
 export const SkillBundleSchema = z.object({
   id: z.string().min(1),
   name: z.string().regex(/^[a-z0-9-]+$/, "名称只能包含小写字母、数字和连字符"),
   displayName: z.string().min(1, "显示名称不能为空"),
   description: z.string().optional(),
-  categoryNames: z
-    .array(z.string().min(1))
-    .min(1, "至少选择 1 个分类")
-    .max(20, "最多选择 20 个分类"),
+  criteria: SkillBundleCriteriaSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/** SkillBundleLegacy Zod Schema（V3 迁移前兼容） */
+export const SkillBundleLegacySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().regex(/^[a-z0-9-]+$/),
+  displayName: z.string().min(1),
+  description: z.string().optional(),
+  categoryNames: z.array(z.string().min(1)).min(1).max(20),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -252,17 +275,14 @@ export const SkillBundleCreateSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "名称只能包含小写字母、数字和连字符"),
   displayName: z.string().min(1, "displayName 为必填项"),
   description: z.string().optional(),
-  categoryNames: z
-    .array(z.string().min(1))
-    .min(1, "至少选择 1 个分类")
-    .max(20, "最多选择 20 个分类"),
+  criteria: SkillBundleCriteriaSchema,
 });
 
 /** PUT /api/skill-bundles/:id 请求体 */
 export const SkillBundleUpdateSchema = z.object({
   displayName: z.string().min(1).optional(),
   description: z.string().optional(),
-  categoryNames: z.array(z.string().min(1)).min(1).max(20).optional(),
+  criteria: SkillBundleCriteriaSchema.optional(),
 });
 
 // ---- 分类与配置 Schema ----

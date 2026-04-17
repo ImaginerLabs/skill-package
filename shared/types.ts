@@ -225,7 +225,17 @@ export interface PathPreset {
 
 // ---- 套件类型 ----
 
-/** 套件（分类组合） */
+/** 套件条件（V3 统一模型） */
+export interface SkillBundleCriteria {
+  /** 分类条件：引用分类的 name（英文标识）列表 */
+  categories?: string[];
+  /** 来源条件：来源标识列表（如 ""=我的 Skill，"anthropic-official" 等） */
+  sources?: string[];
+  /** 特定 Skill 条件：Skill ID 列表 */
+  skills?: string[];
+}
+
+/** 套件（分类组合，V3 统一模型） */
 export interface SkillBundle {
   /** 格式：bundle-{ts36}-{rand4} */
   id: string;
@@ -235,11 +245,22 @@ export interface SkillBundle {
   displayName: string;
   /** 可选描述 */
   description?: string;
-  /** 引用分类的 name（英文标识）列表，最多 20 个 */
-  categoryNames: string[];
+  /** V3 统一条件（categories/sources/skills 三选一或组合） */
+  criteria: SkillBundleCriteria;
   /** ISO 8601 创建时间 */
   createdAt: string;
   /** ISO 8601 更新时间 */
+  updatedAt: string;
+}
+
+/** 旧版套件格式（V3 迁移前） */
+export interface SkillBundleLegacy {
+  id: string;
+  name: string;
+  displayName: string;
+  description?: string;
+  categoryNames: string[];
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -251,10 +272,12 @@ export interface SkillBundleWithStatus extends SkillBundle {
 
 /** 套件激活结果 */
 export interface ApplyBundleResult {
-  /** 成功激活的分类名列表 */
+  /** 成功激活的 Skill ID 列表 */
   applied: string[];
   /** 因引用损坏被跳过的分类名列表 */
   skipped: string[];
+  /** 激活的 Skill 总数 */
+  total: number;
 }
 
 /** 创建套件请求体 */
@@ -262,14 +285,14 @@ export interface SkillBundleCreate {
   name: string;
   displayName: string;
   description?: string;
-  categoryNames: string[];
+  criteria: SkillBundleCriteria;
 }
 
 /** 更新套件请求体 */
 export interface SkillBundleUpdate {
   displayName?: string;
   description?: string;
-  categoryNames?: string[];
+  criteria?: SkillBundleCriteria;
 }
 
 // ---- 外部仓库配置类型 ----
