@@ -8,7 +8,11 @@ sync:
     - id: sync-mo1arcsq-51da
       name: codebuddy
       path: /Users/alex/.codebuddy/skills
-      enabled: true
+      enabled: false
+    - id: sync-mo2cayw3-1czq
+      name: open code
+      path: /Users/alex/.config/opencode/skills
+      enabled: false
 ui:
   defaultView: grid
   sidebarWidth: 240
@@ -24,6 +28,9 @@ pathPresets:
   - id: preset-mo18alu9-b7j6
     path: /Users/alex/.trae-cn/skills
     label: trae-cn
+  - id: preset-mo2caufg-02k7
+    path: /Users/alex/.config/opencode/skills
+    label: open code
 skillBundles:
   - id: bundle-default
     name: default
@@ -60,6 +67,47 @@ skillBundles:
         - anthropic-official
     createdAt: '2026-04-16T15:17:11.873Z'
     updatedAt: '2026-04-16T15:17:11.873Z'
+  - id: bundle-mo2b5sgw-5xfa
+    name: daily-dev
+    displayName: 日常开发
+    criteria:
+      skills:
+        - skill
+        - skill-2
+        - skill-3
+        - skill-4
+        - skill-5
+        - skill-6
+        - skill-7
+        - skill-8
+        - skill-9
+        - skill-10
+        - skill-11
+        - skill-12
+        - skill-13
+        - skill-15
+        - skill-16
+        - skill-17
+        - skill-19
+        - skill-20
+        - skill-21
+        - skill-24
+        - skill-25
+        - skill-31
+        - skill-32
+        - skill-39
+        - skill-41
+        - skill-42
+        - skill-14
+        - skill-18
+        - skill-22
+        - skill-34
+        - skill-45
+        - skill-40
+        - skill-33
+        - skill-27
+    createdAt: '2026-04-17T02:47:44.480Z'
+    updatedAt: '2026-04-17T02:47:44.480Z'
 activeCategories:
   - coding
   - writing
