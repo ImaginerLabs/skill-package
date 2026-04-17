@@ -112,22 +112,6 @@ bundleRoutes.put(
 );
 
 /**
- * DELETE /api/skill-bundles/:id — 删除套件
- */
-bundleRoutes.delete(
-  "/skill-bundles/:id",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      await removeBundle(id);
-      res.json({ success: true, data: null });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
-
-/**
  * PUT /api/skill-bundles/:id/apply — 一键激活套件
  */
 bundleRoutes.put(
@@ -137,6 +121,22 @@ bundleRoutes.put(
       const { id } = req.params;
       const result = await applyBundle(id);
       res.json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/**
+ * DELETE /api/skill-bundles/:id — 删除套件
+ */
+bundleRoutes.delete(
+  "/skill-bundles/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      await removeBundle(id);
+      res.json({ success: true, data: null });
     } catch (err) {
       next(err);
     }
