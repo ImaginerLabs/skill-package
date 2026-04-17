@@ -185,21 +185,46 @@ export default function SyncSkillSelector() {
     [groupedSkills, selectedSkillIds],
   );
 
-  // 点击套件：将套件下所有分类的 Skill 追加到已选中
+  // V3 统一解析：解析套件条件，返回匹配的 Skill ID 列表
+  const resolveBundleSkillIds = useCallback(
+    (bundle: SkillBundleWithStatus): string[] => {
+      const matchedIds = new Set<string>();
+      const { criteria } = bundle;
+
+      if (criteria.categories?.length) {
+        for (const catName of criteria.categories) {
+          const ids = categorySkillIdsMap.get(catName.toLowerCase()) ?? [];
+          ids.forEach((id) => matchedIds.add(id));
+        }
+      }
+
+      if (criteria.sources?.length) {
+        for (const skill of skills) {
+          if (criteria.sources.includes(skill.source ?? "")) {
+            matchedIds.add(skill.id);
+          }
+        }
+      }
+
+      if (criteria.skills?.length) {
+        criteria.skills.forEach((id) => matchedIds.add(id));
+      }
+
+      return [...matchedIds];
+    },
+    [categorySkillIdsMap, skills],
+  );
+
+  // 点击套件：将套件下所有匹配的 Skill 追加到已选中（V3 支持分类/来源/Skill）
   const handleSelectBundle = useCallback(
     (bundle: SkillBundleWithStatus) => {
-      // 收集套件下所有有效分类的 skill id
-      const bundleSkillIds: string[] = [];
-      for (const catName of bundle.categoryNames) {
-        const ids = categorySkillIdsMap.get(catName.toLowerCase()) ?? [];
-        bundleSkillIds.push(...ids);
-      }
+      const bundleSkillIds = resolveBundleSkillIds(bundle);
+
       if (bundleSkillIds.length === 0) {
         toast.info(t("sync.bundleNoMatch", { name: bundle.displayName }));
         return;
       }
 
-      // 判断是否已全部选中 → 切换逻辑
       const allBundleSelected = bundleSkillIds.every((id) =>
         selectedSkillIds.includes(id),
       );
@@ -211,17 +236,14 @@ export default function SyncSkillSelector() {
         selectByCategory([...newIds]);
       }
     },
-    [categorySkillIdsMap, selectedSkillIds, selectByCategory, t],
+    [resolveBundleSkillIds, selectedSkillIds, selectByCategory, t],
   );
 
-  // 判断套件选中状态
+  // 判断套件选中状态（V3 支持）
   const getBundleCheckState = useCallback(
     (bundle: SkillBundleWithStatus): "all" | "some" | "none" => {
-      const bundleSkillIds: string[] = [];
-      for (const catName of bundle.categoryNames) {
-        const ids = categorySkillIdsMap.get(catName.toLowerCase()) ?? [];
-        bundleSkillIds.push(...ids);
-      }
+      const bundleSkillIds = resolveBundleSkillIds(bundle);
+
       if (bundleSkillIds.length === 0) return "none";
       const selectedCount = bundleSkillIds.filter((id) =>
         selectedSkillIds.includes(id),
@@ -230,7 +252,7 @@ export default function SyncSkillSelector() {
       if (selectedCount > 0) return "some";
       return "none";
     },
-    [categorySkillIdsMap, selectedSkillIds],
+    [resolveBundleSkillIds, selectedSkillIds],
   );
 
   return (
