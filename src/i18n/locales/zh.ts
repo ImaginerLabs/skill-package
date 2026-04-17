@@ -20,6 +20,7 @@ export const zh = {
     allSources: "全部",
     mySkills: "我的 Skill",
     sourceListLabel: "按来源筛选 Skill",
+    devTools: "开发工具",
   },
 
   // ── 通用 UI ───────────────────────────────────────────────
@@ -413,5 +414,86 @@ export const zh = {
     BUNDLE_NAME_DUPLICATE: "套件名称已存在",
     PATH_TRAVERSAL: "路径包含非法字符",
     unknown: "操作失败，请重试",
+  },
+
+  // ── 开发工具页 ────────────────────────────────────────────
+  devTools: {
+    title: "开发工具",
+    subtitle: "实用开发小工具集合，提升日常开发效率",
+    toolCount: "{{count}} 个工具",
+    branchGenerator: {
+      title: "Git 分支生成器",
+      desc: "中文描述智能转英文分支名，自动生成符合 Git 规范的分支名和命令",
+    },
+  },
+
+  // ── Git 分支生成器 ────────────────────────────────────────
+  branchGenerator: {
+    title: "Git 智能分支名生成器",
+    targetBranch: "选择目标分支",
+    optional: "选填",
+    customTarget: "自定义目标分支...",
+    intentLabel: "选择分支意图",
+    // 意图标签
+    intentFeature: "新功能",
+    intentBugfix: "修复Bug",
+    intentHotfix: "紧急修复",
+    intentRelease: "发布版本",
+    intentRefactor: "代码重构",
+    intentChore: "日常维护",
+    intentDocs: "文档更新",
+    intentTest: "测试相关",
+    intentPerf: "性能优化",
+    // 意图描述
+    intentDescFeature: "开发新功能或新需求",
+    intentDescBugfix: "修复已知的缺陷",
+    intentDescHotfix: "线上紧急问题修复",
+    intentDescRelease: "准备发布新版本",
+    intentDescRefactor: "重构现有代码结构",
+    intentDescChore: "构建、CI/CD、依赖更新等",
+    intentDescDocs: "更新项目文档",
+    intentDescTest: "添加或修改测试用例",
+    intentDescPerf: "提升系统性能",
+    // 描述输入
+    descriptionLabel: "填写分支描述",
+    descriptionPlaceholder: "简短描述，如：用户登录、修复支付超时...",
+    noMappingHint: "（部分中文无法映射将被丢弃）",
+    // 元数据
+    ticketNumber: "关联单号",
+    ticketPlaceholder: "如 JIRA-1234、TAPD-5678",
+    dateTag: "日期标记",
+    author: "作者标识",
+    authorPlaceholder: "如 zhangsan",
+    // 操作
+    generate: "生成分支名",
+    reset: "重置",
+    // 结果
+    result: "生成结果",
+    copied: "已复制到剪贴板",
+    // 历史
+    history: "历史记录",
+    noHistory: "暂无历史记录",
+    historyCleared: "历史记录已清空",
+    // 规范
+    convention: "命名规范速查",
+    // 流程图
+    flowChart: "分支流程",
+    flow: {
+      main: "主分支（生产环境）",
+      develop: "开发分支（集成测试）",
+      featureBugfix: "功能/修复分支",
+      release: "发布准备分支",
+      hotfix: "紧急修复分支",
+    },
+    // 错误提示
+    error: {
+      noDescription: "请输入分支描述",
+      validationFailed: "分支名校验未通过",
+      copyFailed: "复制失败，请手动复制",
+    },
+    // 成功提示
+    success: {
+      generated: "分支名生成成功",
+    },
   },
 } as const;

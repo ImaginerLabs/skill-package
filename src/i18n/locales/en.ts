@@ -20,6 +20,7 @@ export const en = {
     allSources: "All",
     mySkills: "My Skills",
     sourceListLabel: "Filter Skills by source",
+    devTools: "Dev Tools",
   },
 
   // ── Common UI ─────────────────────────────────────────────
@@ -420,5 +421,87 @@ export const en = {
     BUNDLE_NAME_DUPLICATE: "Bundle name already exists",
     PATH_TRAVERSAL: "Path contains illegal characters",
     unknown: "Operation failed, please try again",
+  },
+
+  // ── Dev Tools Page ────────────────────────────────────────
+  devTools: {
+    title: "Dev Tools",
+    subtitle: "Practical dev tools to boost daily productivity",
+    toolCount: "{{count}} tools",
+    branchGenerator: {
+      title: "Git Branch Generator",
+      desc: "Smart Chinese-to-English branch naming with auto-generated Git commands",
+    },
+  },
+
+  // ── Git Branch Generator ──────────────────────────────────
+  branchGenerator: {
+    title: "Git Smart Branch Generator",
+    targetBranch: "Select Target Branch",
+    optional: "Optional",
+    customTarget: "Custom target branch...",
+    intentLabel: "Select Branch Intent",
+    // Intent labels
+    intentFeature: "Feature",
+    intentBugfix: "Bug Fix",
+    intentHotfix: "Hotfix",
+    intentRelease: "Release",
+    intentRefactor: "Refactor",
+    intentChore: "Chore",
+    intentDocs: "Docs",
+    intentTest: "Test",
+    intentPerf: "Perf",
+    // Intent descriptions
+    intentDescFeature: "Develop new features",
+    intentDescBugfix: "Fix known bugs",
+    intentDescHotfix: "Urgent production fixes",
+    intentDescRelease: "Prepare a new release",
+    intentDescRefactor: "Refactor existing code",
+    intentDescChore: "Build, CI/CD, deps update",
+    intentDescDocs: "Update documentation",
+    intentDescTest: "Add or modify tests",
+    intentDescPerf: "Improve performance",
+    // Description input
+    descriptionLabel: "Branch Description",
+    descriptionPlaceholder:
+      "Brief description, e.g. user login, fix payment timeout...",
+    noMappingHint: "(Unmapped Chinese chars will be dropped)",
+    // Metadata
+    ticketNumber: "Ticket Number",
+    ticketPlaceholder: "e.g. JIRA-1234, TAPD-5678",
+    dateTag: "Date Tag",
+    author: "Author",
+    authorPlaceholder: "e.g. zhangsan",
+    // Actions
+    generate: "Generate Branch Name",
+    reset: "Reset",
+    // Result
+    result: "Result",
+    copied: "Copied to clipboard",
+    // History
+    history: "History",
+    noHistory: "No history yet",
+    historyCleared: "History cleared",
+    // Convention
+    convention: "Naming Convention",
+    // Flow chart
+    flowChart: "Branch Flow",
+    flow: {
+      main: "Main branch (production)",
+      develop: "Develop branch (integration)",
+      featureBugfix: "Feature / Bugfix branches",
+      release: "Release preparation branch",
+      hotfix: "Urgent fix branch",
+    },
+    // Errors
+    error: {
+      noDescription: "Please enter a branch description",
+      validationFailed: "Branch name validation failed",
+      copyFailed: "Copy failed, please copy manually",
+    },
+    // Success
+    success: {
+      generated: "Branch name generated successfully",
+    },
   },
 } as const;
