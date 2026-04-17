@@ -31,6 +31,7 @@
 | 📊 Stats Panel      | Sidebar footer shows total Skills, categories, and sync count                                                                                                                                                                      |
 | 🔥 Activity Heatmap | Visualize recent Skill file modification activity, GitHub contribution heatmap style; hover tooltip shows daily change count and file list                                                                                         |
 | 🌓 Theme Toggle     | Light/dark theme switch via Sun/Moon button in Header; preference persisted to localStorage, initialized from system `prefers-color-scheme`                                                                                        |
+| 🛠️ Dev Tools        | Built-in developer utilities; Git branch name generator (9 intent mappings, Chinese-to-branch conversion, one-click copy, history)                                                                                                 |
 | 🌍 i18n             | Supports Chinese (zh) and English (en); language follows browser settings; manual switch with persistence                                                                                                                          |
 
 ---
