@@ -81,6 +81,8 @@ export const zh = {
     startSync: "开始同步",
     syncing: "同步中...",
     clearResults: "清除结果",
+    collapseResult: "收起",
+    expandResult: "展开",
     syncComplete: "同步完成",
     syncSuccess: "同步完成！{{count}} 个文件已同步",
     syncPartialFail: "同步完成，{{failed}} 个文件失败",

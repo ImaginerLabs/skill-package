@@ -82,6 +82,8 @@ export const en = {
     startSync: "Start Sync",
     syncing: "Syncing...",
     clearResults: "Clear Results",
+    collapseResult: "Collapse",
+    expandResult: "Expand",
     syncComplete: "Sync Complete",
     syncSuccess: "Sync complete! {{count}} files synced",
     syncPartialFail: "Sync complete, {{failed}} files failed",
