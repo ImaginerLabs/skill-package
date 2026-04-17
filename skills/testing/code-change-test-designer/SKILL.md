@@ -1,7 +1,15 @@
 ---
 name: code-change-test-designer
-description: Analyze code changes from any source (staged, unstaged, commits, branches, or files) and design comprehensive test cases. This skill should be used when the user mentions「测试用例覆盖」「帮我设计测试」「分析代码变更」「生成测试报告」「测试覆盖」「diff 测试」「commit 测试」. Automatically reads code changes, summarizes the purpose and capability changes, designs test cases covering main flows and edge cases, and outputs a complete test analysis report.
+description: >-
+  Analyzes code changes and designs comprehensive test cases. Reads diffs, summarizes capability changes,
+  and designs test cases covering main flows and edge cases.
+  Should be used when the user mentions test coverage, designing tests for code changes, or analyzing
+  diff/commit for testing purposes.
+  Distinguished from code-review-workflow which provides comprehensive review, this skill focuses on
+  test case design for code changes.
 category: testing
+boundary:
+  vs_code-review-workflow: "code-review-workflow provides comprehensive 4-phase review, this skill focuses specifically on test case design for code changes"
 ---
 
 # 代码变更测试用例覆盖分析

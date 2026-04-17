@@ -1,16 +1,15 @@
 ---
 name: react-performance
-description: >
-  Reviews and optimizes React component performance and correctness. Covers stale closures, unnecessary
-  re-renders, useEffect cleanup, state design, debounce/throttle for high-frequency events, and race
-  conditions. Use this skill whenever the user is concerned about React performance — whether they're
-  seeing slow renders, suspect stale closure bugs, or want to optimize useMemo/useCallback usage.
-  Trigger on phrases like "React performance", "stale closure", "useMemo", "useCallback", "avoid re-renders",
-  "useEffect issues", "React 性能优化", "闭包陷阱", "避免重渲染", "渲染性能", "性能审查",
-  "component re-rendering", "React slow", "optimize React". Also use when the user mentions React
-  performance problems, unnecessary re-renders, or Hook-related bugs — these issues are subtle and
-  often missed in regular code reviews, so this skill provides the focused deep dive they need.
+description: >-
+  Reviews and optimizes React component performance and correctness. Covers stale closures, unnecessary re-renders,
+  useEffect cleanup, state design, debounce/throttle, and race conditions.
+  Should be used when the user is concerned about React performance — slow renders, stale closure bugs,
+  or optimizing useMemo/useCallback usage.
+  Distinguished from frontend-code-review which covers general code quality, this skill focuses specifically
+  on React performance and Hook-related issues.
 category: coding
+boundary:
+  vs_frontend-code-review: "frontend-code-review covers general code quality, this skill focuses specifically on React performance and Hook-related issues"
 ---
 
 # React Performance & Common Pitfalls

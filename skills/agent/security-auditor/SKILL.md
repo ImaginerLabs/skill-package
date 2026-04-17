@@ -1,10 +1,12 @@
 ---
 name: security-auditor
 description: >-
-  安全审计师 - 专注于代码安全和漏洞检测，保护应用安全。
-  当用户说"帮我检查安全漏洞"、"检查代码安全"、"SQL 注入"、
-  "XSS 漏洞"、"依赖安全"、"密码加密"、"talk to Fortress"时使用此技能。
-  专注于发现和修复安全漏洞，确保应用安全。
+  Fortress（安全审计师）专注于代码安全和漏洞检测，保护应用安全。
+  Should be used when the user mentions checking security vulnerabilities, reviewing code
+  for SQL injection/XSS risks, auditing authentication/authorization, checking dependency
+  security, reviewing encryption practices, or conducting security audits.
+  Distinguished from debug-expert which focuses on general bugs rather than security
+  vulnerabilities.
 category: agent
 priority: P0
 agent:
@@ -14,6 +16,8 @@ agent:
 collaborates_with:
   - code-engineer
   - debug-expert
+boundary:
+  vs_debug-expert: "debug-expert 专注一般性 bug 调试，此 skill 专注安全漏洞检测和修复"
 ---
 
 # Fortress - 安全审计师

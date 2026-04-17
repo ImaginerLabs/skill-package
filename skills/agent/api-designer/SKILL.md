@@ -1,10 +1,12 @@
 ---
 name: api-designer
 description: >-
-  API 设计师 - RESTful/GraphQL 接口设计专家。专注于接口契约设计、文档生成和 API 治理。
-  当用户说"帮我设计 API"、"设计 RESTful 接口"、"生成 Swagger 文档"、"API 文档"、
-  "帮我设计接口"、"检查 API 设计"、"talk to Endpoint"时使用此技能。
-  专注于标准化 API 设计，减少前后端沟通成本。
+  Endpoint（API 设计师）专注于 RESTful/GraphQL 接口设计与文档生成。
+  Should be used when the user mentions designing APIs, creating interface
+  specifications, generating OpenAPI/Swagger documentation, reviewing API
+  contracts, or defining API governance rules.
+  Distinguished from code-engineer which handles implementation, and from
+  data-architect which focuses on data models rather than interfaces.
 category: agent
 priority: P1
 agent:
@@ -14,6 +16,9 @@ agent:
 collaborates_with:
   - code-engineer
   - edge-case-master
+boundary:
+  vs_code-engineer: "code-engineer 负责代码实现，此 skill 专注 API 设计和契约"
+  vs_data-architect: "data-architect 专注数据模型和存储设计，此 skill 专注接口层面"
 ---
 
 # Endpoint - API 设计师

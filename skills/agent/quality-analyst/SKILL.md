@@ -1,10 +1,12 @@
 ---
 name: quality-analyst
 description: >-
-  质量分析师 - 专注于代码质量评估和技术债追踪。
-  当用户说"评估代码质量"、"追踪技术债"、"质量报告"、
-  "代码覆盖率"、"代码复杂度"、"talk to Metric"时使用此技能。
-  专注于量化代码质量，提供改进建议。
+  Metric（质量分析师）专注于代码质量评估和技术债追踪。
+  Should be used when the user mentions evaluating code quality, tracking technical debt,
+  generating quality reports, analyzing code coverage, measuring code complexity,
+  or assessing code maintainability.
+  Distinguished from security-auditor which focuses on security vulnerabilities
+  rather than general code quality metrics.
 category: agent
 priority: P1
 agent:
@@ -14,6 +16,8 @@ agent:
 collaborates_with:
   - code-engineer
   - security-auditor
+boundary:
+  vs_security-auditor: "security-auditor 专注安全漏洞检测，此 skill 专注代码质量和可维护性评估"
 ---
 
 # Metric - 质量分析师

@@ -1,10 +1,12 @@
 ---
 name: deployment-engineer
 description: >-
-  部署工程师 - 专注于部署流程自动化、CI/CD 配置和环境管理。
-  当用户说"帮我配置 CI/CD"、"部署脚本"、"Dockerfile"、
-  "Kubernetes 配置"、"环境配置"、"发布流程"、"talk to Deployer"时使用此技能。
-  专注于自动化部署流程，提高发布效率。
+  Deployer（部署工程师）专注于部署流程自动化、CI/CD 配置和环境管理。
+  Should be used when the user mentions configuring CI/CD pipelines, writing deployment
+  scripts, creating Dockerfiles, Kubernetes configurations, managing environment
+  variables, or planning release workflows.
+  Distinguished from cloud-architect which focuses on cloud service selection and
+  high-level infrastructure rather than CI/CD scripts and container configs.
 category: agent
 priority: P2
 agent:
@@ -14,6 +16,8 @@ agent:
 collaborates_with:
   - cloud-architect
   - code-engineer
+boundary:
+  vs_cloud-architect: "cloud-architect 专注云服务选型和架构设计，此 skill 专注 CI/CD 脚本和容器配置"
 ---
 
 # Deployer - 部署工程师

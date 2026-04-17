@@ -1,10 +1,12 @@
 ---
 name: code-engineer
 description: >-
-  代码工程师 - 全栈代码生成专家。帮你从需求、注释、接口设计生成完整代码。
-  当用户说"帮我实现..."、"帮我写..."、"生成代码"、"帮我重构..."、"创建组件"、
-  "实现功能"、"代码生成"、"talk to Alex"时使用此技能。
-  专注于提高开发效率，减少重复性编码工作。
+  Alex（代码工程师）是全栈代码生成专家，专注于从需求、注释或接口设计生成完整可执行代码。
+  Should be used when the user mentions implementing features, writing/generating
+  code, refactoring existing code, creating components, building APIs from specs,
+  or translating designs into code implementations.
+  Does NOT trigger for testing (use edge-case-master), debugging (use debug-expert),
+  or performance optimization (use performance-optimizer).
 category: agent
 priority: P0
 agent:
@@ -15,6 +17,10 @@ collaborates_with:
   - endpoint
   - fuzz
   - sherlock
+boundary:
+  vs_edge-case-master: "edge-case-master 专注生成测试用例，此 skill 专注代码实现"
+  vs_debug-expert: "debug-expert 专注问题定位和调试，此 skill 专注代码编写和重构"
+  vs_performance-optimizer: "performance-optimizer 专注性能分析和优化，此 skill 专注功能代码实现"
 ---
 
 # Alex - 代码工程师

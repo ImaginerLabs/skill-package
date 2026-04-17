@@ -1,16 +1,14 @@
 ---
 name: frontend-code-review
-description: >
-  Comprehensive frontend code quality audit covering ESLint, robustness, side effects, and performance.
-  Auto-detects and fixes ESLint errors, analyzes defensive coding, boundary conditions, race conditions,
-  and performance anti-patterns for React/Vue/Taro projects. Use this skill whenever the user needs a
-  thorough code quality check — before committing, during a PR review, after refactoring, or when inheriting
-  someone else's code. Trigger on phrases like "code review", "check this code", "review my code",
-  "code quality", "pre-commit check", "审查代码", "检查这段代码", "代码体检", "质量检查", "帮我看看这段代码",
-  "代码有没有问题", "检查一下代码", "帮我做代码审查", "提交前检查". Also use when the user is about to
-  commit code, doing a PR review, or inheriting code — even if they don't say "code review", any request to
-  verify code quality or check for issues before shipping is a good fit.
+description: >-
+  Comprehensive frontend code quality audit covering ESLint, robustness, side effects, and performance for
+  React/Vue/Taro projects. Should be used when the user needs a thorough code quality check — before
+  committing, during PR review, after refactoring, or when inheriting someone else's code.
+  Distinguished from staged-code-review which focuses on git staged changes pre-commit, this skill
+  focuses on general frontend code quality auditing.
 category: coding
+boundary:
+  vs_staged-code-review: "staged-code-review focuses on pre-commit git staged changes, this skill focuses on general frontend code quality auditing"
 ---
 
 # Frontend Code Quality Review

@@ -1,17 +1,13 @@
 ---
 name: feature-port-doc-generator
-description: >
-  Generates standardized porting documentation from completed feature changes. Analyzes commit diffs or
-  file contents, extracts the change intent, and outputs a Markdown document that lets other teams understand
-  what changed, why, and how to implement it in their own project. Use this skill whenever the user needs to
-  document a change for cross-team or cross-project consumption — whether it's sharing a feature implementation,
-  creating a migration guide, or writing a porting reference. Trigger on phrases like "generate porting doc",
-  "write porting guide", "document this change for porting", "how to port this to other projects",
-  "生成移植文档", "帮我写移植说明", "整理这个需求的移植指南", "这个改动怎么移植到其他项目",
-  "porting documentation", "migration guide", "create port doc", "feature porting guide". Also use when
-  the user mentions sharing implementation details across teams or projects — the goal is to communicate
-  intent, not copy code, so the receiving team can implement the same feature in their own context.
+description: >-
+  Generates standardized porting documentation from completed feature changes. Analyzes commit diffs or file contents,
+  extracts change intent, and outputs Markdown documentation for cross-team understanding.
+  Should be used when the user needs to document a change for cross-team or cross-project consumption.
+  Distinguished from cross-branch-fix-porter which actively re-implements fixes, this skill documents changes.
 category: dev-tools
+boundary:
+  vs_cross-branch-fix-porter: "cross-branch-fix-porter actively re-implements fixes across branches, this skill documents changes for other teams"
 ---
 
 # Feature Porting Document Generator

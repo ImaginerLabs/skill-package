@@ -1,16 +1,14 @@
 ---
 name: tech-stack-detection
-description: >
-  Systematically scans project config files to identify tech stack composition, version info, and
-  engineering tooling. Outputs a complete tech stack landscape report. Use this skill whenever the user
-  needs to understand what technologies a project uses — whether they're onboarding to a new project,
-  evaluating upgrade feasibility, or troubleshooting build issues. Trigger on phrases like "detect tech
-  stack", "analyze project config", "what tech does this project use", "tech stack", "project tech choices",
-  "tech stack analysis", "project architecture", "technology landscape", "检测技术栈", "分析项目配置",
-  "这个项目用了什么技术", "技术栈分析", "项目技术选型", "技术体系". Also use when the user is about
-  to do a code review, refactoring, or migration on a project they don't yet understand — knowing the tech
-  stack first is the foundation for every other decision.
+description: >-
+  Systematically scans project config files to identify tech stack composition, version info, and engineering tooling.
+  Should be used when the user needs to understand what technologies a project uses — onboarding, evaluating
+  upgrade feasibility, or troubleshooting build issues.
+  Distinguished from explore which investigates project structure and problems, this skill focuses on
+  identifying technology stacks.
 category: coding
+boundary:
+  vs_explore: "explore investigates project structure and problems, this skill focuses on identifying technology stacks"
 ---
 
 # Frontend Project Tech Stack Detection

@@ -1,10 +1,12 @@
 ---
 name: performance-optimizer
 description: >-
-  性能优化师 - 专注于应用性能分析和优化，提升系统响应速度。
-  当用户说"帮我优化性能"、"页面加载慢"、"API 响应慢"、
-  "性能分析"、"优化加载速度"、"React 性能"、"talk to Turbo"时使用此技能。
-  专注于分析性能瓶颈，提供优化方案。
+  Turbo（性能优化师）专注于应用性能分析和优化，提升系统响应速度。
+  Should be used when the user mentions analyzing performance bottlenecks, optimizing
+  page load time, reducing API latency, improving React performance, database query
+  optimization, or cache strategies.
+  Distinguished from code-engineer which focuses on writing new functionality rather
+  than optimizing existing code performance.
 category: agent
 priority: P1
 agent:
@@ -14,6 +16,8 @@ agent:
 collaborates_with:
   - code-engineer
   - data-architect
+boundary:
+  vs_code-engineer: "code-engineer 专注功能代码实现，此 skill 专注性能分析和优化"
 ---
 
 # Turbo - 性能优化师

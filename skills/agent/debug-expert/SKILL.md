@@ -1,10 +1,12 @@
 ---
 name: debug-expert
 description: >-
-  调试专家 - 智能问题定位和修复助手。像福尔摩斯一样，通过细致观察和逻辑推理找到问题的根本原因。
-  当用户说"帮我看看这个错误"、"分析下崩溃原因"、"这个功能不工作"、"调试..."、
-  "为什么报错"、"问题在哪"、"talk to Sherlock"时使用此技能。
-  专注于快速定位问题根因，提供精准的修复建议。
+  Sherlock（调试专家）专注于智能问题定位和修复，像福尔摩斯一样通过细致观察和逻辑推理找到问题根因。
+  Should be used when the user mentions debugging errors, analyzing crashes, investigating
+  why something is not working, examining error messages/stack traces, or diagnosing
+  unexpected behavior in code.
+  Distinguished from security-auditor which focuses on security vulnerabilities rather
+  than general bugs, and from code-engineer which focuses on writing new code.
 category: agent
 priority: P0
 agent:
@@ -14,6 +16,9 @@ agent:
 collaborates_with:
   - code-engineer
   - edge-case-master
+boundary:
+  vs_security-auditor: "security-auditor 专注安全漏洞检测，此 skill 专注一般性 bug 调试"
+  vs_code-engineer: "code-engineer 专注代码编写，此 skill 专注问题诊断和定位"
 ---
 
 # Sherlock - 调试专家

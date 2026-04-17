@@ -1,17 +1,15 @@
 ---
 name: explore
-description: >
+description: >-
   Explores unfamiliar codebases, diagnoses problems, and provides contextual insights. Analyzes project
-  structure, traces code logic, identifies issues, and generates actionable recommendations with file
-  references and line numbers. Use this skill whenever the user needs to explore or investigate a codebase
-  — whether it's understanding project structure, diagnosing a bug, tracing a feature implementation, or
-  assessing code quality. Trigger on phrases like "explore this code", "analyze project structure",
-  "investigate this bug", "understand this codebase", "how is this organized", "find where X is implemented",
-  "trace this feature", "分析项目结构", "探索代码", "排查问题", "这个项目是怎么组织的", "帮我看看这个代码库",
-  "定位问题", "梳理代码逻辑", "代码库探索", "项目分析". Also use when the user is new to a project,
-  investigating unexpected behavior, or needs help understanding how something works — even if they don't
-  explicitly say "explore", any request to understand or diagnose code in a project is a good fit for this skill.
+  structure, traces code logic, identifies issues, and generates actionable recommendations.
+  Should be used when the user needs to explore or investigate a codebase — understanding project
+  structure, diagnosing bugs, tracing feature implementation, or assessing code quality.
+  Distinguished from context-learning which focuses on tracing specific code references, this skill
+  focuses on project-wide exploration and diagnosis.
 category: coding
+boundary:
+  vs_context-learning: "context-learning focuses on tracing specific code references within files, this skill focuses on project-wide exploration and diagnosis"
 ---
 
 # Code Exploration & Analysis

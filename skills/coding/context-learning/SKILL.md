@@ -1,17 +1,15 @@
 ---
 name: context-learning
-description: >
-  Quickly understands unfamiliar code by tracing imports, call chains, and data flows from a given file or folder.
-  Produces a concise context analysis report covering module purpose, dependencies, logic flow, and side effects.
-  Use this skill whenever the user needs to understand code they didn't write — onboarding to a new project,
-  investigating a bug, preparing for a code review, or figuring out how a feature works. Trigger on phrases like
-  "understand this code", "analyze this module", "trace the call chain", "context analysis", "how does this work",
-  "what does this module do", "walk me through this code", "explain the architecture", "帮我理解这段代码",
-  "分析这个模块", "梳理调用链", "上下文分析", "快速了解代码", "代码是怎么工作的", "这个模块做什么",
-  "理清代码逻辑", "读懂这段代码", "分析依赖关系", "模块职责分析". Also use when the user is new to a
-  project, investigating a bug, or preparing for a code review — even if they don't explicitly ask for "context
-  analysis", understanding the code structure first is almost always the right move.
+description: >-
+  Quickly understands unfamiliar code by tracing imports, call chains, and data flows. Produces concise
+  context analysis covering module purpose, dependencies, logic flow, and side effects.
+  Should be used when the user needs to understand code they didn't write — onboarding, investigating
+  bugs, preparing for code review, or figuring out how a feature works.
+  Distinguished from explore which focuses on project-wide investigation, this skill focuses on
+  tracing code references and understanding specific code contexts.
 category: coding
+boundary:
+  vs_explore: "explore focuses on project-wide investigation, this skill focuses on tracing code references and call chains within specific files"
 ---
 
 # Code Context Learning

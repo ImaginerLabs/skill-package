@@ -1,17 +1,14 @@
 ---
 name: frontend-staged-bundle-review
-description: >
-  Reviews staged git changes from a bundle size perspective. Reads git diff --staged, analyzes the change
-  intent, and provides high/medium/low priority optimization recommendations for React/Vue/Taro/Next.js projects.
-  Use this skill whenever the user is concerned about code size, bundle bloat, or package weight — whether
-  they're about to commit and worried about size, evaluating a new dependency, or doing a performance audit.
-  Trigger on phrases like "check bundle size", "analyze bundle", "bundle optimization", "size review",
-  "check staged size", "package size analysis", "size regression", "build optimization", "reduce bundle size",
-  "slim down", "检查暂存区体积", "分析包体积", "bundle 优化", "体积审查", "检查体积", "包大小分析",
-  "体积回归", "打包优化", "减少体积", "瘦身". Also use when the user mentions adding a new dependency,
-  worrying about first-screen load performance, or mini-program package size limits — bundle size is often
-  the hidden cost of feature development, and this skill catches it before it ships.
+description: >-
+  Reviews staged git changes from a bundle size perspective. Analyzes change intent and provides optimization
+  recommendations for React/Vue/Taro/Next.js projects. Should be used when the user is concerned about bundle
+  size, code bloat, or package weight — before committing or evaluating new dependencies.
+  Distinguished from frontend-code-review which focuses on code quality, this skill focuses specifically
+  on bundle size impact analysis.
 category: coding
+boundary:
+  vs_frontend-code-review: "frontend-code-review focuses on general code quality issues, this skill focuses specifically on bundle size impact"
 ---
 
 # Frontend Staged Code Bundle Size Review

@@ -1,17 +1,14 @@
 ---
 name: cross-branch-fix-porter
-description: >
-  Cross-branch fix porting expert. When two projects have significantly different structures and direct
-  cherry-pick isn't feasible, this skill understands the fix intent and re-implements the same fix goal
-  in the current branch's code context. Use this skill whenever the user needs to apply a fix from one
-  branch or project to another — especially when the codebases differ enough that a simple cherry-pick
-  would fail or produce incorrect results. Trigger on phrases like "port this fix", "apply this commit's
-  changes to current branch", "cross-branch apply fix", "cherry-pick this fix", "移植这个修复",
-  "把这个 commit 的改动应用到当前分支", "跨分支应用修复", "移植修复", "应用这个改动",
-  "port the fix", "apply fix from another branch". Also use when the user mentions a fix that was made
-  in one project and needs to be applied to another, or when cherry-pick produces conflicts — the key
-  signal is that the same logical fix needs to be expressed in different code.
+description: >-
+  Cross-branch fix porting expert. Understands fix intent and re-implements the same fix goal in the current branch's
+  code context when direct cherry-pick isn't feasible.
+  Should be used when the user needs to apply a fix from one branch to another where code structures differ
+  significantly.
+  Distinguished from feature-port-doc-generator which documents changes, this skill actively re-implements fixes.
 category: dev-tools
+boundary:
+  vs_feature-port-doc-generator: "feature-port-doc-generator documents changes for other teams, this skill actively re-implements fixes across branches"
 ---
 
 # Cross-Branch Fix Porting

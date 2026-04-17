@@ -1,14 +1,14 @@
 ---
 name: code-comment-writer
-description: >
-  Writes precise, reader-oriented code comments tailored to the reading scenario — onboarding, refactoring,
-  algorithm explanation, tech debt marking, or API integration. Comments explain "why" (intent, edge cases,
-  pitfalls, migration context), never "what" (restating logic). Trigger on phrases like "add comments", "write
-  comments", "annotate code", "code documentation", "explain this code", "code readability", "help me understand
-  this", "新人接手", "帮我写注释", "给这段代码加注释", "需求改造注释", "添加文档注释", "代码说明",
-  "加文档". Also trigger when the user mentions onboarding, code handoff, migration notes, or any
-  situation where someone else needs to understand the code.
+description: >-
+  Writes precise, reader-oriented code comments explaining "why" not "what". Covers onboarding,
+  refactoring, algorithm explanation, tech debt marking, and API integration scenarios.
+  Should be used when the user mentions adding comments, documenting code, explaining code
+  logic, improving code readability, or needs help understanding code during handoff.
+  Distinguished from refactoring skills which focus on code structure changes.
 category: coding
+boundary:
+  vs_react-component-refactor: "react-component-refactor focuses on restructuring code, this skill focuses on adding explanatory comments"
 ---
 
 # Code Comment Writer

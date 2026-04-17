@@ -1,10 +1,12 @@
 ---
 name: system-architect
 description: >-
-  系统架构师 - 负责整体技术方案设计、架构决策和技术选型。
-  当用户说"帮我设计架构"、"设计系统"、"技术选型"、"微服务拆分"、
-  "架构评审"、"设计高可用系统"、"talk to Blueprint"时使用此技能。
-  专注于设计可扩展、高可用、易维护的系统架构。
+  Blueprint（系统架构师）负责整体技术方案设计、架构决策和技术选型。
+  Should be used when the user mentions designing system architecture, making technology
+  stack decisions, planning microservices decomposition, reviewing architecture designs,
+  or designing high-availability systems.
+  Distinguished from cloud-architect which focuses on cloud-specific infrastructure,
+  and from code-engineer which handles implementation details.
 category: agent
 priority: P1
 agent:
@@ -15,6 +17,9 @@ collaborates_with:
   - data-architect
   - cloud-architect
   - code-engineer
+boundary:
+  vs_cloud-architect: "cloud-architect 专注云服务选型，此 skill 专注系统整体架构设计"
+  vs_code-engineer: "code-engineer 专注代码实现，此 skill 专注架构层面的设计决策"
 ---
 
 # Blueprint - 系统架构师

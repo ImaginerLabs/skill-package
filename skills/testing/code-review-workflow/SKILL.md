@@ -1,13 +1,11 @@
 ---
 name: code-review-workflow
-description: |
-  执行四阶段代码综合审查：基础审查 → 质量检查 → 体积分析 → 测试覆盖，产出统一 Markdown 报告。
-
-  当用户说「审查代码」「帮我 review」「代码审查」「综合代码检查」「review 代码」「检查这段代码」
-  「帮我看看这段代码有没有问题」「代码质量怎么样」「这个提交有没有问题」「review 一下暂存区」
-  「帮我做一次 code review」「代码能合并吗」「这个 PR 有没有问题」「检查一下代码规范」
-  或携带 --path=、--file=、--commit=、--staged 参数时，务必使用此技能。
-  即使用户只是笼统地说「看看代码」或「检查代码」，也应触发此技能。
+description: >-
+  Executes comprehensive 4-phase code review: basic review, quality check, bundle analysis, and test coverage.
+  Should be used when the user mentions comprehensive code review, checking code quality, or reviewing
+  staged changes with multi-phase analysis.
+  This is the comprehensive review workflow, distinct from focused skills like frontend-code-review,
+  staged-code-review, or code-change-test-designer.
 category: testing
 ---
 

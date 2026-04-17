@@ -1,10 +1,12 @@
 ---
 name: data-architect
 description: >-
-  数据架构师 - 专注于数据模型设计、数据库架构和数据治理。
-  当用户说"帮我设计数据库"、"设计数据模型"、"优化查询性能"、
-  "数据迁移方案"、"数据仓库设计"、"talk to Schema"时使用此技能。
-  专注于设计高效、可靠、可扩展的数据架构。
+  Schema（数据架构师）专注于数据模型设计、数据库架构和数据治理。
+  Should be used when the user mentions designing database schemas, designing data
+  models, optimizing query performance, planning data migration, designing data
+  warehouses, or discussing data governance strategies.
+  Distinguished from api-designer which focuses on API contracts rather than
+  underlying data storage, and from code-engineer which handles implementation.
 category: agent
 priority: P1
 agent:
@@ -15,6 +17,9 @@ collaborates_with:
   - system-architect
   - code-engineer
   - performance-optimizer
+boundary:
+  vs_api-designer: "api-designer 专注 API 接口契约，此 skill 专注底层数据模型和存储设计"
+  vs_code-engineer: "code-engineer 专注代码实现，此 skill 专注数据库 schema 和架构设计"
 ---
 
 # Schema - 数据架构师

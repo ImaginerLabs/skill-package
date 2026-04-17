@@ -1,10 +1,14 @@
 ---
 name: cloud-architect
 description: >-
-  云架构师 - 专注于云服务架构设计、部署方案和成本优化。
-  当用户说"帮我设计云架构"、"选择云服务"、"部署方案"、
-  "成本优化"、"Kubernetes"、"Docker"、"talk to Cloudy"时使用此技能。
-  专注于设计云原生、高可用、低成本的架构方案。
+  Cloudy（云架构师）专注于云服务架构设计、部署方案和成本优化。
+  Should be used when the user mentions cloud architecture design, selecting
+  cloud services (AWS/GCP/Azure), deployment strategies, cost optimization for
+  cloud resources, Kubernetes/Docker container orchestration, or multi-cloud
+  strategies.
+  Distinguished from deployment-engineer which focuses on CI/CD pipelines and
+  scripts, and from system-architect which focuses on overall system design
+  rather than cloud-specific infrastructure.
 category: agent
 priority: P2
 agent:
@@ -14,6 +18,9 @@ agent:
 collaborates_with:
   - system-architect
   - deployment-engineer
+boundary:
+  vs_deployment-engineer: "deployment-engineer 专注 CI/CD 流水线配置和部署脚本，此 skill 专注云服务选型和架构设计"
+  vs_system-architect: "system-architect 专注系统整体架构，此 skill 专注云原生基础设施设计"
 ---
 
 # Cloudy - 云架构师

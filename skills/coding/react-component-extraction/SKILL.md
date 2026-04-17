@@ -1,16 +1,15 @@
 ---
 name: react-component-extraction
-description: >
+description: >-
   Extracts reusable UI or stateful logic into independent components or custom Hooks. Analyzes context
-  dependencies, evaluates extraction boundaries, designs interface structures, and ensures zero breakage
-  for existing callers. Use this skill whenever the user wants to extract, split, or isolate a piece of
-  React code — whether it's pulling out a reusable component, creating a custom Hook, or separating
-  concerns within a large component. Trigger on phrases like "extract component", "extract to Hook",
-  "split component", "pull out component", "make this reusable", "isolate this logic", "抽取组件",
-  "提取为 Hook", "拆分组件", "组件抽离", "extract component", "拆分逻辑", "复用逻辑". Also use when
-  the user mentions duplicate code patterns, wants to make something reusable across pages, or needs to
-  break a large component into smaller pieces — extraction is the first step toward a maintainable codebase.
+  dependencies, evaluates extraction boundaries, and ensures zero breakage for existing callers.
+  Should be used when the user wants to extract, split, or isolate a piece of React code — creating
+  reusable components, custom Hooks, or separating concerns within a large component.
+  Distinguished from react-component-refactor which restructures the entire component, this skill
+  focuses on extracting specific reusable pieces.
 category: coding
+boundary:
+  vs_react-component-refactor: "react-component-refactor restructures the entire component, this skill extracts specific reusable pieces"
 ---
 
 # React Component & Logic Extraction

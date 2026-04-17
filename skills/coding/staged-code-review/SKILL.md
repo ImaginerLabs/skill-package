@@ -1,15 +1,14 @@
 ---
 name: staged-code-review
-description: >
-  Comprehensive pre-commit review of git staged changes. Reads git diff --staged, performs tech-stack-aware
-  code quality checks, and generates a conventional commit message. Supports --story=, --task=, --fix=
-  parameters to link requirement IDs. Use this skill whenever the user is about to commit code and wants
-  a quality gate — it catches debug leftovers, sensitive data, missing error handling, and framework-specific
-  issues before they enter the repository. Trigger on phrases like "review staged changes", "pre-commit review",
-  "git review", "review before commit", "check staged code", "commit check", "审查暂存区", "提交前审查",
-  "git review", "帮我审查代码再提交", "检查暂存代码", "commit前检查". Also use when the user says they're
-  about to commit, push, or submit a PR — catching issues before they ship is always cheaper than fixing them after.
+description: >-
+  Comprehensive pre-commit review of git staged changes. Performs tech-stack-aware code quality checks and generates
+  conventional commit messages. Should be used when the user is about to commit code and wants a quality gate —
+  catching debug leftovers, sensitive data, missing error handling before they enter the repository.
+  Distinguished from frontend-code-review which reviews general code quality, this skill focuses specifically
+  on git staged changes pre-commit.
 category: coding
+boundary:
+  vs_frontend-code-review: "frontend-code-review covers general code quality, this skill focuses specifically on git staged changes pre-commit"
 ---
 
 # Git Staged Code Review

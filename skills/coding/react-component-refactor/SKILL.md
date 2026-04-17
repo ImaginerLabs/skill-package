@@ -1,17 +1,15 @@
 ---
 name: react-component-refactor
-description: >
-  Analyzes React component structure, identifies reusable units, and refactors large or messy components
-  into clean, well-organized code. Strictly maintains 1:1 logic equivalence — only structure changes,
-  never behavior. Supports: large component splitting, duplicate logic extraction into Hooks, messy
-  structure reorganization. Use this skill whenever the user wants to refactor a React component — whether
-  it's splitting a monolith, reorganizing a messy file, or restructuring for better maintainability.
-  Trigger on phrases like "refactor component", "refactor this file", "component refactor",
-  "refactor component", "split and refactor", "restructure component", "重构组件", "帮我重构这个文件",
-  "组件重构", "拆分重构", "整理组件结构". Also use when the user mentions a component is too large,
-  hard to maintain, or needs restructuring — but note: if the goal is specifically to extract a reusable
-  piece (not restructure the whole component), use `react-component-extraction` instead.
+description: >-
+  Analyzes React component structure, identifies reusable units, and refactors large or messy components into
+  clean, well-organized code. Strictly maintains 1:1 logic equivalence — only structure changes, never behavior.
+  Should be used when the user wants to refactor a React component — splitting a monolith, reorganizing a
+  messy file, or restructuring for better maintainability.
+  Distinguished from react-component-extraction which extracts specific reusable pieces, this skill
+  restructures the entire component.
 category: coding
+boundary:
+  vs_react-component-extraction: "react-component-extraction extracts specific reusable pieces, this skill restructures the entire component"
 ---
 
 # React Component Refactoring

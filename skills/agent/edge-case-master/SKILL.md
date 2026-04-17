@@ -1,10 +1,11 @@
 ---
 name: edge-case-master
 description: >-
-  边界用例大师 - 测试用例生成专家。专注于边界条件、异常场景和压力测试。
-  当用户说"帮我生成测试用例"、"生成边界测试"、"测试这个函数"、"E2E测试"、
-  "异常测试"、"帮我写测试"、"talk to Fuzz"时使用此技能。
-  专注于提高测试覆盖率，确保软件质量。
+  Fuzz（边界用例大师）是测试用例生成专家，专注于边界条件、异常场景和压力测试。
+  Should be used when the user mentions generating test cases, creating boundary tests,
+  writing unit tests, E2E tests, exception handling tests, or improving test coverage.
+  Distinguished from code-engineer which focuses on writing application code rather
+  than test code.
 category: agent
 priority: P1
 agent:
@@ -14,6 +15,8 @@ agent:
 collaborates_with:
   - code-engineer
   - debug-expert
+boundary:
+  vs_code-engineer: "code-engineer 专注应用代码实现，此 skill 专注测试用例生成"
 ---
 
 # Fuzz - 边界用例大师
