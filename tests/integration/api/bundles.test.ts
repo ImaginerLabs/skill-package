@@ -91,14 +91,14 @@ import {
 } from "../../../server/services/bundleService";
 import { AppError } from "../../../server/types/errors";
 
-// ---- Mock 数据 ----
+// ---- Mock 数据（V3） ----
 
 const mockBundle = {
   id: "bundle-abc123-xyz1",
   name: "frontend-dev",
   displayName: "前端日常开发",
   description: "前端开发常用分类",
-  categoryNames: ["coding", "testing"],
+  criteria: { categories: ["coding", "testing"] },
   createdAt: "2026-04-13T00:00:00.000Z",
   updatedAt: "2026-04-13T00:00:00.000Z",
   brokenCategoryNames: [],
@@ -166,7 +166,7 @@ describe("Bundle API 集成测试", () => {
         .send({
           name: "frontend-dev",
           displayName: "前端日常开发",
-          categoryNames: ["coding", "testing"],
+          criteria: { categories: ["coding", "testing"] },
         });
 
       expect(res.status).toBe(201);
@@ -177,7 +177,7 @@ describe("Bundle API 集成测试", () => {
     it("请求体缺少必填字段时返回 400", async () => {
       const res = await request(app)
         .post("/api/skill-bundles")
-        .send({ name: "test" }); // 缺少 displayName 和 categoryNames
+        .send({ name: "test" }); // 缺少 displayName 和 criteria
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
@@ -190,7 +190,7 @@ describe("Bundle API 集成测试", () => {
         .send({
           name: "Invalid Name",
           displayName: "无效名称",
-          categoryNames: ["coding"],
+          criteria: { categories: ["coding"] },
         });
 
       expect(res.status).toBe(400);
@@ -205,7 +205,7 @@ describe("Bundle API 集成测试", () => {
         .send({
           name: "new-bundle",
           displayName: "新套件",
-          categoryNames: ["coding"],
+          criteria: { categories: ["coding"] },
         });
 
       expect(res.status).toBe(400);
@@ -272,7 +272,7 @@ describe("Bundle API 集成测试", () => {
     it("请求体校验失败时返回 400", async () => {
       const res = await request(app)
         .put(`/api/skill-bundles/${mockBundle.id}`)
-        .send({ categoryNames: [] }); // 空数组不符合 min(1)
+        .send({ criteria: {} }); // 空 criteria 不符合至少选择一个条件
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
@@ -314,8 +314,9 @@ describe("Bundle API 集成测试", () => {
   describe("PUT /api/skill-bundles/:id/apply", () => {
     it("成功激活套件", async () => {
       vi.mocked(applyBundle).mockResolvedValue({
-        applied: ["coding", "testing"],
+        applied: ["skill-1", "skill-2"],
         skipped: [],
+        total: 2,
       });
 
       const res = await request(app).put(
@@ -324,14 +325,15 @@ describe("Bundle API 集成测试", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.applied).toEqual(["coding", "testing"]);
+      expect(res.body.data.applied).toEqual(["skill-1", "skill-2"]);
       expect(res.body.data.skipped).toEqual([]);
     });
 
     it("激活时跳过损坏引用", async () => {
       vi.mocked(applyBundle).mockResolvedValue({
-        applied: ["coding"],
+        applied: ["skill-1"],
         skipped: ["deleted-category"],
+        total: 1,
       });
 
       const res = await request(app).put(

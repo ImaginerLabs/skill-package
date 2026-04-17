@@ -346,13 +346,13 @@ describe("SyncSkillSelector", () => {
     });
   });
 
-  describe("套件选择 — 默认套件全选修复 (V2-1.1)", () => {
+  describe("套件选择 — V3 统一模型", () => {
     const defaultBundle = {
       id: "bundle-default",
       name: "default",
       displayName: "默认套件",
       description: "包含所有出厂预设分类的完整技能组合",
-      categoryNames: ["coding", "workflows"],
+      criteria: { categories: ["coding", "workflows"] },
       createdAt: "2026-04-14T04:01:28.856Z",
       updatedAt: "2026-04-14T04:01:28.856Z",
       brokenCategoryNames: [],
@@ -447,10 +447,10 @@ describe("SyncSkillSelector", () => {
         { name: "Coding", displayName: "Coding", skillCount: 1 },
       ];
 
-      // 套件 categoryNames 使用小写
+      // 套件 criteria.categories 使用小写
       const bundleWithLowerCase = {
         ...defaultBundle,
-        categoryNames: ["coding"],
+        criteria: { categories: ["coding"] },
       };
       vi.mocked(fetchSkillBundles).mockResolvedValue([bundleWithLowerCase]);
 
@@ -487,7 +487,7 @@ describe("SyncSkillSelector", () => {
     it("套件包含损坏引用时正确跳过，不影响有效分类", async () => {
       const bundleWithBroken = {
         ...defaultBundle,
-        categoryNames: ["coding", "deleted-category"],
+        criteria: { categories: ["coding", "deleted-category"] },
         brokenCategoryNames: ["deleted-category"],
       };
       vi.mocked(fetchSkillBundles).mockResolvedValue([bundleWithBroken]);

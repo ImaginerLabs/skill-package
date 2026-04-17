@@ -1,5 +1,5 @@
 // ============================================================
-// tests/unit/server/services/bundleService.test.ts — 套件服务单元测试
+// tests/unit/server/services/bundleService.test.ts — 套件服务单元测试（V3）
 // ============================================================
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -14,7 +14,6 @@ vi.mock("../../../../server/services/categoryService", () => ({
   getCategories: vi.fn(),
 }));
 
-// Mock skillService（ensureDefaultBundle 依赖 waitForInitialization + getAllSkills）
 vi.mock("../../../../server/services/skillService", () => ({
   waitForInitialization: vi.fn().mockResolvedValue(undefined),
   getAllSkills: vi.fn().mockReturnValue([]),
@@ -25,10 +24,13 @@ import {
   applyBundle,
   ensureDefaultBundle,
   getBundles,
+  migrateBundlesIfNeeded,
   removeBundle,
+  resolveBundleSkills,
   updateBundle,
 } from "../../../../server/services/bundleService";
 import { getCategories } from "../../../../server/services/categoryService";
+import { getAllSkills } from "../../../../server/services/skillService";
 import { readYaml, writeYaml } from "../../../../server/utils/yamlUtils";
 
 // 测试用分类数据
@@ -38,13 +40,49 @@ const mockCategories = [
   { name: "writing", displayName: "写作", description: "", skillCount: 2 },
 ];
 
-// 测试用套件数据
+// 测试用 Skill 数据（用于来源测试）
+const mockSkills = [
+  { id: "skill-1", name: "Skill 1", category: "coding", source: "" },
+  {
+    id: "skill-2",
+    name: "Skill 2",
+    category: "coding",
+    source: "anthropic-official",
+  },
+  {
+    id: "skill-3",
+    name: "Skill 3",
+    category: "testing",
+    source: "anthropic-official",
+  },
+  {
+    id: "skill-4",
+    name: "Skill 4",
+    category: "writing",
+    source: "awesome-copilot",
+  },
+];
+
+// 测试用 V3 套件数据
 const mockBundle = {
   id: "bundle-abc123-xyz1",
   name: "frontend-dev",
   displayName: "前端日常开发",
   description: "前端开发常用分类",
-  categoryNames: ["coding", "testing"],
+  criteria: {
+    categories: ["coding", "testing"],
+  },
+  createdAt: "2026-04-13T00:00:00.000Z",
+  updatedAt: "2026-04-13T00:00:00.000Z",
+};
+
+// 旧版套件格式（V2）
+const mockLegacyBundle = {
+  id: "bundle-legacy-xyz",
+  name: "legacy-bundle",
+  displayName: "旧版套件",
+  description: "使用旧格式",
+  categoryNames: ["coding", "writing"],
   createdAt: "2026-04-13T00:00:00.000Z",
   updatedAt: "2026-04-13T00:00:00.000Z",
 };
@@ -53,10 +91,51 @@ describe("bundleService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getCategories).mockResolvedValue(mockCategories);
+    vi.mocked(getAllSkills).mockReturnValue(mockSkills);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  // ----------------------------------------------------------------
+  // migrateBundlesIfNeeded
+  // ----------------------------------------------------------------
+  describe("migrateBundlesIfNeeded", () => {
+    it("所有套件已是 V3 格式时不迁移", async () => {
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [mockBundle],
+      });
+
+      await migrateBundlesIfNeeded();
+
+      expect(writeYaml).not.toHaveBeenCalled();
+    });
+
+    it("存在旧格式套件时自动迁移", async () => {
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [mockLegacyBundle],
+      });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      await migrateBundlesIfNeeded();
+
+      expect(writeYaml).toHaveBeenCalledOnce();
+      const writeCall = vi.mocked(writeYaml).mock.calls[0];
+      const writtenData = writeCall[1] as { skillBundles: unknown[] };
+      expect(writtenData.skillBundles).toHaveLength(1);
+      expect(writtenData.skillBundles[0]).toHaveProperty("criteria");
+      expect(
+        (writtenData.skillBundles[0] as { criteria: { categories: string[] } })
+          .criteria.categories,
+      ).toEqual(["coding", "writing"]);
+    });
+
+    it("迁移失败时不阻塞（使用 try/catch）", async () => {
+      vi.mocked(readYaml).mockRejectedValue(new Error("读取失败"));
+
+      await expect(migrateBundlesIfNeeded()).resolves.not.toThrow();
+    });
   });
 
   // ----------------------------------------------------------------
@@ -81,7 +160,7 @@ describe("bundleService", () => {
       expect(result).toEqual([]);
     });
 
-    it("返回套件列表，并注入 brokenCategoryNames（无损坏引用）", async () => {
+    it("返回套件列表，自动迁移旧格式，注入 brokenCategoryNames（无损坏引用）", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [mockBundle],
       });
@@ -91,10 +170,21 @@ describe("bundleService", () => {
       expect(result[0].brokenCategoryNames).toEqual([]);
     });
 
+    it("自动迁移旧格式套件到 V3", async () => {
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [mockLegacyBundle],
+      });
+
+      const result = await getBundles();
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("criteria");
+      expect(result[0].criteria.categories).toEqual(["coding", "writing"]);
+    });
+
     it("注入 brokenCategoryNames（有损坏引用）", async () => {
       const bundleWithBroken = {
         ...mockBundle,
-        categoryNames: ["coding", "deleted-category"],
+        criteria: { categories: ["coding", "deleted-category"] },
       };
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [bundleWithBroken],
@@ -107,7 +197,7 @@ describe("bundleService", () => {
     it("分类名大小写不敏感匹配（不误判为损坏引用）", async () => {
       const bundleWithUpperCase = {
         ...mockBundle,
-        categoryNames: ["Coding", "Testing"],
+        criteria: { categories: ["Coding", "Testing"] },
       };
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [bundleWithUpperCase],
@@ -119,28 +209,54 @@ describe("bundleService", () => {
   });
 
   // ----------------------------------------------------------------
-  // addBundle
+  // addBundle（V3 格式）
   // ----------------------------------------------------------------
   describe("addBundle", () => {
-    it("成功创建套件", async () => {
+    it("成功创建套件（V3 格式）", async () => {
       vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
       const result = await addBundle({
         name: "my-bundle",
         displayName: "我的套件",
-        categoryNames: ["coding", "testing"],
+        criteria: { categories: ["coding", "testing"] },
       });
 
       expect(result.id).toMatch(/^bundle-/);
       expect(result.name).toBe("my-bundle");
       expect(result.displayName).toBe("我的套件");
-      expect(result.categoryNames).toEqual(["coding", "testing"]);
+      expect(result.criteria.categories).toEqual(["coding", "testing"]);
       expect(result.brokenCategoryNames).toEqual([]);
       expect(writeYaml).toHaveBeenCalledOnce();
     });
 
-    it("成功创建套件（含 description）", async () => {
+    it("成功创建来源套件", async () => {
+      vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      const result = await addBundle({
+        name: "source-bundle",
+        displayName: "来源套件",
+        criteria: { sources: ["anthropic-official"] },
+      });
+
+      expect(result.criteria.sources).toEqual(["anthropic-official"]);
+    });
+
+    it("成功创建 Skill 套件", async () => {
+      vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      const result = await addBundle({
+        name: "skill-bundle",
+        displayName: "Skill 套件",
+        criteria: { skills: ["skill-1", "skill-2"] },
+      });
+
+      expect(result.criteria.skills).toEqual(["skill-1", "skill-2"]);
+    });
+
+    it("成功创建含 description 的套件", async () => {
       vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
@@ -148,18 +264,20 @@ describe("bundleService", () => {
         name: "my-bundle",
         displayName: "我的套件",
         description: "这是描述",
-        categoryNames: ["coding"],
+        criteria: { categories: ["coding"] },
       });
 
       expect(result.description).toBe("这是描述");
     });
 
     it("名称不符合正则时抛出校验错误", async () => {
+      vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
+
       await expect(
         addBundle({
           name: "My Bundle",
           displayName: "我的套件",
-          categoryNames: ["coding"],
+          criteria: { categories: ["coding"] },
         }),
       ).rejects.toThrow("小写字母");
     });
@@ -173,7 +291,7 @@ describe("bundleService", () => {
         addBundle({
           name: "my-bundle",
           displayName: "重复套件",
-          categoryNames: ["coding"],
+          criteria: { categories: ["coding"] },
         }),
       ).rejects.toThrow("已存在");
     });
@@ -185,7 +303,7 @@ describe("bundleService", () => {
         addBundle({
           name: "my-bundle",
           displayName: "我的套件",
-          categoryNames: ["nonexistent-category"],
+          criteria: { categories: ["nonexistent-category"] },
         }),
       ).rejects.toThrow("不存在");
     });
@@ -202,27 +320,25 @@ describe("bundleService", () => {
         addBundle({
           name: "new-bundle",
           displayName: "新套件",
-          categoryNames: ["coding"],
+          criteria: { categories: ["coding"] },
         }),
       ).rejects.toThrow("上限");
     });
 
-    it("创建后 writeYaml 写入的数据包含新套件", async () => {
+    it("创建后 writeYaml 写入 V3 格式数据", async () => {
       vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
       await addBundle({
         name: "new-bundle",
         displayName: "新套件",
-        categoryNames: ["coding"],
+        criteria: { categories: ["coding"] },
       });
 
       const writeCall = vi.mocked(writeYaml).mock.calls[0];
-      const writtenData = writeCall[1] as {
-        skillBundles: { name: string }[];
-      };
+      const writtenData = writeCall[1] as { skillBundles: unknown[] };
       expect(writtenData.skillBundles).toHaveLength(1);
-      expect(writtenData.skillBundles[0].name).toBe("new-bundle");
+      expect(writtenData.skillBundles[0]).toHaveProperty("criteria");
     });
   });
 
@@ -241,30 +357,34 @@ describe("bundleService", () => {
       });
 
       expect(result.displayName).toBe("新显示名称");
-      expect(result.name).toBe(mockBundle.name); // name 不变
+      expect(result.name).toBe(mockBundle.name);
     });
 
-    it("成功更新 categoryNames", async () => {
+    it("成功更新 criteria", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [mockBundle],
       });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
       const result = await updateBundle(mockBundle.id, {
-        categoryNames: ["coding", "writing"],
+        criteria: {
+          categories: ["coding", "writing"],
+          sources: ["anthropic-official"],
+        },
       });
 
-      expect(result.categoryNames).toEqual(["coding", "writing"]);
+      expect(result.criteria.categories).toEqual(["coding", "writing"]);
+      expect(result.criteria.sources).toEqual(["anthropic-official"]);
     });
 
-    it("更新 categoryNames 包含不存在的分类时抛出错误", async () => {
+    it("更新 criteria.categories 包含不存在的分类时抛出错误", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [mockBundle],
       });
 
       await expect(
         updateBundle(mockBundle.id, {
-          categoryNames: ["nonexistent"],
+          criteria: { categories: ["nonexistent"] },
         }),
       ).rejects.toThrow("不存在");
     });
@@ -341,7 +461,7 @@ describe("bundleService", () => {
             id: "bundle-default",
             name: "default",
             displayName: "默认套件",
-            categoryNames: ["coding"],
+            criteria: { categories: ["coding"] },
             createdAt: "2026-04-14T00:00:00.000Z",
             updatedAt: "2026-04-14T00:00:00.000Z",
           },
@@ -358,7 +478,7 @@ describe("bundleService", () => {
   // ensureDefaultBundle
   // ----------------------------------------------------------------
   describe("ensureDefaultBundle", () => {
-    it("默认套件不存在时自动创建", async () => {
+    it("默认套件不存在时自动创建（V3 格式）", async () => {
       vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
@@ -370,27 +490,26 @@ describe("bundleService", () => {
         skillBundles: {
           id: string;
           name: string;
-          categoryNames: string[];
+          criteria: { categories: string[] };
         }[];
       };
       expect(writtenData.skillBundles).toHaveLength(1);
       expect(writtenData.skillBundles[0].id).toBe("bundle-default");
       expect(writtenData.skillBundles[0].name).toBe("default");
-      // mock 中 getCategories 返回 3 个分类，getAllSkills 返回空，所以收集到 3 个分类
-      expect(writtenData.skillBundles[0].categoryNames).toHaveLength(3);
-      expect(writtenData.skillBundles[0].categoryNames).toContain("coding");
-      expect(writtenData.skillBundles[0].categoryNames).toContain("testing");
-      expect(writtenData.skillBundles[0].categoryNames).toContain("writing");
+      expect(writtenData.skillBundles[0].criteria.categories).toHaveLength(3);
+      expect(writtenData.skillBundles[0].criteria.categories).toContain(
+        "coding",
+      );
     });
 
-    it("默认套件已存在且分类已全部包含时幂等跳过（不重复创建）", async () => {
+    it("默认套件已存在且分类已全部包含时幂等跳过", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [
           {
             id: "bundle-default",
             name: "default",
             displayName: "默认套件",
-            categoryNames: ["coding", "testing", "writing"],
+            criteria: { categories: ["coding", "testing", "writing"] },
             createdAt: "2026-04-14T00:00:00.000Z",
             updatedAt: "2026-04-14T00:00:00.000Z",
           },
@@ -398,25 +517,32 @@ describe("bundleService", () => {
       });
       await ensureDefaultBundle();
 
-      // 幂等：分类已全部包含，不应调用 writeYaml
       expect(writeYaml).not.toHaveBeenCalled();
     });
 
-    it("创建的默认套件包含所有已定义分类", async () => {
-      vi.mocked(readYaml).mockResolvedValue({ skillBundles: [] });
+    it("默认套件已存在但使用旧格式时自动迁移", async () => {
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [
+          {
+            id: "bundle-default",
+            name: "default",
+            displayName: "默认套件",
+            categoryNames: ["coding", "testing"],
+            createdAt: "2026-04-14T00:00:00.000Z",
+            updatedAt: "2026-04-14T00:00:00.000Z",
+          },
+        ],
+      });
       vi.mocked(writeYaml).mockResolvedValue(undefined);
 
       await ensureDefaultBundle();
 
+      expect(writeYaml).toHaveBeenCalledOnce();
       const writeCall = vi.mocked(writeYaml).mock.calls[0];
       const writtenData = writeCall[1] as {
-        skillBundles: { categoryNames: string[] }[];
+        skillBundles: { criteria?: { categories: string[] } }[];
       };
-      const categories = writtenData.skillBundles[0].categoryNames;
-      // mock 中 getCategories 返回 3 个分类
-      expect(categories).toContain("coding");
-      expect(categories).toContain("testing");
-      expect(categories).toContain("writing");
+      expect(writtenData.skillBundles[0]).toHaveProperty("criteria");
     });
 
     it("settings 为 null 时也能正常创建默认套件", async () => {
@@ -430,10 +556,10 @@ describe("bundleService", () => {
   });
 
   // ----------------------------------------------------------------
-  // applyBundle
+  // applyBundle（V3 统一激活逻辑）
   // ----------------------------------------------------------------
   describe("applyBundle", () => {
-    it("成功激活套件（所有分类有效）", async () => {
+    it("成功激活分类套件", async () => {
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [mockBundle],
         activeCategories: [],
@@ -442,14 +568,75 @@ describe("bundleService", () => {
 
       const result = await applyBundle(mockBundle.id);
 
-      expect(result.applied).toEqual(["coding", "testing"]);
+      expect(result.total).toBeGreaterThan(0);
+      expect(result.applied.length).toBe(result.total);
       expect(result.skipped).toEqual([]);
     });
 
-    it("激活时跳过已删除的分类（损坏引用）", async () => {
+    it("激活来源套件（动态查询）", async () => {
+      const sourceBundle = {
+        ...mockBundle,
+        id: "bundle-source",
+        criteria: { sources: ["anthropic-official"] },
+      };
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [sourceBundle],
+        activeCategories: [],
+      });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      const result = await applyBundle(sourceBundle.id);
+
+      expect(result.total).toBe(2);
+      expect(result.applied).toContain("skill-2");
+      expect(result.applied).toContain("skill-3");
+    });
+
+    it("激活 Skill 套件", async () => {
+      const skillBundle = {
+        ...mockBundle,
+        id: "bundle-skills",
+        criteria: { skills: ["skill-1", "skill-4"] },
+      };
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [skillBundle],
+        activeCategories: [],
+      });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      const result = await applyBundle(skillBundle.id);
+
+      expect(result.total).toBe(2);
+      expect(result.applied).toContain("skill-1");
+      expect(result.applied).toContain("skill-4");
+    });
+
+    it("混合条件取并集", async () => {
+      const mixedBundle = {
+        ...mockBundle,
+        id: "bundle-mixed",
+        criteria: {
+          categories: ["coding"],
+          sources: ["awesome-copilot"],
+        },
+      };
+      vi.mocked(readYaml).mockResolvedValue({
+        skillBundles: [mixedBundle],
+        activeCategories: [],
+      });
+      vi.mocked(writeYaml).mockResolvedValue(undefined);
+
+      const result = await applyBundle(mixedBundle.id);
+
+      expect(result.applied).toContain("skill-1");
+      expect(result.applied).toContain("skill-2");
+      expect(result.applied).toContain("skill-4");
+    });
+
+    it("激活时跳过已删除的分类", async () => {
       const bundleWithBroken = {
         ...mockBundle,
-        categoryNames: ["coding", "deleted-category"],
+        criteria: { categories: ["coding", "deleted-category"] },
       };
       vi.mocked(readYaml).mockResolvedValue({
         skillBundles: [bundleWithBroken],
@@ -459,24 +646,7 @@ describe("bundleService", () => {
 
       const result = await applyBundle(bundleWithBroken.id);
 
-      expect(result.applied).toEqual(["coding"]);
-      expect(result.skipped).toEqual(["deleted-category"]);
-    });
-
-    it("激活以覆盖模式写入 activeCategories（不叠加）", async () => {
-      vi.mocked(readYaml).mockResolvedValue({
-        skillBundles: [mockBundle],
-        activeCategories: ["writing", "old-category"],
-      });
-      vi.mocked(writeYaml).mockResolvedValue(undefined);
-
-      await applyBundle(mockBundle.id);
-
-      const writeCall = vi.mocked(writeYaml).mock.calls[0];
-      const writtenData = writeCall[1] as { activeCategories: string[] };
-      // 覆盖写入，不叠加旧的 activeCategories
-      expect(writtenData.activeCategories).toEqual(["coding", "testing"]);
-      expect(writtenData.activeCategories).not.toContain("writing");
+      expect(result.skipped).toContain("deleted-category");
     });
 
     it("id 不存在时抛出 404 错误", async () => {
@@ -484,26 +654,51 @@ describe("bundleService", () => {
 
       await expect(applyBundle("nonexistent-id")).rejects.toThrow("未找到");
     });
+  });
 
-    it("所有分类均已删除时 applied 为空数组", async () => {
-      const bundleAllBroken = {
+  // ----------------------------------------------------------------
+  // resolveBundleSkills
+  // ----------------------------------------------------------------
+  describe("resolveBundleSkills", () => {
+    it("解析分类条件", () => {
+      const result = resolveBundleSkills(mockBundle);
+
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it("解析来源条件（包含空来源）", () => {
+      const sourceBundle = {
         ...mockBundle,
-        categoryNames: ["deleted-1", "deleted-2"],
+        criteria: { sources: ["", "anthropic-official"] },
       };
-      vi.mocked(readYaml).mockResolvedValue({
-        skillBundles: [bundleAllBroken],
-        activeCategories: ["coding"],
-      });
-      vi.mocked(writeYaml).mockResolvedValue(undefined);
 
-      const result = await applyBundle(bundleAllBroken.id);
+      const result = resolveBundleSkills(sourceBundle);
 
-      expect(result.applied).toEqual([]);
-      expect(result.skipped).toEqual(["deleted-1", "deleted-2"]);
+      expect(result).toContain("skill-1");
+      expect(result).toContain("skill-2");
+      expect(result).toContain("skill-3");
+    });
 
-      const writeCall = vi.mocked(writeYaml).mock.calls[0];
-      const writtenData = writeCall[1] as { activeCategories: string[] };
-      expect(writtenData.activeCategories).toEqual([]);
+    it("解析 Skill 条件", () => {
+      const skillBundle = {
+        ...mockBundle,
+        criteria: { skills: ["skill-1", "skill-4"] },
+      };
+
+      const result = resolveBundleSkills(skillBundle);
+
+      expect(result).toEqual(["skill-1", "skill-4"]);
+    });
+
+    it("空条件返回空数组", () => {
+      const emptyBundle = {
+        ...mockBundle,
+        criteria: {},
+      };
+
+      const result = resolveBundleSkills(emptyBundle);
+
+      expect(result).toEqual([]);
     });
   });
 });
