@@ -46,7 +46,9 @@ function StatusIcon({ status }: { status: SyncDetail["status"] }) {
         />
       );
     case "deleted":
-      return <Trash2 size={14} className="text-red-400 shrink-0" />;
+      return (
+        <Trash2 size={14} className="text-[hsl(var(--destructive))] shrink-0" />
+      );
     default:
       return null;
   }
@@ -113,7 +115,7 @@ export default function SyncResultFloatCard({
             {result.updated > 0 && (
               <Badge
                 variant="secondary"
-                className="text-[10px] px-1 py-0 bg-blue-500/15 text-blue-400"
+                className="text-[10px] px-1 py-0 bg-[hsl(var(--info))/0.15] text-[hsl(var(--info))]"
               >
                 {t("sync.updatedCount", { count: result.updated })}
               </Badge>
@@ -121,7 +123,7 @@ export default function SyncResultFloatCard({
             {result.overwritten > 0 && (
               <Badge
                 variant="secondary"
-                className="text-[10px] px-1 py-0 bg-yellow-500/15 text-yellow-500"
+                className="text-[10px] px-1 py-0 bg-[hsl(var(--warning))/0.15] text-[hsl(var(--warning))]"
               >
                 {t("sync.overwrittenCount", { count: result.overwritten })}
               </Badge>
@@ -134,7 +136,7 @@ export default function SyncResultFloatCard({
             {result.deleted > 0 && (
               <Badge
                 variant="secondary"
-                className="text-[10px] px-1 py-0 bg-red-500/15 text-red-400"
+                className="text-[10px] px-1 py-0 bg-[hsl(var(--destructive))/0.15] text-[hsl(var(--destructive))]"
               >
                 {t("sync.deletedCount", { count: result.deleted })}
               </Badge>
@@ -217,11 +219,11 @@ export default function SyncResultFloatCard({
                       }
                       className={`text-[10px] px-1 py-0 shrink-0 ${
                         detail.status === "overwritten"
-                          ? "bg-yellow-500/15 text-yellow-500"
+                          ? "bg-[hsl(var(--warning))/0.15] text-[hsl(var(--warning))]"
                           : detail.status === "updated"
-                            ? "bg-blue-500/15 text-blue-400"
+                            ? "bg-[hsl(var(--info))/0.15] text-[hsl(var(--info))]"
                             : detail.status === "deleted"
-                              ? "bg-red-500/15 text-red-400"
+                              ? "bg-[hsl(var(--destructive))/0.15] text-[hsl(var(--destructive))]"
                               : ""
                       }`}
                     >

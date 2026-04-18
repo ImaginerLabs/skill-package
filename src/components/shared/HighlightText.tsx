@@ -63,7 +63,7 @@ export default function HighlightText({
         return isMatch ? (
           <mark
             key={i}
-            className="bg-green-500/20 text-green-400 rounded px-0.5"
+            className="bg-[hsl(var(--primary))/0.2] text-[hsl(var(--primary))] rounded px-0.5"
           >
             {part}
           </mark>

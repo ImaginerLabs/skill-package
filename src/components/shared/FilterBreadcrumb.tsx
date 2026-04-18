@@ -98,7 +98,7 @@ export default function FilterBreadcrumb() {
             <button
               type="button"
               onClick={item.onClick}
-              className="text-slate-400 hover:text-green-400 cursor-pointer transition-colors duration-150 truncate max-w-[200px]"
+              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] cursor-pointer transition-colors duration-150 truncate max-w-[200px]"
             >
               {item.label}
             </button>
@@ -111,7 +111,7 @@ export default function FilterBreadcrumb() {
         type="button"
         data-testid="breadcrumb-clear"
         onClick={handleClear}
-        className="ml-1.5 flex items-center justify-center w-5 h-5 rounded-sm text-slate-400 hover:text-green-400 hover:bg-slate-700/50 transition-colors duration-150"
+        className="ml-1.5 flex items-center justify-center w-5 h-5 rounded-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] transition-colors duration-150"
         title={t("skillBrowse.breadcrumbClearFilter")}
         aria-label={t("skillBrowse.breadcrumbClearFilter")}
       >

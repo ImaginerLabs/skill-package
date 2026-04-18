@@ -102,17 +102,17 @@ export default function DiffReportView({
             {t("sync.diffSummary")}:
           </span>
           {added.length > 0 && (
-            <Badge className="text-[10px] px-1.5 py-0 bg-green-500/15 text-green-400">
+            <Badge className="text-[10px] px-1.5 py-0 bg-[hsl(var(--primary))/0.15] text-[hsl(var(--primary))]">
               {t("sync.diffAdded")} {added.length}
             </Badge>
           )}
           {modified.length > 0 && (
-            <Badge className="text-[10px] px-1.5 py-0 bg-yellow-500/15 text-yellow-400">
+            <Badge className="text-[10px] px-1.5 py-0 bg-[hsl(var(--warning))/0.15] text-[hsl(var(--warning))]">
               {t("sync.diffModified")} {modified.length}
             </Badge>
           )}
           {deleted.length > 0 && (
-            <Badge className="text-[10px] px-1.5 py-0 bg-red-500/15 text-red-400">
+            <Badge className="text-[10px] px-1.5 py-0 bg-[hsl(var(--destructive))/0.15] text-[hsl(var(--destructive))]">
               {t("sync.diffDeleted")} {deleted.length}
             </Badge>
           )}
@@ -129,30 +129,42 @@ export default function DiffReportView({
             {/* 新增 */}
             {added.length > 0 && (
               <DiffSection
-                icon={<CirclePlus size={14} className="text-green-400" />}
+                icon={
+                  <CirclePlus
+                    size={14}
+                    className="text-[hsl(var(--primary))]"
+                  />
+                }
                 label={t("sync.diffAdded")}
                 items={added}
-                colorClass="text-green-400"
+                colorClass="text-[hsl(var(--primary))]"
               />
             )}
 
             {/* 修改 */}
             {modified.length > 0 && (
               <DiffSection
-                icon={<Pencil size={14} className="text-yellow-400" />}
+                icon={
+                  <Pencil size={14} className="text-[hsl(var(--warning))]" />
+                }
                 label={t("sync.diffModified")}
                 items={modified}
-                colorClass="text-yellow-400"
+                colorClass="text-[hsl(var(--warning))]"
               />
             )}
 
             {/* 删除 */}
             {deleted.length > 0 && (
               <DiffSection
-                icon={<CircleMinus size={14} className="text-red-400" />}
+                icon={
+                  <CircleMinus
+                    size={14}
+                    className="text-[hsl(var(--destructive))]"
+                  />
+                }
                 label={t("sync.diffDeleted")}
                 items={deleted}
-                colorClass="text-red-400"
+                colorClass="text-[hsl(var(--destructive))]"
               />
             )}
 

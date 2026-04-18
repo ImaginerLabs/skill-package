@@ -118,7 +118,7 @@ export const ImportFileList = memo(function ImportFileList({
               <div className="flex items-center gap-2">
                 <span className="font-medium truncate">{item.name}</span>
                 {item.parseStatus === "failed" && (
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[hsl(var(--warning))/0.2] text-[hsl(var(--warning))]">
                     {t("import.scanFailed")}
                   </span>
                 )}

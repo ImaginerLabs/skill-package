@@ -9,6 +9,11 @@
 - **`ActivityDay` 接口在前后端重复定义** — `server/routes/statsRoutes.ts` 和 `src/lib/api.ts` 各自定义 `ActivityDay`。Story 明确保持现有模式，避免引入重构风险。
 - **测试依赖 `new Date()` 当前日期** — UTC 午夜边界可能导致测试不稳定。预存在测试模式，非本次引入。
 
+## Completed: 组件规范化测试补写 (2026-04-18)
+
+1. **补写 ConfirmDialog 单元测试** — `tests/unit/components/shared/ConfirmDialog.test.tsx`（15 个测试用例：variant、props、按钮回调、confirmDisabled、defaultFocus、键盘操作）
+2. **EmptyState 测试已完整** — 经验证，现有 `tests/unit/components/skills/EmptyState.test.tsx` 已覆盖所有 variant 场景，无需补充
+
 ## Completed: 延期工作全量清理 (2026-04-15)
 
 **已完成的修复工作（7 项）：**

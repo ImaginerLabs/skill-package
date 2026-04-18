@@ -126,6 +126,57 @@ context:
 
 - 2026-04-16: Party Mode 审查后更新 — 决策：Settings CRUD 不纳入、i18n 全局迁移不纳入、useSkillListLogic 拆为组合式 Hooks、ConfirmDialog 增加 defaultFocus、SidebarItem 增加 state variant + 字重区分、EmptyState 补充 variant 映射表、SearchInput 补充完整交互规格、测试覆盖从 4 项扩展至 12 项、增加集成测试层、增加覆盖率目标、执行分两阶段
 
+### 2026-04-18: 额外完成工作（超出原 spec 范围）
+
+以下工作虽超出原 spec 范围，但属于组件抽象与复用范畴：
+
+**已完成：**
+- `src/components/shared/ErrorAlert.tsx` — 统一错误提示组件，支持 error/warning/info 变体
+- `src/hooks/useExpandedState.ts` — 统一的展开/折叠状态管理 hook
+- `src/hooks/useSelectionState.ts` — 统一的选择状态管理 hook（Set<string>）
+- `src/hooks/useSourceDisplay.ts` — 来源显示映射 hook
+
+**SyncTargetManager 重构（Phase 3 完成）：**
+- `src/components/sync/TargetList.tsx` — 目标列表组件
+- `src/components/sync/TargetItem.tsx` — 单个目标项组件（展开/编辑/删除）
+- `src/components/sync/TargetForm.tsx` — 目标表单组件（新建/编辑）
+- `src/components/sync/GuideSteps.tsx` — 引导步骤组件
+- `src/components/sync/SyncTargetManager.tsx` — 重构为组合子组件
+
+**CategoryManager 重构（Phase 4 完成）：**
+- `src/components/settings/CategoryForm.tsx` — 分类表单组件
+- `src/components/settings/SkillChecklist.tsx` — 分类下的 Skill 勾选列表
+- `src/components/settings/CategoryItem.tsx` — 单个分类项组件
+- `src/components/settings/CategoryManager.tsx` — 重构为组合子组件
+
+**样式规范化：**
+- 修复 hardcoded `yellow-500`/`yellow-400` 颜色为 `hsl(var(--warning))`：
+  - `SyncResultFloatCard.tsx`
+  - `DiffReportView.tsx`
+  - `ImportFileList.tsx`
+  - `BundleManager.tsx`
+- 修复 hardcoded `green-400` 颜色为 `hsl(var(--primary))`：
+  - `DiffReportView.tsx` (added 状态)
+  - `SyncResultFloatCard.tsx`
+  - `HighlightText.tsx` (高亮)
+  - `FilterBreadcrumb.tsx` (hover)
+- 修复 hardcoded `red-400` 颜色为 `hsl(var(--destructive))`：
+  - `DiffReportView.tsx` (deleted 状态)
+  - `SyncResultFloatCard.tsx` (deleted 状态)
+  - `SkillBrowsePage.tsx` (搜索无结果)
+- 修复 hardcoded `blue-400` 颜色为 `hsl(var(--info))`：
+  - `SyncResultFloatCard.tsx` (updated 状态)
+- 修复 `slate-400`/`slate-500` 颜色为 `hsl(var(--muted-foreground))`：
+  - `SkillBrowsePage.tsx`
+  - `FilterBreadcrumb.tsx`
+
+**单元测试：**
+- `tests/unit/components/shared/ErrorAlert.test.tsx`
+- `tests/unit/components/sync/TargetItem.test.tsx`
+- `tests/unit/components/settings/CategoryForm.test.tsx`
+- `tests/unit/components/settings/SkillChecklist.test.tsx`
+- `tests/unit/components/settings/CategoryItem.test.tsx`
+
 ## Design Notes
 
 **ConfirmDialog 统一模式：** 当前 6 处 AlertDialog 用法分为两类：

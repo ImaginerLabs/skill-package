@@ -36,8 +36,8 @@ describe("HighlightText", () => {
         <HighlightText text="Hello World" query="World" />,
       );
       const mark = container.querySelector("mark");
-      expect(mark?.className).toContain("bg-green-500/20");
-      expect(mark?.className).toContain("text-green-400");
+      expect(mark?.className).toContain("bg-[hsl(var(--primary))/0.2]");
+      expect(mark?.className).toContain("text-[hsl(var(--primary))]");
     });
 
     it("部分匹配也高亮（如搜索 view 匹配 review）", () => {

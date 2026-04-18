@@ -1405,7 +1405,7 @@ export default function BundleManager() {
                           {bundle.brokenCategoryNames.length > 0 && (
                             <Badge
                               variant="outline"
-                              className="h-5 px-1.5 text-[10px] border-yellow-500 text-yellow-500"
+                              className="h-5 px-1.5 text-[10px] border-[hsl(var(--warning))] text-[hsl(var(--warning))]"
                             >
                               {t("bundle.brokenRef", {
                                 count: bundle.brokenCategoryNames.length,
@@ -1497,7 +1497,7 @@ export default function BundleManager() {
                                   ({skillCount} SKILL)
                                 </span>
                                 {isBroken && (
-                                  <span className="text-[10px] text-yellow-500">
+                                  <span className="text-[10px] text-[hsl(var(--warning))]">
                                     (deleted)
                                   </span>
                                 )}

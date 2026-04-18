@@ -216,13 +216,15 @@ describe("FilterBreadcrumb", () => {
       expect(currentLevel.className).toContain("text-slate-200");
     });
 
-    it("可点击项使用 text-slate-400 hover:text-green-400 样式", () => {
+    it("可点击项使用 muted-foreground hover:primary 样式", () => {
       mockStoreState.selectedCategory = "coding";
       renderBreadcrumb();
 
       const allButton = screen.getByText("全部");
-      expect(allButton.className).toContain("text-slate-400");
-      expect(allButton.className).toContain("hover:text-green-400");
+      expect(allButton.className).toContain(
+        "text-[hsl(var(--muted-foreground))]",
+      );
+      expect(allButton.className).toContain("hover:text-[hsl(var(--primary))]");
     });
 
     it("三层级时，中间分类层级为可点击按钮样式", () => {

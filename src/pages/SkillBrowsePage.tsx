@@ -171,7 +171,9 @@ export default function SkillBrowsePage() {
             <span
               data-testid="search-match-count"
               className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${
-                filteredSkills.length === 0 ? "text-red-400" : "text-slate-500"
+                filteredSkills.length === 0
+                  ? "text-[hsl(var(--destructive))]"
+                  : "text-[hsl(var(--muted-foreground))]"
               }`}
             >
               {filteredSkills.length}/{categorySourceFiltered.length}
